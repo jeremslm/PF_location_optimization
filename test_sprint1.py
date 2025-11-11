@@ -25,7 +25,7 @@ from OpenFUSIONToolkit.TokaMaker.util import read_eqdsk
 
 # Import our new package
 from OFT_pf_coil_optimize import pf_coil_optimize, CoilPositionSpace
-from helper_functions_angle import update_boundary, resize_polygon
+from helper_functions import update_boundary, resize_polygon
 
 print("="*70)
 print("SPRINT 1 TEST: PF Coil Optimization Package")

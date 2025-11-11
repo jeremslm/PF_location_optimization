@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.ndimage import uniform_filter1d
 
 def resize_polygon(points, dx):
     """
@@ -124,3 +125,10 @@ def update_boundary(r0, z0, a0, kappa, delta, squar, npts=20):
 
 def plot_coil(pts, ax, c='k', ls='-', alpha=1):
     ax.plot(np.hstack((pts[:,0],pts[0,0])), np.hstack((pts[:,1],pts[0,1])), c=c, ls=ls, alpha=alpha)
+
+def smoothen(curve, window):
+    if window < 1:
+        raise ValueError("window must be >=1")
+    if window>len(curve):
+        raise ValueError(f"window ({window}) cannot exceed curve length ({len(curve)})")
+    return uniform_filter1d(curve, window, axis=0, mode='wrap')

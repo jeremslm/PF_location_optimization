@@ -17,7 +17,7 @@ from scipy.stats import qmc
 # Import helper functions from existing module
 try:
     # Relative import (when used as package)
-    from .helper_functions_angle import (
+    from .helper_functions import (
         resize_polygon,
         resize_polygon_MANTA,
         update_boundary,
@@ -26,12 +26,13 @@ try:
     )
 except ImportError:
     # Absolute import (when run as script)
-    from helper_functions_angle import (
+    from helper_functions import (
         resize_polygon,
         resize_polygon_MANTA,
         update_boundary,
         plot_coil,
-        place_points
+        place_points,
+        smoothen,
     )
 
 # Optional dependencies
@@ -64,20 +65,24 @@ class CoilPositionSpace:
     - Radial ratio (rho): 0=inner boundary, 1=outer boundary
     """
     
-    def __init__(self, inner_boundary, outer_boundary, method='curve',
-                 angular_bounds=None, radial_bounds=None):
+    def __init__(self, inner_boundary=None, outer_boundary=None, method='coords',
+                 angular_bounds=None, radial_bounds=None, 
+                 single_curve=None, dx_inner=None, dx_outer=None, smoothen_window = 5):
         """
         Initialize coil position space.
 
         Parameters
         ----------
         inner_boundary: ndarray (N, 2) or dict or callable
-            - If method='curve': (R, Z) array
+            - If method='coords': (R, Z) array
             - If method='parametric': dict with keys {r0, z0, a, kappa, delta, squar, npts, offset}
             - If method='function': callable(theta) -> (R, Z)
+            - If method='single_curve': pass in a curve like a limiter
+                - dx_inner = offset of curve which defines the inner boundary
+                - dx_outer = offset of the curve which defines the outer boundary
         outer_boundary: same as inner_boundary
         method: str
-            'curve', 'parametric', or 'function'
+            'coords', 'parametric', 'function', 'single_curve' 
         angular_bounds: tuple (float, float), optional
             (min, max) poloidal angle in degrees. Default: (0, 180)
         radial_bounds: tuple (float, float), optional
@@ -89,8 +94,11 @@ class CoilPositionSpace:
         self.angular_bounds = angular_bounds if angular_bounds is not None else (0, 180)
         self.radial_bounds = radial_bounds if radial_bounds is not None else (0, 1)
 
-        if method == 'curve':
+        if method == 'coords':
             # Direct (R, Z) arrays
+            if(inner_boundary == None or outer_boundary == None):
+                raise ValueError("For method 'coords', inner boundary and outer boundary curves must not be None")
+
             self.inner_curve = np.asarray(inner_boundary, dtype=float)
             self.outer_curve = np.asarray(outer_boundary, dtype=float)
 
@@ -101,6 +109,9 @@ class CoilPositionSpace:
 
         elif method == 'parametric':
             # Generate from plasma shape parameters (like your notebook!)
+            if(inner_boundary == None or outer_boundary == None):
+                raise ValueError("For method 'parametric', inner boundary and outer boundary curves must not be None")
+
             try:
                 # Inner boundary
                 lim_inner = update_boundary(
@@ -127,14 +138,14 @@ class CoilPositionSpace:
                 self.outer_curve = resize_polygon(lim_outer, dx=outer_boundary['offset'])
 
             except KeyError as e:
-                raise KeyError(f"Missing required key for parametric method: {e}. "
+                raise KeyError(f"Missing required key for method 'parametric': {e}. "
                              f"Required: r0, a, kappa, delta, squar, offset. "
                              f"Optional: z0 (default=0), npts (default=1700)")
 
         elif method == 'function':
             # User-provided functions
             if not callable(inner_boundary) or not callable(outer_boundary):
-                raise TypeError("For method='function', boundaries must be callable: func(theta) -> (R, Z)")
+                raise TypeError("For method 'function', boundaries must be callable: func(theta) -> (R, Z)")
 
             self.inner_func = inner_boundary
             self.outer_func = outer_boundary
@@ -153,9 +164,23 @@ class CoilPositionSpace:
 
             self.inner_curve = np.array(inner_pts)
             self.outer_curve = np.array(outer_pts)
+        
+        elif method == 'single_curve':
+            if(single_curve == None or dx_inner == None or dx_outer == None):
+                raise ValueError("For method 'single_curve', single_curve, dx_inner, and dx_outer must not be None")
+            
+            if(dx_outer<dx_inner):
+               raise ValueError("For method 'single_curve, dx_outer must be greater than dx_inner")
 
+            if(dx_outer <= 0 or dx_inner <= 0):
+                raise ValueError("For method 'single_curve, dx_outer and dx_inner must be greater 0")
+        
+            smooth_curve = smoothen(single_curve, smoothen_window)
+            self.outer_curve = resize_polygon(smooth_curve, dx_outer)
+            self.inner_curve = resize_polygon(smooth_curve, dx_inner)
         else:
-            raise ValueError(f"Unknown method '{method}'. Use 'curve', 'parametric', or 'function'")
+            raise ValueError(f"Unknown method '{method}'. Use 'coords', 'single_curve', 'parametric', or 'function'")
+        
 
     def interpolate(self, theta, radial):
         """Get (R, Z) position from poloidal angle and radial ratio."""
