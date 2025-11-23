@@ -13,10 +13,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 from scipy.stats import qmc
+import pandas as pd
+import matplotlib as plt
 
 # Import helper functions from existing module
 try:
-    # Relative import (when used as package)
     from .helper_functions import (
         resize_polygon,
         resize_polygon_MANTA,
@@ -25,7 +26,6 @@ try:
         place_points
     )
 except ImportError:
-    # Absolute import (when run as script)
     from helper_functions import (
         resize_polygon,
         resize_polygon_MANTA,
@@ -96,7 +96,7 @@ class CoilPositionSpace:
 
         if method == 'coords':
             # Direct (R, Z) arrays
-            if(inner_boundary == None or outer_boundary == None):
+            if inner_boundary is None or outer_boundary is None:
                 raise ValueError("For method 'coords', inner boundary and outer boundary curves must not be None")
 
             self.inner_curve = np.asarray(inner_boundary, dtype=float)
@@ -109,7 +109,7 @@ class CoilPositionSpace:
 
         elif method == 'parametric':
             # Generate from plasma shape parameters (like your notebook!)
-            if(inner_boundary == None or outer_boundary == None):
+            if inner_boundary is None or outer_boundary is None:
                 raise ValueError("For method 'parametric', inner boundary and outer boundary curves must not be None")
 
             try:
@@ -166,7 +166,7 @@ class CoilPositionSpace:
             self.outer_curve = np.array(outer_pts)
         
         elif method == 'single_curve':
-            if(single_curve == None or dx_inner == None or dx_outer == None):
+            if single_curve is None or dx_inner is None or dx_outer is None:
                 raise ValueError("For method 'single_curve', single_curve, dx_inner, and dx_outer must not be None")
             
             if(dx_outer<dx_inner):
@@ -421,12 +421,182 @@ def _optimize_lbfgs(initial_params, bounds, objective_args, verbose=True):
     
     return result, final_currents, inner_cost
 
+def _optimize_multi_start_lbfgs(initial_params, bounds, objective_args, verbose=True, n_starts=10):
+    """Run multi-start L-BFGS-B optimization."""
 
-def pf_coil_optimize(tokamaker_solver, coil_space, n_coils=5,
+    final_currents = None
+    inner_cost = None
+
+    def objective_wrapper(params):
+        nonlocal final_currents, inner_cost
+        cost, currents, inner = _objective_function(params, **objective_args)
+        final_currents = currents
+        inner_cost = inner
+        return cost
+
+    # Sobol sequence sampling
+    sampler = qmc.Sobol(d=len(bounds), scramble=True, seed=42)
+    samples = sampler.random(n_starts)
+
+    # Scale to bounds
+    starts = []
+    for i in range(n_starts):
+        point = []
+        for j, (low, high) in enumerate(bounds):
+            point.append(low + samples[i, j] * (high - low))
+        starts.append(point)
+
+    results = []
+    for start in starts:
+        try:
+            result = minimize(
+                objective_wrapper,
+                start,
+                method='L-BFGS-B',
+                bounds=bounds,
+                options={'disp': verbose}
+            )
+            results.append(result)
+        except Exception as e:
+            print(f"Error optimizing with start {start}: {e}")
+            continue
+
+    if len(results) == 0:
+        return None, None, None
+
+    return results, final_currents, inner_cost
+
+def _optimize_bayesian(bounds, objective_args, n_calls=100, n_initial_points=50,
+                       acq_func='EI', random_state=42, n_jobs=1,
+                       local_optimize=False, n_local_refine=5, verbose=True):
+    """
+    Run Bayesian optimization using Gaussian Process surrogate model.
+
+    Parameters
+    ----------
+    bounds : list of tuples
+        Parameter bounds [(low, high), ...]
+    objective_args : dict
+        Arguments for _objective_function
+    n_calls : int
+        Total number of evaluations
+    n_initial_points : int
+        Number of random initial points before using GP
+    acq_func : str
+        Acquisition function: 'EI' (Expected Improvement), 'LCB', 'PI'
+    random_state : int
+        Random seed for reproducibility
+    n_jobs : int
+        Number of parallel jobs
+    local_optimize : bool
+        If True, run L-BFGS on top results after Bayesian optimization
+    n_local_refine : int
+        Number of top Bayesian results to refine with L-BFGS
+    verbose : bool
+        Print progress information
+
+    Returns
+    -------
+    result : OptimizeResult
+        Bayesian optimization result (or best L-BFGS result if local_optimize)
+    final_currents : ndarray
+        Optimized coil currents
+    inner_cost : float
+        Inner loop cost (flux matching error)
+    """
+    final_currents = None
+    inner_cost = None
+
+    def objective_wrapper(params):
+        nonlocal final_currents, inner_cost
+        cost, currents, inner = _objective_function(params, **objective_args)
+        final_currents = currents
+        inner_cost = inner
+        return cost
+
+    # Build search space from bounds
+    space = []
+    n_params = len(bounds)
+    n_coils = n_params // 2
+    for i in range(n_coils):
+        space.append(Real(bounds[i][0], bounds[i][1], name=f'angle_{i}'))
+    for i in range(n_coils):
+        space.append(Real(bounds[n_coils + i][0], bounds[n_coils + i][1], name=f'radial_{i}'))
+
+    if verbose:
+        print(f"Running Bayesian optimization with {n_calls} calls, {n_initial_points} initial points")
+
+    # Run Bayesian optimization
+    result = gp_minimize(
+        objective_wrapper,
+        space,
+        n_calls=n_calls,
+        n_initial_points=n_initial_points,
+        acq_func=acq_func,
+        random_state=random_state,
+        initial_point_generator='sobol',
+        verbose=verbose,
+        acq_optimizer='lbfgs',
+        n_jobs=n_jobs,
+    )
+
+    if local_optimize and n_local_refine > 0:
+        if verbose:
+            print(f"\nRefining top {n_local_refine} results with L-BFGS...")
+
+        # Find indices of top N results
+        min_indices = np.argsort(result.func_vals)[:n_local_refine]
+        best_starts = [result.x_iters[idx] for idx in min_indices]
+
+        # Run L-BFGS from each of the top results
+        best_cost = float('inf')
+        best_result = None
+
+        for i, start in enumerate(best_starts):
+            if verbose:
+                print(f"  Refining result {i+1}/{n_local_refine} (cost: {result.func_vals[min_indices[i]]:.6e})")
+
+            try:
+                lbfgs_result, curr, inner = _optimize_lbfgs(
+                    np.array(start), bounds, objective_args, verbose=False
+                )
+
+                if lbfgs_result.fun < best_cost:
+                    best_cost = lbfgs_result.fun
+                    best_result = lbfgs_result
+                    final_currents = curr
+                    inner_cost = inner
+
+                if verbose:
+                    print(f"    → Refined cost: {lbfgs_result.fun:.6e}")
+
+            except Exception as e:
+                if verbose:
+                    print(f"    → Failed: {e}")
+                continue
+
+        if best_result is not None:
+            result = best_result
+        else:
+            # Recompute final values for best Bayesian result
+            objective_wrapper(result.x)
+    else:
+        # Recompute final values for best result
+        objective_wrapper(result.x)
+
+    return result, final_currents, inner_cost
+
+def pf_coil_optimize(tokamaker_solver, reg_current, reg_distance, min_coil_distance, coil_space, n_coils=5,
                      coil_dx=0.08, coil_dy=0.08, coil_filament_radius=0.01,
-                     method='lbfgs',
+                     method='lbfgs', local_optimize=False,
                      initial_angles=None, initial_radials=None, bounds=None,
-                     reg_current=1e-7, reg_distance=1e-5, min_coil_distance=5,
+                     
+                     # Bayesian optimization parameters
+                     n_calls=100, n_initial_points=50, acq_func='EI',
+                     random_state=42, n_jobs=1, n_local_refine=5,
+                    
+                     # Multi-start parameters
+                     n_starts=10,
                      verbose=True, plot_result=False):
     """
     Optimize PF coil locations for fixed-boundary equilibrium.
@@ -440,7 +610,7 @@ def pf_coil_optimize(tokamaker_solver, coil_space, n_coils=5,
     n_coils : int
         Number of coil pairs (top/bottom)
     method : str
-        Optimization method ('lbfgs', 'multi_start', 'bayesian')
+        Optimization method ('lbfgs', 'multi_start_lbfgs', 'bayesian')
     
     Returns
     -------
@@ -448,11 +618,8 @@ def pf_coil_optimize(tokamaker_solver, coil_space, n_coils=5,
         Optimization results
     """
     # Validate inputs
-    if method not in ['lbfgs', 'multi_start', 'bayesian']:
+    if method not in ['lbfgs', 'multi_start_lbfgs', 'bayesian']:
         raise ValueError(f"Unknown method '{method}'")
-    
-    if method in ['multi_start', 'bayesian']:
-        raise NotImplementedError(f"Method '{method}' will be implemented in Sprint 2")
     
     # Extract boundary flux from TokaMaker
     if verbose:
@@ -500,17 +667,20 @@ def pf_coil_optimize(tokamaker_solver, coil_space, n_coils=5,
         print(f"  min_coil_distance: {min_coil_distance} degrees")
     
     # Prepare objective function arguments
-    objective_args = {
-        'tokamaker_solver': tokamaker_solver,
-        'position_space': coil_space,
-        'n_coils': n_coils,
-        'r_bnd': r_bnd,
-        'psi_bnd': psi_bnd,
-        'omega': reg_distance,
-        'dist_th': min_coil_distance,
-        'reg_in': reg_current,
-        'Rfil': coil_filament_radius
-    }
+    try: 
+        objective_args = {
+            'tokamaker_solver': tokamaker_solver,
+            'position_space': coil_space,
+            'n_coils': n_coils,
+            'r_bnd': r_bnd,
+            'psi_bnd': psi_bnd,
+            'omega': reg_distance,
+            'dist_th': min_coil_distance,
+            'reg_in': reg_current,
+            'Rfil': coil_filament_radius
+        }
+    except Exception as e:
+        raise ValueError(f"Error preparing objective function arguments: {e}")
     
     # Run optimization
     if method == 'lbfgs':
@@ -521,6 +691,35 @@ def pf_coil_optimize(tokamaker_solver, coil_space, n_coils=5,
         success = opt_result.success
         n_iterations = opt_result.nit
         message = opt_result.message
+        outer_cost = opt_result.fun
+
+    elif method == 'multi_start_lbfgs':
+        results, final_currents, inner_cost = _optimize_multi_start_lbfgs(
+            initial_params, bounds, objective_args, verbose=verbose, n_starts=n_starts
+        )
+        if results is None:
+            raise RuntimeError("All multi-start optimizations failed")
+        # Find best result
+        opt_result = min(results, key=lambda x: x.fun)
+        opt_params = opt_result.x
+        success = opt_result.success
+        n_iterations = sum(r.nit for r in results)
+        message = f"Best of {len(results)} starts"
+        outer_cost = opt_result.fun
+        # Recompute final currents for best result
+        _, final_currents, inner_cost = _objective_function(opt_params, **objective_args)
+
+    elif method == 'bayesian':
+        opt_result, final_currents, inner_cost = _optimize_bayesian(
+            bounds, objective_args, n_calls=n_calls, n_initial_points=n_initial_points,
+            acq_func=acq_func, random_state=random_state, n_jobs=n_jobs,
+            local_optimize=local_optimize, n_local_refine=n_local_refine, verbose=verbose
+        )
+        opt_params = np.array(opt_result.x)
+        # Handle both scipy and skopt result types
+        success = getattr(opt_result, 'success', True)
+        n_iterations = getattr(opt_result, 'nit', getattr(opt_result, 'nfev', n_calls))
+        message = getattr(opt_result, 'message', f"Bayesian optimization completed with {n_calls} calls")
         outer_cost = opt_result.fun
     
     # Extract results

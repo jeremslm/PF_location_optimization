@@ -132,3 +132,90 @@ def smoothen(curve, window):
     if window>len(curve):
         raise ValueError(f"window ({window}) cannot exceed curve length ({len(curve)})")
     return uniform_filter1d(curve, window, axis=0, mode='wrap')
+
+def place_points_pol_rad(ncoils, arc_inner, arc_outer, pol_angles, radials):
+    """
+    Places coils inside a strip defined by two curves (arc_inner, arc_outer)
+    based on poloidal angle and radial offset.
+
+    Parameters:
+        ncoils: (int) Number of coils in upper side
+        arc_inner: (ndarray (N,2)) Inner curve coordinates (R,Z)
+        arc_outer: (ndarray (N,2)) Outer curve coordinates (R,Z)
+        pol_angles: Poloidal angles (degrees)
+        radials: Radial ratios (0 = inner, 1 = outer)
+
+    Returns:
+        inds: (ndarray) Indices along the arc (based on arc_inner indexing)
+        locs: (ndarray (npoints, 2)) Coil (R, Z) coordinates
+    """
+    if len(pol_angles) != ncoils or len(radials) != ncoils:
+        raise ValueError("Length of pol_angles and radials must match ncoils.")
+
+    # Create a mapping from poloidal angle to index along arc
+    theta_range = np.linspace(0, 180, len(arc_inner))  # top half
+    pol_angles = np.asarray(pol_angles)
+
+    inds = []
+    locs = []
+
+    for theta, rho in zip(pol_angles, radials):
+        # Interpolate R and Z along each arc at this theta
+        R_inner = np.interp(theta, theta_range, arc_inner[:, 0])
+        Z_inner = np.interp(theta, theta_range, arc_inner[:, 1])
+        R_outer = np.interp(theta, theta_range, arc_outer[:, 0])
+        Z_outer = np.interp(theta, theta_range, arc_outer[:, 1])
+
+        # Interpolate between inner and outer curves based on rho
+        R_pos = (1 - rho) * R_inner + rho * R_outer
+        Z_pos = (1 - rho) * Z_inner + rho * Z_outer
+
+        # Approximate index based on inner arc position
+        idx = int(np.interp(theta, theta_range, np.arange(len(arc_inner))))
+
+        inds.append(idx)
+        locs.append([R_pos, Z_pos])
+
+    return np.array(inds), np.array(locs)
+
+def compute_coil_centers(coil_pts_dict):
+    """
+    Compute the center of each coil from a dictionary of coil geometries
+
+    Parameter:
+        coil_pts_dict: (Dict) dictionary with coil points {'coil_name': {'pts': array}}
+
+    return:
+        coil_centers: (list of arrays) Coils centers of both top & bottom side
+    """
+    coil_centers = []
+
+    # Loading and computing the mean of coil edges for each coil
+    for coil_name, coil_data in coil_pts_dict.items():
+        pts = np.array(coil_data["pts"])
+        center = np.mean(pts, axis=0)
+        coil_centers.append(np.asarray([center]))
+
+    return coil_centers
+
+def make_3x3_thick(center, R):
+    """
+    Generate the centers of 9 tangent cables forming a 3x3 coil.
+
+    Parameters:
+        center: (R, Z) coord. of the central filament
+        R: Coil filament radius
+
+    Returns:
+        fil_centers: List of (R, Z) coord. for each cable center
+    """
+    R0, Z0 = center
+    offsets = [-1, 0, 1]
+    fil_centers = []
+
+    # scanning the grid
+    for dx in offsets:
+        for dy in offsets:
+            fil_centers.append([R0 + 2 * R * dx, Z0 + 2 * R * dy])
+
+    return fil_centers
