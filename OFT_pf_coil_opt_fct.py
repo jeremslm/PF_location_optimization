@@ -18,7 +18,7 @@ import matplotlib as plt
 
 # Import helper functions from existing module
 try:
-    from .helper_functions import (
+    from .helper_fct import (
         resize_polygon,
         resize_polygon_MANTA,
         update_boundary,
@@ -26,7 +26,7 @@ try:
         place_points
     )
 except ImportError:
-    from helper_functions import (
+    from helper_fct import (
         resize_polygon,
         resize_polygon_MANTA,
         update_boundary,

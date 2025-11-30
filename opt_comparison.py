@@ -125,7 +125,7 @@ class OptimizationComparison:
         currs : ndarray
             Coil currents
         """
-        from helper_functions import place_points_pol_rad, make_3x3_thick
+        from helper_fct import place_points_pol_rad, make_3x3_thick
 
         num_coils = len(params) // 2
         thetas = params[:num_coils]
@@ -1008,8 +1008,8 @@ def main(methods=None):
     from OpenFUSIONToolkit.TokaMaker import TokaMaker
     from OpenFUSIONToolkit.TokaMaker.meshing import gs_Domain
     from OpenFUSIONToolkit.TokaMaker.util import read_eqdsk, eval_green
-    from helper_functions import resize_polygon, update_boundary
-    from OFT_pf_coil_optimize import CoilPositionSpace
+    from helper_fct import resize_polygon, update_boundary
+    from OFT_pf_coil_opt_fct import CoilPositionSpace
 
     # ========================================
     # Load EQDSK and create mesh

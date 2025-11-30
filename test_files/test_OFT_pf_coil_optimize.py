@@ -23,11 +23,11 @@ from OpenFUSIONToolkit.TokaMaker import TokaMaker
 from OpenFUSIONToolkit.TokaMaker.meshing import gs_Domain
 from OpenFUSIONToolkit.TokaMaker.util import read_eqdsk
 
-from OFT_pf_coil_optimize import (
+from OFT_pf_coil_opt_fct import (
     CoilPositionSpace,
     pf_coil_optimize
 )
-from helper_functions import update_boundary, resize_polygon
+from helper_fct import update_boundary, resize_polygon
 
 
 def test_lbfgs_optimization():

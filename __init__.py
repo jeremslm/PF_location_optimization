@@ -16,17 +16,22 @@ Main Components
 
 """
 
-from .OFT_pf_coil_optimize import (
+from .OFT_pf_coil_opt_fct import (
     pf_coil_optimize,
     CoilPositionSpace,
     PerCoilPositionSpace,
     OptimizationResult
 )
 
-__version__ = '1.0.1'
+from .opt_comparison import (
+    OptimizationComparison
+)
+
+__version__ = '1.0.2'
 __all__ = [
-    'OFT_pf_coil_optimize',
+    'OFT_pf_coil_opt_fct',
     'CoilPositionSpace',
     'PerCoilPositionSpace',
     'OptimizationResult'
+    'OptimizationComparison'
 ]
