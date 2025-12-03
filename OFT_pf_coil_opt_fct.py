@@ -162,6 +162,9 @@ class CoilPositionSpace:
                 inner_pts.append([R_in, Z_in])
                 outer_pts.append([R_out, Z_out])
 
+                # to-do !!! mapping from parameters to R,Z positions array = defined by a fct that user provides 
+                # would have to change the way we define CoilPositionSpace
+
             self.inner_curve = np.array(inner_pts)
             self.outer_curve = np.array(outer_pts)
         

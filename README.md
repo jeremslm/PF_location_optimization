@@ -40,7 +40,7 @@ export OFT_ROOTPATH=/path/to/OpenFUSIONToolkit/install_release
 ```python
 from OpenFUSIONToolkit import OFT_env
 from OpenFUSIONToolkit.TokaMaker import TokaMaker
-from OFT_pf_coil_optimize import CoilPositionSpace, pf_coil_optimize
+from OFT_pf_coil_opt_fct import CoilPositionSpace, pf_coil_optimize
 
 # Setup and solve fixed-boundary equilibrium with TokaMaker
 myOFT = OFT_env(nthreads=2)
@@ -56,7 +56,7 @@ coil_space = CoilPositionSpace(
     radial_bounds=(0.0, 1.0)     # Radial position (0=inner, 1=outer)
 )
 
-# Optimize coil positions
+# Optimize coil positions using active learning (Bayesian + L-BFGS)
 result = pf_coil_optimize(
     tokamaker_solver=mygs,
     coil_space=coil_space,
@@ -66,7 +66,9 @@ result = pf_coil_optimize(
     min_coil_distance=10,   # Minimum angular separation (degrees)
     method='bayesian',
     n_calls=100,
-    local_optimize=True,    # Refine with L-BFGS
+    n_initial_points=50,
+    local_optimize=True,    # Enable active learning refinement
+    n_local_refine=5,       # Refine top 5 results with L-BFGS
     verbose=True
 )
 
@@ -75,11 +77,15 @@ print(result)
 print(f"Optimized angles: {result.angles}")
 print(f"Optimized positions: {result.positions}")
 print(f"Coil currents: {result.currents}")
+print(f"Final cost: {result.cost_outer:.6e}")
+print(f"Flux error: {result.flux_error:.6e}")
 ```
+
+For a complete working example, see `examples/test_OFT_pf_coil_optimize.py`.
 
 ## Core Components
 
-### 1. OFT_pf_coil_optimize.py
+### 1. OFT_pf_coil_opt_fct.py
 
 Main optimization module providing:
 
@@ -141,11 +147,13 @@ Main optimization function with configurable parameters.
 - `min_coil_distance`: Minimum angular separation (degrees)
 
 **Bayesian optimization parameters:**
-- `n_calls`: Total evaluations
-- `n_initial_points`: Random samples before GP modeling
-- `acq_func`: Acquisition function (`'EI'`, `'LCB'`, `'PI'`)
-- `local_optimize`: Refine results with L-BFGS
-- `n_local_refine`: Number of top results to refine
+- `n_calls`: Total evaluations (default: 100)
+- `n_initial_points`: Random Sobol samples before GP modeling (default: 50)
+- `acq_func`: Acquisition function - `'EI'` (Expected Improvement), `'LCB'` (Lower Confidence Bound), `'PI'` (Probability of Improvement)
+- `local_optimize`: Enable active learning - refine top results with L-BFGS (default: False)
+- `n_local_refine`: Number of top Bayesian results to refine with L-BFGS (default: 5)
+- `random_state`: Random seed for reproducibility
+- `n_jobs`: Number of parallel jobs for GP optimization
 
 #### OptimizationResult
 Container for optimization results with attributes:
@@ -161,7 +169,7 @@ Container for optimization results with attributes:
 - `flux_error`: L2 norm of flux reproduction error
 - `n_iterations`: Number of iterations
 
-### 2. helper_functions.py
+### 2. helper_fct.py
 
 Utility functions for geometry manipulation:
 
@@ -174,59 +182,75 @@ Utility functions for geometry manipulation:
 - **`compute_coil_centers(coil_pts_dict)`**: Compute centers from coil geometry
 - **`make_3x3_thick(center, R)`**: Generate 3×3 filament arrangement
 
-### 3. optimization_comparison.py
+### 3. opt_comparison.py
 
-Framework for comparing optimization methods:
+Framework for comparing optimization methods with comprehensive visualization:
 
 ```python
-from optimization_comparison import OptimizationComparison
+from opt_comparison import OptimizationComparison
 
 # Create comparison object
 comparison = OptimizationComparison(
     objective_func=my_objective,
     bounds=parameter_bounds,
     max_time=120,  # seconds per method
-    NUM_COILS=10
+    NUM_COILS=10,
+    OMEGA=1e-5,
+    DIST_TH=10,
+    REG_IN=1e-5,
+    RFIL=0.01
 )
+
+# Set problem data for plotting
+comparison.set_problem_data(r_bnd, psi_bnd, coil_center_cand1,
+                           coil_center_cand2, o_point, eval_green)
 
 # Run all methods
 comparison.compare_all(x0=initial_guess)
 
 # Generate visualizations
-comparison.plot_result()
-comparison.plot_each_method_coils()
-comparison.plot_each_method_error()
+fig, coil_fig, err_fig = comparison.plot_result()  # 2x2 overview plot
+comparison.plot_each_method_coils()  # Separate coil placement plots
+comparison.plot_each_method_error()  # Separate flux error plots
 ```
 
 **Supported methods:**
 - L-BFGS-B
-- Multi-start L-BFGS (Sobol sampling)
+- Multi-start L-BFGS (Sobol sampling for better coverage)
 - Differential Evolution
 - Dual Annealing
-- Bayesian Optimization (with optional L-BFGS refinement)
+- Bayesian Optimization with Gaussian Process
+- Bayesian + L-BFGS (hybrid active learning approach)
 - Basin Hopping
 - Multi-start Basin Hopping
+
+**Key features:**
+- Time-limited optimization for fair comparison
+- Comprehensive tracking of convergence history
+- Three-tier visualization system:
+  - Combined 2x2 overview (convergence, costs, placements, flux)
+  - Per-method coil placement comparison
+  - Per-method flux error analysis
+- Results automatically saved to `examples/comparisons/` with timestamps
 
 ## Files
 
 ### Core Modules
-- **`OFT_pf_coil_optimize.py`** - Main optimization module
-- **`helper_functions.py`** - Geometry utility functions
-- **`optimization_comparison.py`** - Optimization method benchmarking framework
+- **`OFT_pf_coil_opt_fct.py`** - Main optimization module with CoilPositionSpace and pf_coil_optimize
+- **`helper_fct.py`** - Geometry utility functions for polygon operations and coil placement
+- **`opt_comparison.py`** - Optimization method benchmarking framework with comprehensive plotting
 
-### Test and Example Files
-- **`test_oft_optimize.py`** - Unit tests for optimization module
-- **`PF_coil_opt_original.ipynb`** - Original notebook implementation
-- **`test_files/MIT_CPSFR25_withpsidt.ipynb`** - MIT test case
+### Examples Directory
+- **`examples/test_OFT_pf_coil_optimize.py`** - Example script demonstrating L-BFGS and Bayesian optimization
+- **`examples/comparisons/`** - Saved optimization comparison results with timestamps
+
+### Notebooks
+- **`PF_coil_opt_original.ipynb`** - Original notebook implementation and development
 
 ### Data Files
 - **`g192185.02440`** - DIII-D equilibrium EQDSK file
 - **`DIIID_geom.json`** - DIII-D geometric data
 - **`DIIID_mesh*.h5`** - DIII-D mesh files
-
-### Documentation
-- **`CLAUDE.md`** - Development sprint plan
-- **`comparisons/`** - Saved optimization comparison results
 
 ## Optimization Methods
 
@@ -259,6 +283,30 @@ result = pf_coil_optimize(
 ### Bayesian Optimization
 Gaussian process surrogate model with intelligent sampling. Best for expensive objectives.
 
+**Active Learning (Hybrid) Approach:**
+When `local_optimize=True`, uses a two-phase strategy:
+1. **Phase 1 (50% time)**: Bayesian optimization explores the space using GP-guided acquisition
+2. **Phase 2 (50% time)**: L-BFGS refinement of top N results for precise convergence
+
+```python
+result = pf_coil_optimize(
+    tokamaker_solver=mygs,
+    coil_space=space,
+    n_coils=6,
+    reg_current=1e-5,
+    reg_distance=1e-5,
+    min_coil_distance=10,
+    method='bayesian',
+    n_calls=100,            # Total GP evaluations
+    n_initial_points=50,    # Sobol samples before modeling
+    acq_func='EI',          # Expected Improvement
+    local_optimize=True,    # Enable active learning
+    n_local_refine=5,       # Refine top 5 results
+    random_state=42
+)
+```
+
+**Pure Bayesian (No Refinement):**
 ```python
 result = pf_coil_optimize(
     tokamaker_solver=mygs,
@@ -266,9 +314,7 @@ result = pf_coil_optimize(
     n_coils=6,
     method='bayesian',
     n_calls=100,
-    n_initial_points=20,
-    local_optimize=True,    # Refine with L-BFGS
-    n_local_refine=5
+    local_optimize=False    # Pure GP optimization
 )
 ```
 
@@ -329,44 +375,102 @@ space = PerCoilPositionSpace(
 result = pf_coil_optimize(mygs, space, n_coils=5)
 ```
 
-### Example 3: Comparison of optimization methods
+### Example 3: Running the test script
+
+The `examples/` directory contains a ready-to-run test script:
+
+```bash
+# Run L-BFGS optimization test
+python examples/test_OFT_pf_coil_optimize.py --method lbfgs
+
+# Run Bayesian optimization test
+python examples/test_OFT_pf_coil_optimize.py --method bayesian
+
+# Run all tests
+python examples/test_OFT_pf_coil_optimize.py --method all
+```
+
+### Example 4: Comparison of optimization methods
 
 ```python
-from optimization_comparison import main
+from opt_comparison import main
+
+# Setup TokaMaker solver (mygs) first...
+# (see examples/test_OFT_pf_coil_optimize.py for full setup)
 
 # Run comparison with custom settings
 comparison, summary = main(
-    methods=['lbfgs', 'multistart_lbfgs', 'bayesian']
+    mygs=mygs,
+    methods=['lbfgs', 'multistart_lbfgs', 'bayesian'],
+    NUM_COILS=6,
+    MAX_TIME=120,
+    OMEGA=1e-7,
+    DIST_TH=10,
+    REG_IN=1e-5,
+    RFIL=0.01
 )
 
-# Results automatically saved to comparisons/ directory
+# Results automatically saved to examples/comparisons/{timestamp}/
+# - convergence_plot.png (2x2 overview)
+# - coil_placement_plot.png (per-method placements)
+# - flux_error_plot.png (per-method flux errors)
 ```
+
+The comparison framework generates three comprehensive plots:
+1. **2x2 Overview**: Convergence curves, cost comparison bar chart, combined coil placements, flux reproduction
+2. **Per-Method Coil Placement**: Individual subplots showing optimal coil positions for each method
+3. **Per-Method Flux Error**: Individual subplots showing desired vs. computed flux for each method
 
 ## Output and Visualization
 
-Optimization comparison generates three plots:
-1. **Convergence plot**: Cost vs. iterations for each method
-2. **Coil placement**: Optimized coil positions for each method
-3. **Flux error**: Target vs. computed boundary flux
+### Optimization Results
+The `pf_coil_optimize()` function returns an `OptimizationResult` object containing:
+- Optimized coil angles and radial positions
+- Final (R, Z) coil positions
+- Computed coil currents
+- Complete coil geometry dictionary
+- Cost metrics (outer cost, inner cost, flux error)
+- Optimization metadata (iterations, success flag, method used)
 
-Results are saved to timestamped folders in `comparisons/`.
+### Comparison Visualization
+The `opt_comparison.py` framework generates three comprehensive visualization plots:
+
+1. **2x2 Overview Plot** (`convergence_plot.png`):
+   - Top-left: Convergence curves showing cost vs. evaluations for all methods
+   - Top-right: Bar chart comparing final costs with percentage differences
+   - Bottom-left: Combined coil placement showing all methods' optimal positions
+   - Bottom-right: Flux reproduction showing desired vs. computed boundary flux
+
+2. **Per-Method Coil Placement** (`coil_placement_plot.png`):
+   - Individual subplots for each optimization method
+   - Shows coil positions (top and bottom) with position space boundaries
+   - Displays final cost for each method
+
+3. **Per-Method Flux Error** (`flux_error_plot.png`):
+   - Individual subplots comparing desired and computed flux
+   - Includes RMSE and max error metrics for each method
+   - Helps diagnose where flux reproduction is weakest
+
+Results are saved to timestamped folders in `examples/comparisons/{YYYYMMDD_HHMMSS}/`.
 
 ## Development Status
 
-**Current**: Sprint 2 - Full Features
-- ✅ Core optimization module
-- ✅ CoilPositionSpace with multiple initialization methods
+**Current**: Sprint 2 - Full Features ✅
+- ✅ Core optimization module with three methods
+- ✅ CoilPositionSpace with 4 initialization methods (coords, parametric, function, single_curve)
 - ✅ PerCoilPositionSpace for custom per-coil spaces
-- ✅ Multiple optimization algorithms (L-BFGS, multi-start, Bayesian)
-- ✅ Optimization comparison framework
-- ✅ Active learning and adaptive refinement
-- 🚧 Advanced plotting in OptimizationResult
-- 🚧 Comprehensive documentation
+- ✅ Multiple optimization algorithms (L-BFGS, multi-start L-BFGS, Bayesian)
+- ✅ Active learning (Bayesian + L-BFGS hybrid approach)
+- ✅ Comprehensive optimization comparison framework
+- ✅ Three-tier visualization system (overview, per-method coils, per-method flux)
+- ✅ Example scripts and test cases
+- ✅ Sobol sampling for multi-start methods
 
-**Next**: Sprint 3 - Polish
-- Comprehensive docstrings
-- Error handling improvements
-- Extended test coverage
+**Future Enhancements**:
+- Extended test coverage and unit tests
+- Additional optimization methods (DIRECT, CMA-ES)
+- Interactive plotting capabilities
+- Constraint handling for engineering limits
 
 ## Citation
 

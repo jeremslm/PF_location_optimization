@@ -21,6 +21,21 @@ from scipy.stats import qmc
 import os
 import sys
 
+home_dir = os.path.expanduser("~")
+oft_root_path = os.path.join(home_dir, "OpenFUSIONToolkit/install_release")
+os.environ["OFT_ROOTPATH"] = oft_root_path
+
+tokamaker_python_path = os.getenv("OFT_ROOTPATH")
+if tokamaker_python_path is not None:
+    sys.path.append(os.path.join(tokamaker_python_path, 'python'))
+
+from OpenFUSIONToolkit import OFT_env
+from OpenFUSIONToolkit.TokaMaker import TokaMaker
+from OpenFUSIONToolkit.TokaMaker.meshing import gs_Domain
+from OpenFUSIONToolkit.TokaMaker.util import read_eqdsk, eval_green
+from helper_fct import resize_polygon, update_boundary
+from OFT_pf_coil_opt_fct import CoilPositionSpace
+
 
 class TimeoutException(Exception):
     """Raised when optimization time limit is reached."""
@@ -737,20 +752,30 @@ class OptimizationComparison:
 
             textstr = '\n'.join(params_text)
             props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-            ax1.text(0.98, 0.5, textstr, transform=ax1.transAxes, fontsize=8,
+            ax1.text(0.8, 0.5, textstr, transform=ax1.transAxes, fontsize=8,
                      verticalalignment='top', bbox=props)
-
+            
         # ===== ax2: Bar chart of final costs =====
         methods_names = [m for m, _ in sorted_methods]
-        costs = [r['best_cost'] for _, r in sorted_methods]
+        costs = np.array([r['best_cost'] for _, r in sorted_methods])
+        best_cost = costs[0]  # sorted_methods is already sorted by cost
 
-        bars = ax2.barh(methods_names, costs, color=colors)
+        ax2.barh(methods_names, costs, color=colors)
         ax2.set_xlabel('Final Cost', fontsize=12)
         ax2.set_title('Final Cost by Method', fontsize=14)
-        if log_scale:
-            ax2.set_xscale('log')
+        ax2.axvline(x=best_cost, color='k', linestyle='--', alpha=0.3, linewidth=1.5)
         ax2.grid(True, alpha=0.3, axis='x')
 
+        max_cost = np.max(costs)
+        ax2.set_xlim(best_cost * 0.95, max_cost * 1.15)
+
+        for i, cost in enumerate(costs):
+            pct_increase = ((cost - best_cost) / best_cost) * 100
+            if pct_increase < 0.1:
+                ax2.text(cost, i, f' Best', va='center', fontsize=9, ha='left', weight='bold')
+            else:
+                ax2.text(cost, i, f' +{pct_increase:.1f}%', va='center', fontsize=9, ha='left')
+            
         # ===== ax3: Coil placement for all methods =====
         if self.coil_center_cand1 is not None and self.coil_center_cand2 is not None:
             self._plot_position_space_boundaries(ax3)
@@ -805,7 +830,7 @@ class OptimizationComparison:
 
         return fig, coil_fig, error_fig
 
-    def plot_each_method_coils(self, figsize=(16, 10)):
+    def plot_each_method_coils(self, figsize=(10, 18)):
         """
         Create separate figure with subplots showing each method's coil placement.
 
@@ -969,7 +994,7 @@ class OptimizationComparison:
 # Main function to run comparison
 # ============================================
 
-def main(methods=None):
+def main(mygs, methods=None, **kwargs):
     """
     Run optimization method comparison for DIII-D PF coil placement.
 
@@ -984,71 +1009,13 @@ def main(methods=None):
     # ========================================
     # Optimization parameters
     # ========================================
-    NUM_COILS = 12
-    MAX_TIME = 300  # seconds per method
-    OMEGA = 1e-5  # Distance penalty weight
-    DIST_TH = 10  # Minimum distance threshold (degrees)
-    REG_IN = 1e-5  # Current regularization
-    RFIL = 0.01  # Coil filament radius
 
-    # ========================================
-    # Setup OpenFUSIONToolkit
-    # ========================================
-    print("Setting up OpenFUSIONToolkit...")
-
-    home_dir = os.path.expanduser("~")
-    oft_root_path = os.path.join(home_dir, "OpenFUSIONToolkit/install_release")
-    os.environ["OFT_ROOTPATH"] = oft_root_path
-
-    tokamaker_python_path = os.getenv("OFT_ROOTPATH")
-    if tokamaker_python_path is not None:
-        sys.path.append(os.path.join(tokamaker_python_path, 'python'))
-
-    from OpenFUSIONToolkit import OFT_env
-    from OpenFUSIONToolkit.TokaMaker import TokaMaker
-    from OpenFUSIONToolkit.TokaMaker.meshing import gs_Domain
-    from OpenFUSIONToolkit.TokaMaker.util import read_eqdsk, eval_green
-    from helper_fct import resize_polygon, update_boundary
-    from OFT_pf_coil_opt_fct import CoilPositionSpace
-
-    # ========================================
-    # Load EQDSK and create mesh
-    # ========================================
-    print("Loading EQDSK file...")
-
-    eqdsk = read_eqdsk('g192185.02440')
-    LCFS_contour = eqdsk['rzout'].copy()
-    mesh_dx = 0.015
-
-    # Create mesh
-    gs_mesh = gs_Domain()
-    gs_mesh.define_region('plasma', mesh_dx, 'plasma')
-    gs_mesh.add_polygon(LCFS_contour, 'plasma')
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-
-    # ========================================
-    # Initialize TokaMaker and solve equilibrium
-    # ========================================
-    print("Initializing TokaMaker...")
-
-    myOFT = OFT_env(nthreads=2)
-    mygs = TokaMaker(myOFT)
-
-    mygs.setup_mesh(mesh_pts, mesh_lc)
-    mygs.settings.free_boundary = False
-
-    F0 = eqdsk['rcentr'] * eqdsk['bcentr']
-    mygs.setup(order=2, F0=F0)
-
-    # Set targets
-    Ip_target = eqdsk['ip']
-    pres_target = eqdsk['pres'][0]
-    mygs.set_targets(Ip=Ip_target, pax=pres_target)
-
-    # Solve
-    print("Solving fixed-boundary equilibrium...")
-    mygs.init_psi()
-    mygs.solve()
+    NUM_COILS = kwargs.get('NUM_COILS', 6)
+    MAX_TIME = kwargs.get('MAX_TIME', 120) # seconds per method
+    OMEGA = kwargs.get('OMEGA', 1e-7) # Distance penalty weight
+    DIST_TH = kwargs.get('DIST_TH', 10) # Minimum distance threshold (degrees)
+    REG_IN = kwargs.get('REG_IN', 1e-5) # Current regularization
+    RFIL = kwargs.get('RFIL', 0.01) # Coil filament radius
 
     # Get boundary flux
     r_bnd, psi_bnd = mygs.get_vfixed()
@@ -1182,7 +1149,7 @@ def main(methods=None):
     fig, coil_fig, err_fig = comparison.plot_result()
 
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    foldername = f'comparisons/{timestamp}'
+    foldername = f'examples/comparisons/{timestamp}'
     os.makedirs(foldername, exist_ok=True)
     fig.savefig(f'{foldername}/convergence_plot.png', dpi=150, bbox_inches='tight')
     coil_fig.savefig(f'{foldername}/coil_placement_plot.png', dpi=150, bbox_inches='tight')
@@ -1202,5 +1169,46 @@ if __name__ == "__main__":
     else:
         methods = [m.strip() for m in methods_input.split(",")]
 
+    eqdsk = read_eqdsk('g192185.02440')
+    LCFS_contour = eqdsk['rzout'].copy()
+    mesh_dx = 0.015
+
+    # Create mesh
+    gs_mesh = gs_Domain()
+    gs_mesh.define_region('plasma', mesh_dx, 'plasma')
+    gs_mesh.add_polygon(LCFS_contour, 'plasma')
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+
+    myOFT = OFT_env(nthreads=2)
+    mygs = TokaMaker(myOFT)
+
+    mygs.setup_mesh(mesh_pts, mesh_lc)
+    mygs.settings.free_boundary = False
+
+    F0 = eqdsk['rcentr'] * eqdsk['bcentr']
+    mygs.setup(order=2, F0=F0)
+
+    # Set targets
+    Ip_target = eqdsk['ip']
+    pres_target = eqdsk['pres'][0]
+    mygs.set_targets(Ip=Ip_target, pax=pres_target)
+
+    # Solve
+    print("Solving fixed-boundary equilibrium...")
+    mygs.init_psi()
+    mygs.solve()
+
     # Run comparison
-    comparison, summary = main(methods=methods)
+    for num_coils in [4,6,8,10,12,14,16,18,20]:
+        for reg_in in [1e-7, 1e-6, 1e-5, 1e-4]:
+            if reg_in==1e-7 and num_coils==4:
+                continue # already ran this one
+
+            try:
+                comparison, summary = main(mygs=mygs, methods=methods, NUM_COILS=num_coils, REG_IN=reg_in)
+            except Exception as e:
+                print(f"\n Failed for NUM_COILS={num_coils}, REG_IN={reg_in}")
+                print(f"\n Error: {e}")
+                continue
+
+    # comparison, summary = main(methods=methods, MAX_TIME=5)
