@@ -1,6 +1,5 @@
 """
 PF Coil Optimization Module
-============================
 
 Core module for optimizing poloidal field coil locations in tokamak equilibria.
 """
@@ -25,6 +24,12 @@ try:
         plot_coil,
         place_points
     )
+    from .coil_mapping import (
+        CoilMapping,
+        ThetaRadialMapping,
+        DirectRZMapping,
+        PolarCoordinateMapping
+    )
 except ImportError:
     from helper_fct import (
         resize_polygon,
@@ -33,6 +38,12 @@ except ImportError:
         plot_coil,
         place_points,
         smoothen,
+    )
+    from coil_mapping import (
+        CoilMapping,
+        ThetaRadialMapping,
+        DirectRZMapping,
+        PolarCoordinateMapping
     )
 
 # Optional dependencies
@@ -298,39 +309,6 @@ class OptimizationResult:
         return s
 
 
-def _make_coils_from_params(params, ncoils, position_space, coil_dx=0.08, coil_dy=0.08):
-    """Generate coil geometry from optimization parameters."""
-    thetas = params[:ncoils]
-    radials = params[ncoils:2*ncoils]
-    
-    # Get (R, Z) locations for top-side coils
-    if isinstance(position_space, CoilPositionSpace):
-        locs = np.array([position_space.interpolate(theta, radial)
-                        for theta, radial in zip(thetas, radials)])
-    elif isinstance(position_space, PerCoilPositionSpace):
-        locs = np.array([position_space.interpolate_for_coil(i, theta, radial)
-                        for i, (theta, radial) in enumerate(zip(thetas, radials))])
-    else:
-        raise TypeError(f"Unknown position_space type: {type(position_space)}")
-    
-    # Create coil geometry dictionary
-    coil_geometry = {"coils": {}}
-    
-    for i, loc in enumerate(locs):
-        pts_top = np.array([
-            [loc[0] - coil_dx, loc[1] + coil_dy],
-            [loc[0] + coil_dx, loc[1] + coil_dy],
-            [loc[0] + coil_dx, loc[1] - coil_dy],
-            [loc[0] - coil_dx, loc[1] - coil_dy]
-        ])
-        pts_bot = pts_top * np.array([1, -1])
-        
-        coil_geometry["coils"][f'F{i}A'] = {'pts': copy.deepcopy(pts_top), 'nturns': 1.0}
-        coil_geometry["coils"][f'F{i}B'] = {'pts': copy.deepcopy(pts_bot), 'nturns': 1.0}
-    
-    return coil_geometry
-
-
 def _compute_coil_centers(coil_geometry):
     """Compute center of each coil."""
     coil_centers = []
@@ -341,36 +319,24 @@ def _compute_coil_centers(coil_geometry):
     return coil_centers
 
 
-def _make_3x3_thick(center, R):
-    """Generate centers of 9 filaments in 3×3 arrangement."""
-    R0, Z0 = center
-    offsets = [-1, 0, 1]
-    fil_centers = []
-    for dx in offsets:
-        for dy in offsets:
-            fil_centers.append([R0 + 2 * R * dx, Z0 + 2 * R * dy])
-    return fil_centers
-
-
-def _objective_function(params, tokamaker_solver, position_space, n_coils,
+def _objective_function(params, tokamaker_solver, coil_mapping, n_coils,
                        r_bnd, psi_bnd, omega, dist_th, reg_in, Rfil):
     """Objective function for coil position optimization."""
-    # Generate coil geometry
-    coil_geometry = _make_coils_from_params(params, n_coils, position_space)
+    # Generate coil geometry using CoilMapping
+    coil_geometry = coil_mapping.make_coils_from_params(params, n_coils)
+
+    # Compute coil centers
     coil_centers = _compute_coil_centers(coil_geometry)
-    
-    # Add 3×3 thick coil model
-    coil_centers_3x3 = []
-    for center in coil_centers:
-        thick_centers = _make_3x3_thick(center[0], Rfil)
-        coil_centers_3x3.append(thick_centers)
-    
+
+    # Generate filaments using CoilMapping
+    coil_centers_3x3 = coil_mapping.make_filaments(coil_centers, Rfil)
+
     n_bnd = psi_bnd.shape[0]
     n_coils_total = len(coil_centers_3x3)
     
     # Build constraint matrix
     con = np.zeros((n_bnd - 1 + n_coils_total, n_coils_total))
-    
+
     for i, filament_set in enumerate(coil_centers_3x3):
         flux_tmp = np.zeros((n_bnd,))
         for fil in filament_set:
@@ -589,37 +555,54 @@ def _optimize_bayesian(bounds, objective_args, n_calls=100, n_initial_points=50,
 
     return result, final_currents, inner_cost
 
-def pf_coil_optimize(tokamaker_solver, reg_current, reg_distance, min_coil_distance, coil_space, n_coils=5,
+def pf_coil_optimize(tokamaker_solver, reg_current, reg_distance, min_coil_distance,
+                     coil_mapping=None, coil_space=None,  # NEW: coil_mapping parameter
+                     n_coils=5,
                      coil_dx=0.08, coil_dy=0.08, coil_filament_radius=0.01,
                      method='lbfgs', local_optimize=False,
                      initial_angles=None, initial_radials=None, bounds=None,
-                     
+
                      # Bayesian optimization parameters
                      n_calls=100, n_initial_points=50, acq_func='EI',
                      random_state=42, n_jobs=1, n_local_refine=5,
-                    
+
                      # Multi-start parameters
                      n_starts=10,
                      verbose=True, plot_result=False):
     """
     Optimize PF coil locations for fixed-boundary equilibrium.
-    
+
     Parameters
     ----------
     tokamaker_solver : TokaMaker instance
         Solver with completed fixed-boundary equilibrium
-    coil_space : CoilPositionSpace or PerCoilPositionSpace
-        Search space for coil positions
+    coil_mapping : CoilMapping, optional
+        Coil parameterization mapping. If provided, coil_space is ignored.
+    coil_space : CoilPositionSpace or PerCoilPositionSpace, optional
+        (DEPRECATED) Search space. Will auto-convert to ThetaRadialMapping.
     n_coils : int
         Number of coil pairs (top/bottom)
     method : str
         Optimization method ('lbfgs', 'multi_start_lbfgs', 'bayesian')
-    
+
     Returns
     -------
     result : OptimizationResult
         Optimization results
     """
+    # Backward compatibility: auto-convert coil_space to mapping
+    if coil_mapping is None:
+        if coil_space is None:
+            raise ValueError("Must provide either coil_mapping or coil_space")
+        # Auto-create default mapping from old coil_space parameter
+        coil_mapping = ThetaRadialMapping(
+            position_space=coil_space,
+            coil_dx=coil_dx,
+            coil_dy=coil_dy
+        )
+        if verbose:
+            print("Auto-converted coil_space to ThetaRadialMapping")
+
     # Validate inputs
     if method not in ['lbfgs', 'multi_start_lbfgs', 'bayesian']:
         raise ValueError(f"Unknown method '{method}'")
@@ -633,23 +616,11 @@ def pf_coil_optimize(tokamaker_solver, reg_current, reg_distance, min_coil_dista
     if verbose:
         print(f"  Found {len(r_bnd)} boundary points")
     
-    # Generate bounds
+    # Generate bounds from coil_mapping
     if bounds is None:
         if verbose:
-            print("Generating parameter bounds from coil space...")
-        bounds = []
-        for i in range(n_coils):
-            if isinstance(coil_space, CoilPositionSpace):
-                theta_bounds, radial_bounds = coil_space.get_bounds()
-            else:
-                theta_bounds, radial_bounds = coil_space.get_bounds_for_coil(i)
-            bounds.append(theta_bounds)
-        for i in range(n_coils):
-            if isinstance(coil_space, CoilPositionSpace):
-                theta_bounds, radial_bounds = coil_space.get_bounds()
-            else:
-                theta_bounds, radial_bounds = coil_space.get_bounds_for_coil(i)
-            bounds.append(radial_bounds)
+            print("Generating parameter bounds from coil mapping...")
+        bounds = coil_mapping.get_bounds(n_coils)
     
     # Generate initial guess
     if initial_angles is None or initial_radials is None:
@@ -670,10 +641,10 @@ def pf_coil_optimize(tokamaker_solver, reg_current, reg_distance, min_coil_dista
         print(f"  min_coil_distance: {min_coil_distance} degrees")
     
     # Prepare objective function arguments
-    try: 
+    try:
         objective_args = {
             'tokamaker_solver': tokamaker_solver,
-            'position_space': coil_space,
+            'coil_mapping': coil_mapping,
             'n_coils': n_coils,
             'r_bnd': r_bnd,
             'psi_bnd': psi_bnd,
@@ -729,9 +700,9 @@ def pf_coil_optimize(tokamaker_solver, reg_current, reg_distance, min_coil_dista
     opt_angles = opt_params[:n_coils]
     opt_radials = opt_params[n_coils:]
     
-    # Generate final coil geometry
-    final_geometry = _make_coils_from_params(opt_params, n_coils, coil_space, coil_dx, coil_dy)
-    
+    # Generate final coil geometry using coil_mapping
+    final_geometry = coil_mapping.make_coils_from_params(opt_params, n_coils)
+
     # Get all coil positions
     all_positions = []
     for coil_name in sorted(final_geometry["coils"].keys()):
@@ -739,10 +710,10 @@ def pf_coil_optimize(tokamaker_solver, reg_current, reg_distance, min_coil_dista
         center = np.mean(pts, axis=0)
         all_positions.append(center)
     all_positions = np.array(all_positions)
-    
+
     # Compute flux error
     coil_centers = _compute_coil_centers(final_geometry)
-    coil_centers_3x3 = [_make_3x3_thick(c[0], coil_filament_radius) for c in coil_centers]
+    coil_centers_3x3 = coil_mapping.make_filaments(coil_centers, coil_filament_radius)
     
     # Compute flux from coils
     psi_computed = np.zeros_like(psi_bnd)

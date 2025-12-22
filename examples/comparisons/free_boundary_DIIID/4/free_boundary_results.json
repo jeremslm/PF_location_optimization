@@ -1,0 +1,222 @@
+{
+  "4_coils_lambda_1.00e-05_Multi-start L-BFGS": {
+    "num_coils": 4,
+    "lambda": 1e-05,
+    "method": "Multi-start L-BFGS",
+    "total_current": 3067174.733057494,
+    "flux_error_fixed_boundary": 0.026939649400825712,
+    "coil_params": {
+      "thetas": [
+        13.728825572177318,
+        10.0,
+        16.317918783902854,
+        10.0
+      ],
+      "radials": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "success": true
+  },
+  "4_coils_lambda_1.00e-05_Bayesian": {
+    "num_coils": 4,
+    "lambda": 1e-05,
+    "method": "Bayesian",
+    "total_current": 3073010.48856475,
+    "flux_error_fixed_boundary": 0.026939633620364476,
+    "coil_params": {
+      "thetas": [
+        13.74759304218797,
+        10.0,
+        10.0,
+        16.29941435020293
+      ],
+      "radials": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "success": true
+  },
+  "4_coils_lambda_1.00e-06_Multi-start L-BFGS": {
+    "num_coils": 4,
+    "lambda": 1e-06,
+    "method": "Multi-start L-BFGS",
+    "total_current": 953880.8022261258,
+    "flux_error_fixed_boundary": 0.0015563429098513083,
+    "coil_params": {
+      "thetas": [
+        170.0,
+        153.81893488089568,
+        14.777543936871247,
+        45.87986481772621
+      ],
+      "radials": [
+        0.0,
+        0.0,
+        0.2801146057930984,
+        0.0
+      ]
+    },
+    "success": true
+  },
+  "4_coils_lambda_1.00e-06_Bayesian": {
+    "num_coils": 4,
+    "lambda": 1e-06,
+    "method": "Bayesian",
+    "total_current": 953888.4183688099,
+    "flux_error_fixed_boundary": 0.0015563429077780611,
+    "coil_params": {
+      "thetas": [
+        153.81924392040395,
+        170.0,
+        14.77765299758213,
+        45.879888710289876
+      ],
+      "radials": [
+        0.0,
+        0.0,
+        0.2801247112488806,
+        0.0
+      ]
+    },
+    "success": true
+  },
+  "4_coils_lambda_1.00e-07_Multi-start L-BFGS": {
+    "num_coils": 4,
+    "lambda": 1e-07,
+    "method": "Multi-start L-BFGS",
+    "total_current": 1390270.8245164268,
+    "flux_error_fixed_boundary": 5.336278700033507e-05,
+    "coil_params": {
+      "thetas": [
+        16.32767505418026,
+        53.00511472191106,
+        129.89866915070394,
+        147.56960761380066
+      ],
+      "radials": [
+        0.4240435328514802,
+        0.4656071924900308,
+        0.0,
+        0.021048832032453255
+      ]
+    },
+    "success": true
+  },
+  "4_coils_lambda_1.00e-07_Bayesian": {
+    "num_coils": 4,
+    "lambda": 1e-07,
+    "method": "Bayesian",
+    "total_current": 1386310.3277992406,
+    "flux_error_fixed_boundary": 5.3363395864733155e-05,
+    "coil_params": {
+      "thetas": [
+        52.97074459088503,
+        129.9992574508276,
+        147.51065442747938,
+        16.328442202180558
+      ],
+      "radials": [
+        0.46418731862712287,
+        0.0,
+        6.662846350129142e-05,
+        0.42408899842429637
+      ]
+    },
+    "success": true
+  },
+  "4_coils_lambda_1.00e-08_Multi-start L-BFGS": {
+    "num_coils": 4,
+    "lambda": 1e-08,
+    "method": "Multi-start L-BFGS",
+    "total_current": 1639197.8695244316,
+    "flux_error_fixed_boundary": 8.14605508877511e-06,
+    "coil_params": {
+      "thetas": [
+        16.691087811007538,
+        126.28764981877502,
+        61.1749767973289,
+        165.28663285157555
+      ],
+      "radials": [
+        0.45063260911617875,
+        0.0,
+        1.0,
+        1.0
+      ]
+    },
+    "success": true
+  },
+  "4_coils_lambda_1.00e-08_Bayesian": {
+    "num_coils": 4,
+    "lambda": 1e-08,
+    "method": "Bayesian",
+    "total_current": 1635039.6332242195,
+    "flux_error_fixed_boundary": 8.149161192414976e-06,
+    "coil_params": {
+      "thetas": [
+        165.31999803958925,
+        61.12430860564863,
+        16.693668996397186,
+        126.52337187898979
+      ],
+      "radials": [
+        0.9978856816453127,
+        1.0,
+        0.45083404596111265,
+        0.0
+      ]
+    },
+    "success": true
+  },
+  "4_coils_lambda_5.00e-06_Multi-start L-BFGS": {
+    "num_coils": 4,
+    "lambda": 4.9999999999999996e-06,
+    "method": "Multi-start L-BFGS",
+    "total_current": 828053.7024161199,
+    "flux_error_fixed_boundary": 0.016219030551851456,
+    "coil_params": {
+      "thetas": [
+        149.68932398569174,
+        12.390790761314722,
+        170.0,
+        44.418897882127226
+      ],
+      "radials": [
+        0.0,
+        0.032091372009825966,
+        0.0,
+        0.0
+      ]
+    },
+    "success": true
+  },
+  "4_coils_lambda_5.00e-06_Bayesian": {
+    "num_coils": 4,
+    "lambda": 4.9999999999999996e-06,
+    "method": "Bayesian",
+    "total_current": 831391.0398689051,
+    "flux_error_fixed_boundary": 0.014632000266578024,
+    "coil_params": {
+      "thetas": [
+        170.0,
+        17.432613514683446,
+        42.778313542687464,
+        10.0
+      ],
+      "radials": [
+        0.0,
+        0.0,
+        0.0,
+        0.011056545201335788
+      ]
+    },
+    "success": true
+  }
+}

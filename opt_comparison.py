@@ -49,8 +49,8 @@ class OptimizationComparison:
     All methods are given the same time budget for fair comparison.
     """
 
-    def __init__(self, objective_func, bounds, max_time=60.0,
-                 NUM_COILS=10, OMEGA=1e-5, DIST_TH=10, REG_IN=1e-5, RFIL=0.01):
+    def __init__(self, objective_func, bounds, max_time=120.0,
+                 NUM_COILS=3, OMEGA=1e-5, DIST_TH=5, REG_IN=1e-5, RFIL=0.01):
         """
         Initialize comparison.
 
@@ -196,7 +196,10 @@ class OptimizationComparison:
             self.results.items(),
             key=lambda x: x[1]['best_cost']
         )
-        colors = plt.cm.tab10(np.linspace(0, 1, len(sorted_methods)))
+        if(len(sorted_methods)!=2):
+            colors = plt.cm.tab10(np.linspace(0, 1, len(sorted_methods)))
+
+        colors = plt.cm.tab10(np.array([0.2,0.6]))
         return sorted_methods, colors
 
     def _plot_position_space_boundaries(self, ax):
@@ -232,9 +235,14 @@ class OptimizationComparison:
         self._x_history.append(params.copy())  # Track parameter vector
         self._times.append(time.time() - self._start_time)
 
+        # Read flux_err from objective function attribute if it exists
+        flux_err = getattr(self.objective, 'last_flux_err', None)
+
         if cost < self._best_cost:
             self._best_cost = cost
             self._best_params = params.copy()
+            if flux_err is not None:
+                self._best_flux_err = flux_err
 
         return cost
 
@@ -245,6 +253,7 @@ class OptimizationComparison:
         self._x_history = []  # Track all parameter vectors
         self._times = []  # Track time of each evaluation
         self._best_cost = float('inf')
+        self._best_flux_err = None  # Track best flux error (without distance penalty)
         self._best_params = None
         self._start_time = time.time()
 
@@ -277,6 +286,7 @@ class OptimizationComparison:
 
         self.results['L-BFGS-B'] = {
             'best_cost': self._best_cost,
+            'best_flux_err': self._best_flux_err,
             'best_params': self._best_params,
             'n_evals': self._n_evals,
             'time': elapsed,
@@ -333,6 +343,7 @@ class OptimizationComparison:
 
         self.results['Multi-start L-BFGS'] = {
             'best_cost': self._best_cost,
+            'best_flux_err': self._best_flux_err,
             'best_params': self._best_params,
             'n_evals': self._n_evals,
             'time': elapsed,
@@ -371,6 +382,7 @@ class OptimizationComparison:
 
         self.results['Differential Evolution'] = {
             'best_cost': self._best_cost,
+            'best_flux_err': self._best_flux_err,
             'best_params': self._best_params,
             'n_evals': self._n_evals,
             'time': elapsed,
@@ -409,6 +421,7 @@ class OptimizationComparison:
 
         self.results['Dual Annealing'] = {
             'best_cost': self._best_cost,
+            'best_flux_err': self._best_flux_err,
             'best_params': self._best_params,
             'n_evals': self._n_evals,
             'time': elapsed,
@@ -465,8 +478,9 @@ class OptimizationComparison:
         # Save Bayesian-only result
         elapsed_bayesian = time.time() - self._start_time
 
-        self.results['Bayesian (GP)'] = {
+        self.results['Bayesian'] = {
             'best_cost': self._best_cost,
+            'best_flux_err': self._best_flux_err,
             'best_params': self._best_params,
             'n_evals': self._n_evals,
             'time': elapsed_bayesian,
@@ -475,9 +489,10 @@ class OptimizationComparison:
             'convergence': np.minimum.accumulate(self._history),
             'stopping': f'{stopped_by} ({elapsed_bayesian:.1f}s)'
         }
+        bayesian_evals = self._n_evals
 
         # Phase 2: L-BFGS refinement (if enabled)
-        if local_optimize and len(self._history) >= n_local_refine:
+        if local_optimize:
             # Restore full time budget
             self.max_time = original_max_time
 
@@ -504,22 +519,30 @@ class OptimizationComparison:
 
             # Save refined result
             elapsed_total = time.time() - self._start_time
+            refinement_evals = self._n_evals  # Evals used during refinement phase
 
-            self.results['Bayesian + L-BFGS'] = {
+            # Calculate how many points were attempted vs completed
+            n_attempted = len(top_indices)
+
+            self.results['Bayesian'] = {
                 'best_cost': self._best_cost,
+                'best_flux_err': self._best_flux_err,
                 'best_params': self._best_params,
-                'n_evals': self._n_evals,
+                'n_evals': bayesian_evals + refinement_evals,
                 'time': elapsed_total,
                 'times': self._times.copy(),
                 'history': self._history.copy(),
                 'convergence': np.minimum.accumulate(self._history),
-                'stopping': f'{refinements_completed}/{n_local_refine} refined ({elapsed_total:.1f}s)'
+                'stopping': f'{stopped_by} ({elapsed_bayesian:.1f}s)',
+                'n_bayesian_evals': bayesian_evals,
+                'pts_refined': refinements_completed
             }
+ 
         elif local_optimize:
             # Restore max time even if we didn't refine
             self.max_time = original_max_time
 
-        return self.results['Bayesian (GP)']
+        return self.results['Bayesian']
 
     def run_basin_hopping(self, x0, T=1.0, stepsize=0.5, niter=10000):
         """
@@ -553,6 +576,7 @@ class OptimizationComparison:
 
         self.results['Basin Hopping'] = {
             'best_cost': self._best_cost,
+            'best_flux_err': self._best_flux_err,
             'best_params': self._best_params,
             'n_evals': self._n_evals,
             'time': elapsed,
@@ -611,6 +635,7 @@ class OptimizationComparison:
 
         self.results['Multi-start Basin Hopping'] = {
             'best_cost': self._best_cost,
+            'best_flux_err': self._best_flux_err,
             'best_params': self._best_params,
             'n_evals': self._n_evals,
             'time': elapsed,
@@ -690,14 +715,23 @@ class OptimizationComparison:
         print("=" * 70)
 
         data = []
+
         for method, res in self.results.items():
-            data.append({
+            row = {
                 'Method': method,
                 'Best Cost': res['best_cost'],
                 'Evals Used': res['n_evals'],
                 'Time (s)': res['time'],
-                'Stopping': res['stopping']
-            })
+                'Stopping': res['stopping'],
+            }
+
+            # Add Bayesian-specific fields if they exist
+            if 'n_bayesian_evals' in res:
+                row['Bayesian Evals'] = res['n_bayesian_evals']
+            if 'pts_refined' in res:
+                row['Pts Refined'] = res['pts_refined']
+
+            data.append(row)
 
         df = pd.DataFrame(data)
         df = df.sort_values('Best Cost')
@@ -710,7 +744,7 @@ class OptimizationComparison:
 
         return df
 
-    def plot_result(self, log_scale=True, figsize=(16, 12), each_method_flag=True):
+    def plot_result(self, log_scale=True, figsize=(16, 10), each_method_flag=True):
         """
         Plot 4 subplots: convergence curves, final costs, coil placement, and flux comparison.
         """
@@ -731,6 +765,11 @@ class OptimizationComparison:
         ax1.set_title('Convergence Speed', fontsize=14)
         if log_scale:
             ax1.set_yscale('log')
+            # Add more tick labels on y-axis
+            from matplotlib.ticker import LogLocator, NullFormatter
+            ax1.yaxis.set_major_locator(LogLocator(base=10.0, numticks=15))
+            ax1.yaxis.set_minor_locator(LogLocator(base=10.0, subs='auto', numticks=100))
+            ax1.yaxis.set_minor_formatter(NullFormatter())
         ax1.legend(loc='upper right', fontsize=8)
         ax1.grid(True, alpha=0.3)
 
@@ -830,7 +869,96 @@ class OptimizationComparison:
 
         return fig, coil_fig, error_fig
 
-    def plot_each_method_coils(self, figsize=(10, 18)):
+    def plot_early_convergence(self, n_evals=200, log_scale=True, figsize=(12, 6)):
+        """
+        Plot convergence for early evaluations only to see initial exploration.
+
+        Parameters
+        ----------
+        n_evals : int
+            Number of initial evaluations to plot (default: 200)
+        log_scale : bool
+            Use log scale for y-axis (default: False for linear scale)
+        figsize : tuple
+            Figure size (width, height)
+
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+            Figure with early convergence plot
+        """
+        if not self.results:
+            print("No results to plot")
+            return None
+
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
+
+        # Get sorted methods and colors
+        sorted_methods, colors = self._get_sorted_methods_and_colors()
+
+        # Plot early convergence for each method
+        for (method, res), color in zip(sorted_methods, colors):
+            conv = res['convergence']
+            n_plot = min(n_evals, len(conv))
+            label = f"{method} ({res['best_cost']:.2e})"
+            ax.plot(range(1, n_plot + 1), conv[:n_plot], label=label,
+                   color=color, linewidth=2, marker='o', markersize=3, alpha=0.7)
+
+        ax.set_xlabel('Function Evaluations', fontsize=12)
+        ax.set_ylabel('Best Cost Found', fontsize=12)
+        ax.set_title(f'Early Convergence (First {n_evals} Evaluations)', fontsize=14)
+        if log_scale:
+            ax.set_yscale('log')
+        ax.legend(loc='best', fontsize=10)
+        ax.grid(True, alpha=0.3)
+
+        plt.tight_layout()
+        return fig
+
+    def plot_convergence_vs_time(self, log_scale=True, figsize=(12, 6)):
+        """
+        Plot convergence vs time instead of evaluations.
+
+        Parameters
+        ----------
+        log_scale : bool
+            Use log scale for y-axis (default: True)
+        figsize : tuple
+            Figure size (width, height)
+
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+            Figure with convergence vs time plot
+        """
+        if not self.results:
+            print("No results to plot")
+            return None
+
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
+
+        # Get sorted methods and colors
+        sorted_methods, colors = self._get_sorted_methods_and_colors()
+
+        # Plot convergence vs time for each method
+        for (method, res), color in zip(sorted_methods, colors):
+            conv = res['convergence']
+            times = res['times']
+            label = f"{method} ({res['best_cost']:.2e})"
+            ax.plot(times, conv, label=label, color=color, linewidth=2, alpha=0.8)
+
+        ax.set_xlabel('Time (seconds)', fontsize=12)
+        ax.set_ylabel('Best Cost Found', fontsize=12)
+        ax.set_title('Convergence vs Time', fontsize=14)
+        if log_scale:
+            ax.set_yscale('log')
+        ax.legend(loc='best', fontsize=10)
+        ax.grid(True, alpha=0.3)
+
+        plt.tight_layout()
+        return fig
+
+    def plot_each_method_coils(self, figsize=(16,10)):
         """
         Create separate figure with subplots showing each method's coil placement.
 
@@ -890,7 +1018,7 @@ class OptimizationComparison:
 
         return fig
 
-    def plot_each_method_error(self, figsize=(16, 10)):
+    def plot_each_method_error(self, figsize=(16,10)):
         """
         Create separate figure with subplots showing each method's flux error.
 
@@ -987,7 +1115,83 @@ class OptimizationComparison:
                 print(f"  {method}: did not reach target")
 
         return result
-    
+
+    def save_results_to_json(self, filename):
+        """
+        Save optimization results to JSON file.
+
+        Saves: method, parameters (thetas/radials), coil positions (R,Z),
+        best cost, n_evals, time, and optimization settings.
+
+        Parameters
+        ----------
+        filename : str
+            Path to JSON file to save
+        """
+        import json
+
+        if not self.results:
+            print("No results to save")
+            return
+
+        # Prepare data for JSON serialization
+        save_data = {
+            'optimization_settings': {
+                'num_coils': int(self.num_coils),
+                'max_time': float(self.max_time),
+                'omega': float(self.omega),
+                'dist_th': float(self.dist_th),
+                'reg_in': float(self.reg_in),
+                'rfil': float(self.rfil)
+            },
+            'methods': {}
+        }
+
+        for method, res in self.results.items():
+            # Extract parameters
+            best_params = res['best_params']
+            num_coils = len(best_params) // 2
+            thetas = best_params[:num_coils].tolist()
+            radials = best_params[num_coils:].tolist()
+
+            # Compute coil positions (top half only)
+            if self.coil_center_cand1 is not None:
+                coil_locs, _, currents = self._compute_flux_for_params(best_params)
+                coil_positions = [[float(loc[0]), float(loc[1])] for loc in coil_locs]
+                coil_currents = currents.tolist()
+            else:
+                coil_positions = None
+                coil_currents = None
+
+            # Store method results
+            method_data = {
+                'best_cost': float(res['best_cost']),
+                'flux_err': float(res['best_flux_err']) if res['best_flux_err'] is not None else None,
+                'n_evals': int(res['n_evals']),
+                'time': float(res['time']),
+                'stopping': res['stopping'],
+                'parameters': {
+                    'thetas': thetas,  # Poloidal angles in degrees
+                    'radials': radials  # Radial positions (0=inner, 1=outer)
+                },
+                'coil_positions_top': coil_positions,  # (R, Z) positions of top coils
+                'coil_currents': coil_currents,  # Currents in each coil
+                'convergence_history': res['convergence'].tolist()
+            }
+
+            # Add Bayesian-specific fields if they exist
+            if 'n_bayesian_evals' in res:
+                method_data['n_bayesian_evals'] = int(res['n_bayesian_evals'])
+            if 'pts_refined' in res:
+                method_data['pts_refined'] = int(res['pts_refined'])
+
+            save_data['methods'][method] = method_data
+
+        # Save to file
+        with open(filename, 'w') as f:
+            json.dump(save_data, f, indent=2)
+
+        print(f"Saved results to {filename}")
 
 
 # ============================================
@@ -1012,7 +1216,7 @@ def main(mygs, methods=None, **kwargs):
 
     NUM_COILS = kwargs.get('NUM_COILS', 6)
     MAX_TIME = kwargs.get('MAX_TIME', 120) # seconds per method
-    OMEGA = kwargs.get('OMEGA', 1e-7) # Distance penalty weight
+    OMEGA = kwargs.get('OMEGA', 1e-5) # Distance penalty weight
     DIST_TH = kwargs.get('DIST_TH', 10) # Minimum distance threshold (degrees)
     REG_IN = kwargs.get('REG_IN', 1e-5) # Current regularization
     RFIL = kwargs.get('RFIL', 0.01) # Coil filament radius
@@ -1108,20 +1312,26 @@ def main(mygs, methods=None, **kwargs):
 
         err = np.zeros((n_bnd - 1 + n_coils_total,))
         err[:n_bnd-1] = psi_bnd[1:] - psi_bnd[0]
-
         currs, residuals, _, _ = np.linalg.lstsq(con, err, rcond=None)
 
+        # Extract flux error (sum of squared residuals from least-squares fit)
         if len(residuals) > 0:
-            inner_cost = residuals[0]
+            flux_error_squared = residuals[0]
         else:
-            inner_cost = np.linalg.norm(np.dot(con, currs) - err) ** 2
+            # If lstsq doesn't return residuals (underdetermined system), compute manually
+            flux_error_squared = np.linalg.norm(np.dot(con, currs) - err) ** 2
 
-        # Distance penalty
+        # Store flux_err as function attribute for tracking (this is the first term, without distance penalty)
+        objective.last_flux_err = flux_error_squared
+
+        # Distance penalty (second term in cost function)
         dist_angles = np.diff(np.sort(thetas))
         pen_terms = np.maximum(DIST_TH - dist_angles, 0.0) ** 2
         dist_penalty = OMEGA * np.sum(pen_terms)
 
-        return inner_cost + dist_penalty
+        total_cost = flux_error_squared + dist_penalty
+
+        return total_cost
 
     # ========================================
     # Run comparison
@@ -1147,29 +1357,44 @@ def main(mygs, methods=None, **kwargs):
     # Plot results
     print("\nGenerating convergence plot...")
     fig, coil_fig, err_fig = comparison.plot_result()
+    early_fig = comparison.plot_early_convergence(n_evals=200, log_scale=True)
+    time_fig = comparison.plot_convergence_vs_time(log_scale=True)
 
-    timestamp = time.strftime("%Y%m%d_%H%M%S")
-    foldername = f'examples/comparisons/{timestamp}'
+    # Save results
+    foldername_end = "lambda:" + str(REG_IN) + ",coils:" + str(NUM_COILS)
+    foldername = f'examples/comparisons/{foldername_end}'
     os.makedirs(foldername, exist_ok=True)
+
+    # Save plots
     fig.savefig(f'{foldername}/convergence_plot.png', dpi=150, bbox_inches='tight')
     coil_fig.savefig(f'{foldername}/coil_placement_plot.png', dpi=150, bbox_inches='tight')
     err_fig.savefig(f'{foldername}/flux_error_plot.png', dpi=150, bbox_inches='tight')
-    print(f'Saved all plots to: {foldername}/')
+    early_fig.savefig(f'{foldername}/early_convergence_plot.png', dpi=150, bbox_inches='tight')
+    time_fig.savefig(f'{foldername}/convergence_vs_time_plot.png', dpi=150, bbox_inches='tight')
+
+    # Save results to JSON
+    comparison.save_results_to_json(f'{foldername}/results.json')
+
+    print(f'Saved all plots and results to: {foldername}/')
 
     return comparison, summary
 
 
 if __name__ == "__main__":
     # Get user input for which methods to run
-    print("Available methods: lbfgs, multistart_lbfgs, differential_evolution, dual_annealing, bayesian, basin_hopping, multi_basin_hopping")
-    methods_input = input("Enter the methods to run (comma separated, or press Enter for all): ").strip()
+    # print("Available methods: lbfgs, multistart_lbfgs, differential_evolution, dual_annealing, bayesian, basin_hopping, multi_basin_hopping")
+    
+    # methods_input = input("Enter the methods to run (comma separated, or press Enter for all): ").strip()
 
-    if methods_input == "":
-        methods = ['lbfgs', 'multistart_lbfgs', 'differential_evolution', 'dual_annealing', 'bayesian', 'basin_hopping', 'multi_basin_hopping']  # Run all methods
-    else:
-        methods = [m.strip() for m in methods_input.split(",")]
+    # if methods_input == "":
+    #     methods = ['lbfgs', 'multistart_lbfgs', 'differential_evolution', 'dual_annealing', 'bayesian', 'basin_hopping', 'multi_basin_hopping']  # Run all methods
+    # else:
+    #     methods = [m.strip() for m in methods_input.split(",")]
 
-    eqdsk = read_eqdsk('g192185.02440')
+    methods = ["multistart_lbfgs","bayesian"]
+
+    # eqdsk = read_eqdsk('examples/data/eqdsk/MANTA_posCS_final')
+    eqdsk = read_eqdsk('examples/data/eqdsk/g192185.02440')
     LCFS_contour = eqdsk['rzout'].copy()
     mesh_dx = 0.015
 
@@ -1199,16 +1424,13 @@ if __name__ == "__main__":
     mygs.solve()
 
     # Run comparison
-    for num_coils in [4,6,8,10,12,14,16,18,20]:
-        for reg_in in [1e-7, 1e-6, 1e-5, 1e-4]:
-            if reg_in==1e-7 and num_coils==4:
-                continue # already ran this one
-
+    for num_coils in [5]:
+        for reg_in in [1e-8,1e-7,1e-6,5*1e-6,1e-5]:
             try:
-                comparison, summary = main(mygs=mygs, methods=methods, NUM_COILS=num_coils, REG_IN=reg_in)
+                comparison, summary = main(mygs=mygs, methods=methods, NUM_COILS=num_coils, REG_IN=reg_in, MAX_TIME=120)
             except Exception as e:
                 print(f"\n Failed for NUM_COILS={num_coils}, REG_IN={reg_in}")
                 print(f"\n Error: {e}")
                 continue
 
-    # comparison, summary = main(methods=methods, MAX_TIME=5)
+    # comparison, summary = main(mygs=mygs, methods=methods, NUM_COILS=5, REG_IN=1e-5, MAX_TIME=10)
