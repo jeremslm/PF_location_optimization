@@ -668,8 +668,8 @@ if __name__ == "__main__":
     # Save results to JSON
     output_dir = Path('examples/comparisons/free_boundary_analysis/')
     output_dir.mkdir(parents=True, exist_ok=True)
-
-    output_file = output_dir / 'free_boundary_results.json'
+    
+    output_file = output_dir / f"free_boundary_results.json"
     # Convert results to JSON-serializable format
     json_results = {}
     for key, val in results_data.items():
