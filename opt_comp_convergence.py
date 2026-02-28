@@ -127,6 +127,7 @@ class OptimizationComparison:
             raise MaxEvalsException("Maximum function evaluations reached")
 
         self._n_evals += 1
+        params = np.asarray(params)
         cost = self.objective(params)
         self._history.append(cost)
         self._x_history.append(params.copy())
@@ -253,6 +254,8 @@ class OptimizationComparison:
         starts_completed = 0
         stopped_by = "all starts completed"
         starts_bests = []
+        start_boundaries = []   # cumulative n_evals at end of each start
+        start_costs = []        # best cost at end of each start
 
         for x0 in starts:
             try:
@@ -263,6 +266,8 @@ class OptimizationComparison:
                 )
                 starts_completed += 1
                 starts_bests.append(self._best_cost)
+                start_boundaries.append(self._n_evals)
+                start_costs.append(self._best_cost)
 
                 if _check_starts_convergence(starts_bests, starts_window,
                                              self.convergence_threshold):
@@ -291,12 +296,14 @@ class OptimizationComparison:
             'coil_currents': coil_currents,
             'convergence_history': list(self._convergence),
             'cost_history': list(self._history),
-            'starts_completed': starts_completed
+            'starts_completed': starts_completed,
+            'start_boundaries': start_boundaries,
+            'start_costs': start_costs,
         }
 
         return self.results['Multi-start L-BFGS']
 
-    def run_bayesian(self, n_initial=256, acq_func='EI',
+    def run_bayesian(self, n_initial=None, acq_func='EI',
                      bayesian_stagnation_window=50,
                      local_optimize=True, refinement_window=50):
         """
@@ -310,6 +317,9 @@ class OptimizationComparison:
         cost. Stops when `refinement_window` consecutive completed refinements
         show no improvement, or when max evals / wall-clock time is hit.
         """
+        if n_initial is None:
+            n_initial = int(round(25 * self.num_coils ** 1.5))
+
         self._reset_tracking()
         space = [Real(low, high) for low, high in self.bounds]
 
@@ -357,13 +367,17 @@ class OptimizationComparison:
         pts_refined = 0
         refinement_stopped_by = None
         refinement_bests = []
+        refinement_evals = []        # function calls per refined point
+        refinement_costs = []        # best cost at end of each refinement
+        bayesian_convergence = list(self._convergence)
+        refinement_convergence = []
         if local_optimize and bayesian_stopped_by not in ("exceeded wall time", "max function calls"):
-            bayesian_convergence = list(self._convergence)
             self._convergence = []
             self._stopped_reason = None
             top_indices = np.argsort(self._history)
 
             for idx in top_indices:
+                evals_before = self._n_evals
                 try:
                     start = np.array(self._x_history[idx])
                     minimize(
@@ -373,6 +387,8 @@ class OptimizationComparison:
                     )
                     pts_refined += 1
                     refinement_bests.append(self._best_cost)
+                    refinement_evals.append(self._n_evals - evals_before)
+                    refinement_costs.append(self._best_cost)
 
                     if _check_starts_convergence(refinement_bests, refinement_window,
                                                  self.convergence_threshold):
@@ -385,17 +401,12 @@ class OptimizationComparison:
                     refinement_stopped_by = "max function calls"
                     break
 
+            refinement_convergence = list(self._convergence)
             if refinement_stopped_by is None:
                 refinement_stopped_by = "all refinements completed"
 
         elapsed = time.time() - self._start_time
         stopped_by = refinement_stopped_by or bayesian_stopped_by
-
-        # Full convergence history across both phases
-        if local_optimize and bayesian_stopped_by not in ("exceeded wall time", "max function calls"):
-            full_convergence = bayesian_convergence + list(self._convergence)
-        else:
-            full_convergence = list(self._convergence)
 
         thetas, radials, coil_positions, coil_currents = self._extract_best_result()
 
@@ -410,10 +421,15 @@ class OptimizationComparison:
             'parameters': {'thetas': thetas, 'radials': radials},
             'coil_positions_top': coil_positions,
             'coil_currents': coil_currents,
-            'convergence_history': full_convergence,
+            'convergence_history': bayesian_convergence + refinement_convergence,
+            'bayesian_convergence_history': bayesian_convergence,
+            'refinement_convergence_history': refinement_convergence,
             'cost_history': list(self._history),
+            'n_initial': n_initial,
             'n_bayesian_evals': bayesian_evals,
             'pts_refined': pts_refined,
+            'refinement_evals': refinement_evals,
+            'refinement_costs': refinement_costs,
             'bayesian_stopping': bayesian_stopped_by,
         }
 
@@ -618,8 +634,10 @@ class OptimizationComparison:
         for method, res in self.results.items():
             method_data = {
                 'best_cost': float(res['best_cost']),
+                'best_flux_err': float(res['best_flux_err']) if res['best_flux_err'] is not None else None,
                 'n_evals': int(res['n_evals']),
                 'time': float(res['time']),
+                'times': [float(t) for t in res['times']],
                 'stopping': res['stopping'],
                 'parameters': res['parameters'],
                 'coil_positions_top': res['coil_positions_top'],
@@ -630,10 +648,26 @@ class OptimizationComparison:
 
             if 'starts_completed' in res:
                 method_data['starts_completed'] = int(res['starts_completed'])
+            if 'start_boundaries' in res:
+                method_data['start_boundaries'] = [int(x) for x in res['start_boundaries']]
+            if 'start_costs' in res:
+                method_data['start_costs'] = [float(x) for x in res['start_costs']]
+            if 'n_initial' in res:
+                method_data['n_initial'] = int(res['n_initial'])
             if 'n_bayesian_evals' in res:
                 method_data['n_bayesian_evals'] = int(res['n_bayesian_evals'])
             if 'pts_refined' in res:
                 method_data['pts_refined'] = int(res['pts_refined'])
+            if 'refinement_evals' in res:
+                method_data['refinement_evals'] = [int(x) for x in res['refinement_evals']]
+            if 'refinement_costs' in res:
+                method_data['refinement_costs'] = [float(x) for x in res['refinement_costs']]
+            if 'bayesian_convergence_history' in res:
+                method_data['bayesian_convergence_history'] = res['bayesian_convergence_history']
+            if 'refinement_convergence_history' in res:
+                method_data['refinement_convergence_history'] = res['refinement_convergence_history']
+            if 'bayesian_stopping' in res:
+                method_data['bayesian_stopping'] = res['bayesian_stopping']
 
             save_data['methods'][method] = method_data
 
@@ -650,7 +684,7 @@ class OptimizationComparison:
 def main(mygs, methods=None, **kwargs):
     NUM_COILS = kwargs.get('NUM_COILS', 4)
     MAX_EVALS = kwargs.get('MAX_EVALS', 2**18)
-    MAX_TIME = kwargs.get('MAX_TIME', 7200)
+    MAX_TIME = kwargs.get('MAX_TIME', 86400)
     CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.001)
     OMEGA = kwargs.get('OMEGA', 1e-7)
     DIST_TH = kwargs.get('DIST_TH', 5.0)
@@ -825,8 +859,8 @@ if __name__ == "__main__":
     methods = ["multistart_lbfgs", "bayesian"]
 
     
-    for num_coils in [6,8]:
-        for reg_in in [1e-8,1e-7,1e-6,5e-6,1e-5]:
+    for num_coils in [8]:
+        for reg_in in [5e-6,1e-5]:
             print(f"\n{'='*60}")
             print(f"NUM_COILS={num_coils}, REG_IN={reg_in}")
             print(f"{'='*60}")
@@ -844,22 +878,3 @@ if __name__ == "__main__":
                 print(f"Error: {e}")
                 continue
     
-    for num_coils in [5,7]:
-        for reg_in in [1e-8,1e-7,1e-6,5e-6]:
-            print(f"\n{'='*60}")
-            print(f"NUM_COILS={num_coils}, REG_IN={reg_in}")
-            print(f"{'='*60}")
-
-            try:
-                comparison, summary = main(
-                    mygs=mygs,
-                    methods=methods,
-                    NUM_COILS=num_coils,
-                    REG_IN=reg_in,
-                    MAX_EVALS=2**18
-                )
-            except Exception as e:
-                print(f"\nFailed for NUM_COILS={num_coils}, REG_IN={reg_in}")
-                print(f"Error: {e}")
-                continue
- 
