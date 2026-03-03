@@ -1,10 +1,11 @@
 """
-Optimization Comparison for PF Coil Placement
-==============================================
+Asymmetric Optimization Comparison for PF Coil Placement
+=========================================================
 
-Compare multi-start L-BFGS and Bayesian optimization methods for PF coil
-placement. Stopping criteria are per-start (not per function call):
-after N completed starts without improvement, the method stops.
+Like opt_comp_convergence.py but WITHOUT up-down symmetry enforcement.
+All NUM_COILS coils are placed independently anywhere around the full
+poloidal cross-section (theta in [0, 360] degrees). No mirror coil is
+created at [R, -Z].
 
 Uses brute force parameters: OMEGA=1e-7, DIST_TH=5.0, eqdsk=g192185.02440 (DIIID).
 """
@@ -33,7 +34,7 @@ from OpenFUSIONToolkit import OFT_env
 from OpenFUSIONToolkit.TokaMaker import TokaMaker
 from OpenFUSIONToolkit.TokaMaker.meshing import gs_Domain
 from OpenFUSIONToolkit.TokaMaker.util import read_eqdsk, eval_green
-from helper_fct import resize_polygon, update_boundary, place_points_pol_rad, make_3x3_thick
+from helper_fct import resize_polygon, update_boundary, make_3x3_thick
 from OFT_pf_coil_opt_fct import CoilPositionSpace
 
 
@@ -64,6 +65,9 @@ def _check_starts_convergence(starts_bests, window, threshold):
 class OptimizationComparison:
     """
     Compare optimization methods with per-start convergence stopping.
+
+    Asymmetric version: coils are placed independently in the full
+    poloidal space with no up-down mirroring.
 
     Each method lets individual L-BFGS runs converge naturally (scipy handles
     that). Stopping is based on whether the global best improves across
@@ -145,20 +149,33 @@ class OptimizationComparison:
         return cost
 
     def _compute_flux_for_params(self, params):
-        """Compute flux and coil positions for given parameters."""
+        """Compute flux and coil positions for given parameters.
+
+        Uses full 360-degree boundary curves with no up-down mirroring.
+        """
         num_coils = len(params) // 2
         thetas = params[:num_coils]
         radials = params[num_coils:]
 
-        inner_arc = self.coil_center_cand1[:len(self.coil_center_cand1)//2]
-        outer_arc = self.coil_center_cand2[:len(self.coil_center_cand2)//2]
+        # Full curves (all 1700 pts), theta_range spans 0-360 degrees
+        full_inner = self.coil_center_cand1
+        full_outer = self.coil_center_cand2
+        theta_range = np.linspace(0, 360, len(full_inner))
 
-        _, coil_locs = place_points_pol_rad(num_coils, inner_arc, outer_arc, thetas, radials)
+        coil_locs = []
+        for theta, rho in zip(thetas, radials):
+            R_inner = np.interp(theta, theta_range, full_inner[:, 0])
+            Z_inner = np.interp(theta, theta_range, full_inner[:, 1])
+            R_outer = np.interp(theta, theta_range, full_outer[:, 0])
+            Z_outer = np.interp(theta, theta_range, full_outer[:, 1])
+            R_pos = (1 - rho) * R_inner + rho * R_outer
+            Z_pos = (1 - rho) * Z_inner + rho * Z_outer
+            coil_locs.append([R_pos, Z_pos])
 
+        # No mirroring: each coil is independent
         coil_centers_3x3 = []
         for loc in coil_locs:
             coil_centers_3x3.append(make_3x3_thick(loc, self.rfil))
-            coil_centers_3x3.append(make_3x3_thick([loc[0], -loc[1]], self.rfil))
 
         n_bnd = self.psi_bnd.shape[0]
         n_coils_total = len(coil_centers_3x3)
@@ -216,15 +233,12 @@ class OptimizationComparison:
                'k--', alpha=0.3, linewidth=1)
 
     def _plot_coils_on_axis(self, ax, coil_locs, color, dx=0.035, dy=0.035):
+        # Asymmetric: no mirroring, each coil placed at its actual location
         for loc in coil_locs:
-            rect_top = plt.Rectangle((loc[0]-dx, loc[1]-dy), 2*dx, 2*dy,
-                                    facecolor=color, edgecolor='black',
-                                    alpha=0.7, linewidth=0.5)
-            ax.add_patch(rect_top)
-            rect_bot = plt.Rectangle((loc[0]-dx, -loc[1]-dy), 2*dx, 2*dy,
-                                    facecolor=color, edgecolor='black',
-                                    alpha=0.7, linewidth=0.5)
-            ax.add_patch(rect_bot)
+            rect = plt.Rectangle((loc[0]-dx, loc[1]-dy), 2*dx, 2*dy,
+                                  facecolor=color, edgecolor='black',
+                                  alpha=0.7, linewidth=0.5)
+            ax.add_patch(rect)
 
     # ========================================
     # Optimization methods
@@ -292,7 +306,7 @@ class OptimizationComparison:
             'times': self._times.copy(),
             'stopping': stopped_by,
             'parameters': {'thetas': thetas, 'radials': radials},
-            'coil_positions_top': coil_positions,
+            'coil_positions': coil_positions,
             'coil_currents': coil_currents,
             'convergence_history': list(self._convergence),
             'cost_history': list(self._history),
@@ -305,7 +319,8 @@ class OptimizationComparison:
 
     def run_bayesian(self, n_initial=None, acq_func='EI',
                      bayesian_stagnation_window=50,
-                     local_optimize=True, refinement_window=50):
+                     local_optimize=True, refinement_window=50,
+                     max_refinements=None):
         """
         Bayesian Optimization with GP, then L-BFGS refinement.
 
@@ -313,12 +328,15 @@ class OptimizationComparison:
         hasn't improved in `bayesian_stagnation_window` GP-guided iterations
         (each iteration = 1 point).
 
-        Phase 2 (L-BFGS refinement): refines all Bayesian points sorted by
-        cost. Stops when `refinement_window` consecutive completed refinements
-        show no improvement, or when max evals / wall-clock time is hit.
+        Phase 2 (L-BFGS refinement): refines Bayesian points sorted by cost.
+        Stopping mode is controlled by `max_refinements`:
+          - None (default): stagnation-based — stops when `refinement_window`
+            consecutive completed refinements show no improvement.
+          - int: fixed count — stops after exactly that many refinements.
+        In both modes, max evals / wall-clock time remain hard limits.
         """
         if n_initial is None:
-            n_initial = int(round(25 * self.num_coils ** 1.5))
+            n_initial = int(round(50 * self.num_coils ** (3/2)))
 
         self._reset_tracking()
         space = [Real(low, high) for low, high in self.bounds]
@@ -390,8 +408,12 @@ class OptimizationComparison:
                     refinement_evals.append(self._n_evals - evals_before)
                     refinement_costs.append(self._best_cost)
 
-                    if _check_starts_convergence(refinement_bests, refinement_window,
-                                                 self.convergence_threshold):
+                    if max_refinements is not None:
+                        if pts_refined >= max_refinements:
+                            refinement_stopped_by = "max refinements reached"
+                            break
+                    elif _check_starts_convergence(refinement_bests, refinement_window,
+                                                   self.convergence_threshold):
                         refinement_stopped_by = "converged"
                         break
                 except TimeoutException:
@@ -419,7 +441,7 @@ class OptimizationComparison:
             'times': self._times.copy(),
             'stopping': stopped_by,
             'parameters': {'thetas': thetas, 'radials': radials},
-            'coil_positions_top': coil_positions,
+            'coil_positions': coil_positions,
             'coil_currents': coil_currents,
             'convergence_history': bayesian_convergence + refinement_convergence,
             'bayesian_convergence_history': bayesian_convergence,
@@ -456,7 +478,7 @@ class OptimizationComparison:
 
         if 'bayesian' in methods:
             print("Running Bayesian Optimization...")
-            self.run_bayesian()
+            self.run_bayesian(max_refinements=10)
 
         return self.summary()
 
@@ -518,6 +540,7 @@ class OptimizationComparison:
             f'DIST_TH = {self.dist_th}',
             f'REG_IN = {self.reg_in:.0e}',
             f'RFIL = {self.rfil}',
+            f'SYMMETRIC = False',
         ]
         textstr = '\n'.join(params_text)
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
@@ -541,12 +564,9 @@ class OptimizationComparison:
             for (method, res), color in zip(sorted_methods, colors):
                 coil_locs, _, _ = self._compute_flux_for_params(res['best_params'])
                 for loc in coil_locs:
-                    rect_top = plt.Rectangle((loc[0]-0.035, loc[1]-0.035), 0.07, 0.07,
-                                            facecolor=color, edgecolor=color, alpha=0.6)
-                    ax3.add_patch(rect_top)
-                    rect_bot = plt.Rectangle((loc[0]-0.035, -loc[1]-0.035), 0.07, 0.07,
-                                            facecolor=color, edgecolor=color, alpha=0.6)
-                    ax3.add_patch(rect_bot)
+                    rect = plt.Rectangle((loc[0]-0.035, loc[1]-0.035), 0.07, 0.07,
+                                         facecolor=color, edgecolor=color, alpha=0.6)
+                    ax3.add_patch(rect)
 
             ax3.set_xlabel('R [m]', fontsize=12)
             ax3.set_ylabel('Z [m]', fontsize=12)
@@ -623,7 +643,8 @@ class OptimizationComparison:
                 'omega': float(self.omega),
                 'dist_th': float(self.dist_th),
                 'reg_in': float(self.reg_in),
-                'rfil': float(self.rfil)
+                'rfil': float(self.rfil),
+                'symmetric': False,
             },
             'methods': {}
         }
@@ -640,7 +661,7 @@ class OptimizationComparison:
                 'times': [float(t) for t in res['times']],
                 'stopping': res['stopping'],
                 'parameters': res['parameters'],
-                'coil_positions_top': res['coil_positions_top'],
+                'coil_positions': res['coil_positions'],
                 'coil_currents': res['coil_currents'],
                 'convergence_history': res['convergence_history'],
                 'cost_history': [float(c) for c in res['cost_history']],
@@ -682,8 +703,8 @@ class OptimizationComparison:
 # ============================================
 
 def main(mygs, methods=None, **kwargs):
-    NUM_COILS = kwargs.get('NUM_COILS', 4)
-    MAX_EVALS = kwargs.get('MAX_EVALS', 2**18)
+    NUM_COILS = kwargs.get('NUM_COILS', 8)
+    MAX_EVALS = kwargs.get('MAX_EVALS', 2**20)
     MAX_TIME = kwargs.get('MAX_TIME', 86400)
     CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.001)
     OMEGA = kwargs.get('OMEGA', 1e-7)
@@ -700,13 +721,13 @@ def main(mygs, methods=None, **kwargs):
     lim2 = update_boundary(r0=1.94, z0=0, a0=0.95, kappa=1.55, delta=0.8, squar=0.15, npts=1700)
     coil_center_cand2 = resize_polygon(lim2, dx=0.15)
 
-    # Bounds
+    # Bounds: full 360-degree angular range, no symmetry assumption
     coil_space = CoilPositionSpace(
         inner_boundary=coil_center_cand1,
         outer_boundary=coil_center_cand2,
         method='coords'
     )
-    coil_space.set_bounds(angular_bounds=(10, 170), radial_bounds=(0, 1))
+    coil_space.set_bounds(angular_bounds=(0, 360), radial_bounds=(0, 1))
 
     bounds = []
     theta_bounds, radial_bounds = coil_space.get_bounds()
@@ -715,10 +736,10 @@ def main(mygs, methods=None, **kwargs):
     for _ in range(NUM_COILS):
         bounds.append(radial_bounds)
 
-    # Objective function
-    theta_range = np.linspace(0, 180, len(coil_center_cand1) // 2)
-    inner = coil_center_cand1[:len(coil_center_cand1) // 2]
-    outer = coil_center_cand2[:len(coil_center_cand2) // 2]
+    # Full boundary curves and theta range for the full circle
+    theta_range = np.linspace(0, 360, len(coil_center_cand1))
+    inner = coil_center_cand1   # full 1700-pt polygon
+    outer = coil_center_cand2   # full 1700-pt polygon
 
     def objective(params):
         thetas = params[:NUM_COILS]
@@ -734,18 +755,14 @@ def main(mygs, methods=None, **kwargs):
             Z_pos = (1 - rho) * Z_inner + rho * Z_outer
             locs.append([R_pos, Z_pos])
 
+        # No mirroring: each coil is independent
         coil_centers_3x3 = []
         for loc in locs:
-            centers_top = []
+            centers = []
             for dx in [-1, 0, 1]:
                 for dy in [-1, 0, 1]:
-                    centers_top.append([loc[0] + 2*RFIL*dx, loc[1] + 2*RFIL*dy])
-            coil_centers_3x3.append(centers_top)
-            centers_bot = []
-            for dx in [-1, 0, 1]:
-                for dy in [-1, 0, 1]:
-                    centers_bot.append([loc[0] + 2*RFIL*dx, -loc[1] + 2*RFIL*dy])
-            coil_centers_3x3.append(centers_bot)
+                    centers.append([loc[0] + 2*RFIL*dx, loc[1] + 2*RFIL*dy])
+            coil_centers_3x3.append(centers)
 
         n_bnd = psi_bnd.shape[0]
         n_coils_total = len(coil_centers_3x3)
@@ -769,19 +786,24 @@ def main(mygs, methods=None, **kwargs):
 
         objective.last_flux_err = flux_error_squared
 
-        dist_angles = np.diff(np.sort(thetas))
-        pen_terms = np.maximum(DIST_TH - dist_angles, 0.0) ** 2
+        # Circular distance penalty: includes the wrap-around gap
+        thetas_sorted = np.sort(thetas)
+        gaps = np.diff(thetas_sorted)
+        wrap_gap = thetas_sorted[0] + 360.0 - thetas_sorted[-1]
+        all_gaps = np.concatenate([gaps, [wrap_gap]])
+        pen_terms = np.maximum(DIST_TH - all_gaps, 0.0) ** 2
         dist_penalty = OMEGA * np.sum(pen_terms)
 
         return flux_error_squared + dist_penalty
 
     # Run comparison
     print("\n" + "=" * 60)
-    print("OPTIMIZATION COMPARISON")
+    print("ASYMMETRIC OPTIMIZATION COMPARISON")
     print("=" * 60)
     print(f"  Coils: {NUM_COILS}  |  Max evals: {MAX_EVALS}  |  "
           f"Threshold: {CONVERGENCE_THRESHOLD}")
     print(f"  omega={OMEGA}  |  reg_in={REG_IN}  |  dist_th={DIST_TH}")
+    print(f"  No up-down symmetry: coils placed freely over 0-360 degrees")
     print("=" * 60 + "\n")
 
     comparison = OptimizationComparison(
@@ -799,7 +821,7 @@ def main(mygs, methods=None, **kwargs):
     comparison.set_problem_data(r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2,
                                 mygs.o_point, eval_green)
 
-    # Load brute force baseline
+    # Load brute force baseline if available
     bf_path = f'examples/comparisons/closed_boundary_DIIID/brute_force/lambda:{REG_IN},coils:{NUM_COILS}/results.json'
     if os.path.exists(bf_path):
         with open(bf_path, 'r') as f:
@@ -816,7 +838,7 @@ def main(mygs, methods=None, **kwargs):
     fig = comparison.plot_result()
     time_fig = comparison.plot_convergence_vs_time(log_scale=True)
 
-    foldername = f'examples/comparisons/closed_boundary_DIIID/convergence/lambda:{REG_IN},coils:{NUM_COILS}'
+    foldername = f'examples/comparisons/closed_boundary_DIIID/convergence_asymmetric/lambda:{REG_IN},coils:{NUM_COILS}'
     os.makedirs(foldername, exist_ok=True)
 
     fig.savefig(f'{foldername}/convergence_plot.png', dpi=150, bbox_inches='tight')
@@ -858,9 +880,8 @@ if __name__ == "__main__":
 
     methods = ["multistart_lbfgs", "bayesian"]
 
-    
-    for num_coils in [8]:
-        for reg_in in [1e-5]:
+    for num_coils in [6,7,8,9,10,11,12,4,5]:
+        for reg_in in [1e-8,1e-7,1e-6,5*1e-6,1e-5]:
             print(f"\n{'='*60}")
             print(f"NUM_COILS={num_coils}, REG_IN={reg_in}")
             print(f"{'='*60}")
@@ -871,10 +892,9 @@ if __name__ == "__main__":
                     methods=methods,
                     NUM_COILS=num_coils,
                     REG_IN=reg_in,
-                    MAX_EVALS=2**18
+                    MAX_EVALS=2**20
                 )
             except Exception as e:
                 print(f"\nFailed for NUM_COILS={num_coils}, REG_IN={reg_in}")
                 print(f"Error: {e}")
                 continue
-    
