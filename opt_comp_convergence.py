@@ -13,9 +13,12 @@ import numpy as np
 import time
 import pandas as pd
 import matplotlib.pyplot as plt
+import random
+from itertools import permutations as _iperms
+from math import factorial
 from scipy.optimize import minimize
 from scipy.stats import qmc, norm
-from skopt import gp_minimize
+from skopt import Optimizer
 from skopt.space import Real
 import os
 import sys
@@ -88,6 +91,7 @@ class OptimizationComparison:
         self.rfil = RFIL
 
         self.results = {}
+        self.all_runs = {}
 
         # Problem data for plotting (set via set_problem_data)
         self.r_bnd = None
@@ -178,6 +182,26 @@ class OptimizationComparison:
 
         return coil_locs, psi_computed, currs
 
+    def _get_permuted_points(self, x, cost, max_perms=None):
+        """Return permutations of coil ordering for x with the same cost.
+
+        For N coils, params are [theta_0..theta_{N-1}, rho_0..rho_{N-1}].
+        Swapping coil i and j simultaneously in both halves leaves the cost
+        unchanged. If max_perms is set, a random subset is returned instead
+        of all N! to keep GP training set size manageable.
+        """
+        n = self.num_coils
+        thetas = x[:n]
+        radials = x[n:]
+        all_perms = list(_iperms(range(n)))
+        if max_perms is not None and len(all_perms) > max_perms:
+            all_perms = random.sample(all_perms, max_perms)
+        xs, ys = [], []
+        for perm in all_perms:
+            xs.append([thetas[i] for i in perm] + [radials[i] for i in perm])
+            ys.append(cost)
+        return xs, ys
+
     def _extract_best_result(self):
         """Extract parameters, coil positions, and currents from best result."""
         best_params = self._best_params
@@ -231,7 +255,7 @@ class OptimizationComparison:
     # ========================================
 
     def run_multistart_lbfgs(self, n_starts=262144, ftol=1e-9, gtol=1e-6,
-                             starts_window=50):
+                             starts_window=50, random_state=42):
         """
         Multi-start L-BFGS-B with Sobol sampling.
 
@@ -241,7 +265,7 @@ class OptimizationComparison:
         """
         self._reset_tracking()
 
-        sampler = qmc.Sobol(d=self.n_params, scramble=True, seed=42)
+        sampler = qmc.Sobol(d=self.n_params, scramble=True, seed=random_state)
         samples = sampler.random(n_starts)
 
         starts = []
@@ -299,13 +323,55 @@ class OptimizationComparison:
             'starts_completed': starts_completed,
             'start_boundaries': start_boundaries,
             'start_costs': start_costs,
+            'random_state': random_state,
         }
 
         return self.results['Multi-start L-BFGS']
 
+    def _deduplicate_candidates(self, candidates, tol=1e-2, max_unique=None):
+        """Remove near-duplicate candidates in normalized parameter space.
+
+        Uses Chebyshev (L-inf) distance in [0,1]^d space.  A candidate is
+        a duplicate only if it agrees with an existing unique point in EVERY
+        dimension within tol — it is kept if it differs meaningfully in at
+        least one parameter.  tol=0.05 means a 5% range difference in any
+        single parameter is enough to keep the candidate.
+
+        Parameters
+        ----------
+        candidates : list of array-like
+        tol : float
+            Chebyshev threshold in normalized space.
+        max_unique : int or None
+            If set, return at most this many unique candidates (taken in
+            order, so the highest-acquisition ones come first).
+        """
+        if not candidates:
+            return []
+        lows = np.array([lo for lo, _ in self.bounds])
+        ranges = np.array([hi - lo for lo, hi in self.bounds])
+        ranges[ranges == 0] = 1.0
+
+        def _norm(c):
+            return (np.asarray(c) - lows) / ranges
+
+        unique = [candidates[0]]
+        unique_norm = [_norm(candidates[0])]
+        for c in candidates[1:]:
+            if max_unique is not None and len(unique) >= max_unique:
+                break
+            cn = _norm(c)
+            if all(np.max(np.abs(cn - u)) > tol for u in unique_norm):
+                unique.append(c)
+                unique_norm.append(cn)
+        return unique
+
     def run_bayesian(self, n_initial=None, acq_func='EI',
                      bayesian_stagnation_window=50,
-                     local_optimize=True, refinement_window=50):
+                     local_optimize=True, refinement_window=50,
+                     max_perms=None, n_acq_candidates=None,
+                     acq_dedup_tol=1e-2, unique_refined_points=None,
+                     random_state=42):
         """
         Bayesian Optimization with GP, then L-BFGS refinement.
 
@@ -313,23 +379,30 @@ class OptimizationComparison:
         hasn't improved in `bayesian_stagnation_window` GP-guided iterations
         (each iteration = 1 point).
 
-        Phase 2 (L-BFGS refinement): refines all Bayesian points sorted by
-        cost. Stops when `refinement_window` consecutive completed refinements
+        Phase 2 (L-BFGS refinement): if n_acq_candidates is set, asks the
+        fitted GP's acquisition function for n_acq_candidates points (via
+        the constant-liar batch strategy), deduplicates them, and refines
+        those unique candidates on the real cost.  If n_acq_candidates is
+        None (default), falls back to sorting all Bayesian observations by
+        cost and refining those.  Stops when `refinement_window` consecutive
+        completed refinements
         show no improvement, or when max evals / wall-clock time is hit.
         """
         if n_initial is None:
             n_initial = int(round(25 * self.num_coils ** 1.5))
+        
+        if max_perms is None:
+            max_perms = self.num_coils
 
         self._reset_tracking()
         space = [Real(low, high) for low, high in self.bounds]
 
-        def stopping_callback(res):
-            n = len(res.func_vals)
+        def stopping_callback():
+            n = self._n_evals
             if n <= n_initial + bayesian_stagnation_window:
                 return False
-
-            running_min = np.minimum.accumulate(res.func_vals)
-            old_best = running_min[n - bayesian_stagnation_window - 1]
+            running_min = np.minimum.accumulate(self._history)
+            old_best = running_min[-(bayesian_stagnation_window + 1)]
             new_best = running_min[-1]
             if old_best > 0:
                 rel_imp = (old_best - new_best) / abs(old_best)
@@ -338,18 +411,31 @@ class OptimizationComparison:
                     return True
             return False
 
+        n_perms = min(max_perms, factorial(self.num_coils))
+        gp_opt = Optimizer(
+            space,
+            base_estimator='gp',
+            n_initial_points=n_initial * n_perms,
+            initial_point_generator="sobol",
+            acq_func=acq_func,
+            random_state=random_state,
+        )
+
         # Phase 1: Bayesian exploration
         bayesian_stopped_by = "completed"
         try:
-            gp_minimize(
-                self._track_objective, space,
-                n_calls=self.max_evals or 1000000,
-                n_initial_points=n_initial,
-                acq_func=acq_func,
-                callback=[stopping_callback],
-                random_state=42,
-                verbose=False
-            )
+            flag = True 
+            while flag:
+                x = gp_opt.ask()
+                cost = self._track_objective(x)
+
+                # Tell permutations — same cost by coil symmetry
+                xs_perm, ys_perm = self._get_permuted_points(x, cost, max_perms=max_perms)
+                gp_opt.tell(xs_perm, ys_perm)
+
+                if stopping_callback():
+                    flag = False 
+
         except TimeoutException:
             bayesian_stopped_by = "exceeded wall time"
         except MaxEvalsException:
@@ -368,18 +454,34 @@ class OptimizationComparison:
         refinement_stopped_by = None
         refinement_bests = []
         refinement_evals = []        # function calls per refined point
+        refinement_times = []        # wall time per refined point
         refinement_costs = []        # best cost at end of each refinement
         bayesian_convergence = list(self._convergence)
         refinement_convergence = []
+        n_acq_unique = None
         if local_optimize and bayesian_stopped_by not in ("exceeded wall time", "max function calls"):
             self._convergence = []
             self._stopped_reason = None
-            top_indices = np.argsort(self._history)
 
-            for idx in top_indices:
+            if n_acq_candidates is not None:
+                raw_candidates = gp_opt.ask(n_points=n_acq_candidates, strategy='cl_min')
+                candidates = self._deduplicate_candidates(
+                    raw_candidates, tol=acq_dedup_tol, max_unique=unique_refined_points
+                )
+                n_acq_unique = len(candidates)
+                print(f"  Acq candidates: {n_acq_candidates} raw -> {n_acq_unique} unique "
+                      f"(tol={acq_dedup_tol}, unique_refined_points={unique_refined_points})")
+            else:
+                top_indices = np.argsort(self._history)
+                candidates = [self._x_history[i] for i in top_indices]
+                if unique_refined_points is not None:
+                    candidates = candidates[:unique_refined_points]
+
+            for cand in candidates:
                 evals_before = self._n_evals
+                time_before = time.time() - self._start_time
                 try:
-                    start = np.array(self._x_history[idx])
+                    start = np.array(cand)
                     minimize(
                         self._track_objective, start,
                         method='L-BFGS-B', bounds=self.bounds,
@@ -388,6 +490,7 @@ class OptimizationComparison:
                     pts_refined += 1
                     refinement_bests.append(self._best_cost)
                     refinement_evals.append(self._n_evals - evals_before)
+                    refinement_times.append(time.time() - self._start_time - time_before)
                     refinement_costs.append(self._best_cost)
 
                     if _check_starts_convergence(refinement_bests, refinement_window,
@@ -426,11 +529,21 @@ class OptimizationComparison:
             'refinement_convergence_history': refinement_convergence,
             'cost_history': list(self._history),
             'n_initial': n_initial,
+            'n_perms': n_perms,
             'n_bayesian_evals': bayesian_evals,
+            'n_gp_observations': bayesian_evals * n_perms,
+            'time_bayesian_phase': elapsed_bayesian,
             'pts_refined': pts_refined,
             'refinement_evals': refinement_evals,
+            'refinement_times': refinement_times,
             'refinement_costs': refinement_costs,
             'bayesian_stopping': bayesian_stopped_by,
+            'n_acq_candidates': n_acq_candidates,
+            'acq_dedup_tol': acq_dedup_tol,
+            'n_acq_unique': n_acq_unique,
+            'unique_refined_points': unique_refined_points,
+            'refinement_stopping': refinement_stopped_by,
+            'random_state': random_state,
         }
 
         print(f"  Total: {self._n_evals} evals, {elapsed:.1f}s, "
@@ -442,21 +555,65 @@ class OptimizationComparison:
     # Comparison driver
     # ========================================
 
-    def compare_all(self, methods=None):
+    def run_multiple(self, method, n_runs=1, base_seed=42, **kwargs):
+        """Run the given method n_runs times with different random states.
+
+        Each run uses random_state = base_seed + i.  All individual results
+        are stored in self.all_runs[key].  self.results[key] is set to the
+        best run by best_cost.
+
+        Parameters
+        ----------
+        method : str
+            'bayesian' or 'multistart_lbfgs'
+        n_runs : int
+        base_seed : int
+        **kwargs : passed through to the underlying run method
+        """
+        key_map = {'bayesian': 'Bayesian', 'multistart_lbfgs': 'Multi-start L-BFGS'}
+        if method not in key_map:
+            raise ValueError(f"method must be one of {list(key_map)}")
+        key = key_map[method]
+        run_fn = self.run_bayesian if method == 'bayesian' else self.run_multistart_lbfgs
+
+        runs = []
+        for i in range(n_runs):
+            seed = base_seed + i
+            print(f"\n  [{method}] run {i+1}/{n_runs}, random_state={seed}")
+            result = run_fn(random_state=seed, **kwargs)
+            runs.append(dict(result))
+
+        self.all_runs[key] = runs
+        best = min(runs, key=lambda r: r['best_cost'])
+        self.results[key] = best
+        print(f"\n  {key}: best cost {best['best_cost']:.4e} "
+              f"(seed={best['random_state']}) over {n_runs} runs")
+        return runs
+
+    def compare_all(self, methods=None, n_runs=1, base_seed=42):
         if methods is None:
             methods = ['multistart_lbfgs', 'bayesian']
 
         print(f"Comparing methods: max_evals={self.max_evals}, "
-              f"conv_threshold={self.convergence_threshold}")
+              f"conv_threshold={self.convergence_threshold}, n_runs={n_runs}")
         print("=" * 60)
 
         if 'multistart_lbfgs' in methods:
             print("Running Multi-start L-BFGS...")
-            self.run_multistart_lbfgs()
+            if n_runs > 1:
+                self.run_multiple('multistart_lbfgs', n_runs=n_runs, base_seed=base_seed)
+            else:
+                self.run_multistart_lbfgs()
 
         if 'bayesian' in methods:
             print("Running Bayesian Optimization...")
-            self.run_bayesian()
+            if n_runs > 1:
+                self.run_multiple('bayesian', n_runs=n_runs, base_seed=base_seed,
+                                  max_perms=1, unique_refined_points=5)
+            else:
+                self.run_bayesian(
+                    max_perms=1,
+                    unique_refined_points=5)
 
         return self.summary()
 
@@ -654,12 +811,20 @@ class OptimizationComparison:
                 method_data['start_costs'] = [float(x) for x in res['start_costs']]
             if 'n_initial' in res:
                 method_data['n_initial'] = int(res['n_initial'])
+            if 'n_perms' in res:
+                method_data['n_perms'] = int(res['n_perms'])
             if 'n_bayesian_evals' in res:
                 method_data['n_bayesian_evals'] = int(res['n_bayesian_evals'])
+            if 'n_gp_observations' in res:
+                method_data['n_gp_observations'] = int(res['n_gp_observations'])
+            if 'time_bayesian_phase' in res:
+                method_data['time_bayesian_phase'] = float(res['time_bayesian_phase'])
             if 'pts_refined' in res:
                 method_data['pts_refined'] = int(res['pts_refined'])
             if 'refinement_evals' in res:
                 method_data['refinement_evals'] = [int(x) for x in res['refinement_evals']]
+            if 'refinement_times' in res:
+                method_data['refinement_times'] = [float(x) for x in res['refinement_times']]
             if 'refinement_costs' in res:
                 method_data['refinement_costs'] = [float(x) for x in res['refinement_costs']]
             if 'bayesian_convergence_history' in res:
@@ -668,8 +833,30 @@ class OptimizationComparison:
                 method_data['refinement_convergence_history'] = res['refinement_convergence_history']
             if 'bayesian_stopping' in res:
                 method_data['bayesian_stopping'] = res['bayesian_stopping']
+            if 'n_acq_candidates' in res and res['n_acq_candidates'] is not None:
+                method_data['n_acq_candidates'] = int(res['n_acq_candidates'])
+            if 'acq_dedup_tol' in res and res['acq_dedup_tol'] is not None:
+                method_data['acq_dedup_tol'] = float(res['acq_dedup_tol'])
+            if 'n_acq_unique' in res and res['n_acq_unique'] is not None:
+                method_data['n_acq_unique'] = int(res['n_acq_unique'])
+            if 'unique_refined_points' in res and res['unique_refined_points'] is not None:
+                method_data['unique_refined_points'] = int(res['unique_refined_points'])
+            if 'refinement_stopping' in res and res['refinement_stopping'] is not None:
+                method_data['refinement_stopping'] = res['refinement_stopping']
+            if 'random_state' in res and res['random_state'] is not None:
+                method_data['random_state'] = int(res['random_state'])
 
             save_data['methods'][method] = method_data
+
+        if self.all_runs:
+            save_data['all_runs'] = {}
+            for method_key, runs in self.all_runs.items():
+                save_data['all_runs'][method_key] = [
+                    {k: (v.tolist() if hasattr(v, 'tolist') else v)
+                     for k, v in run.items()
+                     if k != 'best_params'}
+                    for run in runs
+                ]
 
         with open(filename, 'w') as f:
             json.dump(save_data, f, indent=2)
@@ -690,6 +877,7 @@ def main(mygs, methods=None, **kwargs):
     DIST_TH = kwargs.get('DIST_TH', 5.0)
     REG_IN = kwargs.get('REG_IN', 1e-7)
     RFIL = kwargs.get('RFIL', 0.01)
+    N_RUNS = kwargs.get('N_RUNS', 1)
 
     r_bnd, psi_bnd = mygs.get_vfixed()
     print(f"  Found {len(r_bnd)} boundary points")
@@ -809,7 +997,7 @@ def main(mygs, methods=None, **kwargs):
     else:
         print(f"No brute force baseline found at {bf_path}")
 
-    summary = comparison.compare_all(methods=methods)
+    summary = comparison.compare_all(methods=methods, n_runs=N_RUNS)
 
     # Save
     print("\nGenerating plots...")
@@ -827,7 +1015,6 @@ def main(mygs, methods=None, **kwargs):
     plt.close('all')
 
     return comparison, summary
-
 
 if __name__ == "__main__":
     eqdsk = read_eqdsk('examples/data/eqdsk/g192185.02440')
@@ -858,9 +1045,11 @@ if __name__ == "__main__":
 
     methods = ["multistart_lbfgs", "bayesian"]
 
+    # 2,3,4,5,6
+    # 1e-5, 1e-6, 1e-7, 1e-8
     
-    for num_coils in [8]:
-        for reg_in in [1e-5]:
+    for num_coils in [2]:
+        for reg_in in [1e-5, 1e-6, 1e-7, 1e-8]:
             print(f"\n{'='*60}")
             print(f"NUM_COILS={num_coils}, REG_IN={reg_in}")
             print(f"{'='*60}")
