@@ -14,10 +14,10 @@ import time
 import pandas as pd
 import matplotlib.pyplot as plt
 import random
-from itertools import permutations as _iperms
+# from itertools import permutations as _iperms
 from math import factorial
 from scipy.optimize import minimize
-from scipy.stats import qmc, norm
+from scipy.stats import qmc
 from skopt import Optimizer
 from skopt.space import Real
 import os
@@ -369,9 +369,9 @@ class OptimizationComparison:
     def run_bayesian(self, n_initial=None, acq_func='EI',
                      bayesian_stagnation_window=50,
                      local_optimize=True, refinement_window=50,
-                     max_perms=None, n_acq_candidates=None,
-                     acq_dedup_tol=1e-2, unique_refined_points=None,
-                     random_state=42):
+                     max_perms=None, acq_multiplier=10,
+                     acq_dedup_tol=1e-2, unique_refined_points=5,
+                     random_state=1):
         """
         Bayesian Optimization with GP, then L-BFGS refinement.
 
@@ -379,18 +379,19 @@ class OptimizationComparison:
         hasn't improved in `bayesian_stagnation_window` GP-guided iterations
         (each iteration = 1 point).
 
-        Phase 2 (L-BFGS refinement): if n_acq_candidates is set, asks the
-        fitted GP's acquisition function for n_acq_candidates points (via
-        the constant-liar batch strategy), deduplicates them, and refines
-        those unique candidates on the real cost.  If n_acq_candidates is
-        None (default), falls back to sorting all Bayesian observations by
-        cost and refining those.  Stops when `refinement_window` consecutive
-        completed refinements
+        Phase 2 (L-BFGS refinement): asks the fitted GP's acquisition
+        function for n_acq_candidates = acq_multiplier * unique_refined_points
+        points via the constant-liar batch strategy, deduplicates them with
+        Chebyshev tolerance acq_dedup_tol, and refines up to
+        unique_refined_points unique candidates on the real cost.
+        unique_refined_points is a cap — if fewer unique candidates survive
+        deduplication, only those are refined.  Stops when `refinement_window`
+        consecutive completed refinements
         show no improvement, or when max evals / wall-clock time is hit.
         """
         if n_initial is None:
             n_initial = int(round(25 * self.num_coils ** 1.5))
-        
+
         if max_perms is None:
             max_perms = self.num_coils
 
@@ -458,24 +459,19 @@ class OptimizationComparison:
         refinement_costs = []        # best cost at end of each refinement
         bayesian_convergence = list(self._convergence)
         refinement_convergence = []
+        n_acq_candidates = acq_multiplier * unique_refined_points
         n_acq_unique = None
         if local_optimize and bayesian_stopped_by not in ("exceeded wall time", "max function calls"):
             self._convergence = []
             self._stopped_reason = None
 
-            if n_acq_candidates is not None:
-                raw_candidates = gp_opt.ask(n_points=n_acq_candidates, strategy='cl_min')
-                candidates = self._deduplicate_candidates(
-                    raw_candidates, tol=acq_dedup_tol, max_unique=unique_refined_points
-                )
-                n_acq_unique = len(candidates)
-                print(f"  Acq candidates: {n_acq_candidates} raw -> {n_acq_unique} unique "
-                      f"(tol={acq_dedup_tol}, unique_refined_points={unique_refined_points})")
-            else:
-                top_indices = np.argsort(self._history)
-                candidates = [self._x_history[i] for i in top_indices]
-                if unique_refined_points is not None:
-                    candidates = candidates[:unique_refined_points]
+            raw_candidates = gp_opt.ask(n_points=n_acq_candidates, strategy='cl_min')
+            candidates = self._deduplicate_candidates(
+                raw_candidates, tol=acq_dedup_tol, max_unique=unique_refined_points
+            )
+            n_acq_unique = len(candidates)
+            print(f"  Acq candidates: {n_acq_candidates} raw -> {n_acq_unique} unique "
+                  f"(target={unique_refined_points}, tol={acq_dedup_tol})")
 
             for cand in candidates:
                 evals_before = self._n_evals
@@ -538,10 +534,11 @@ class OptimizationComparison:
             'refinement_times': refinement_times,
             'refinement_costs': refinement_costs,
             'bayesian_stopping': bayesian_stopped_by,
+            'acq_multiplier': acq_multiplier,
             'n_acq_candidates': n_acq_candidates,
             'acq_dedup_tol': acq_dedup_tol,
-            'n_acq_unique': n_acq_unique,
             'unique_refined_points': unique_refined_points,
+            'n_acq_unique': n_acq_unique,
             'refinement_stopping': refinement_stopped_by,
             'random_state': random_state,
         }
@@ -555,7 +552,7 @@ class OptimizationComparison:
     # Comparison driver
     # ========================================
 
-    def run_multiple(self, method, n_runs=1, base_seed=42, **kwargs):
+    def run_multiple(self, method, n_runs=1, base_seed=1, **kwargs):
         """Run the given method n_runs times with different random states.
 
         Each run uses random_state = base_seed + i.  All individual results
@@ -833,6 +830,8 @@ class OptimizationComparison:
                 method_data['refinement_convergence_history'] = res['refinement_convergence_history']
             if 'bayesian_stopping' in res:
                 method_data['bayesian_stopping'] = res['bayesian_stopping']
+            if 'acq_multiplier' in res and res['acq_multiplier'] is not None:
+                method_data['acq_multiplier'] = int(res['acq_multiplier'])
             if 'n_acq_candidates' in res and res['n_acq_candidates'] is not None:
                 method_data['n_acq_candidates'] = int(res['n_acq_candidates'])
             if 'acq_dedup_tol' in res and res['acq_dedup_tol'] is not None:
@@ -873,7 +872,7 @@ def main(mygs, methods=None, **kwargs):
     MAX_EVALS = kwargs.get('MAX_EVALS', 2**18)
     MAX_TIME = kwargs.get('MAX_TIME', 86400)
     CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.001)
-    OMEGA = kwargs.get('OMEGA', 1e-7)
+    OMEGA = kwargs.get('OMEGA', 1e-3)
     DIST_TH = kwargs.get('DIST_TH', 5.0)
     REG_IN = kwargs.get('REG_IN', 1e-7)
     RFIL = kwargs.get('RFIL', 0.01)
@@ -997,22 +996,65 @@ def main(mygs, methods=None, **kwargs):
     else:
         print(f"No brute force baseline found at {bf_path}")
 
-    summary = comparison.compare_all(methods=methods, n_runs=N_RUNS)
+    base = f'examples/comparisons/closed_boundary_DIIID/convergence/lambda:{REG_IN},coils:{NUM_COILS}'
 
-    # Save
-    print("\nGenerating plots...")
-    fig = comparison.plot_result()
-    time_fig = comparison.plot_convergence_vs_time(log_scale=True)
+    existing_runs = 0
+    while os.path.exists(os.path.join(base, f'run_{existing_runs:02d}', 'results.json')):
+        existing_runs += 1
 
-    foldername = f'examples/comparisons/closed_boundary_DIIID/convergence/lambda:{REG_IN},coils:{NUM_COILS}'
-    os.makedirs(foldername, exist_ok=True)
+    summary = comparison.compare_all(methods=methods, n_runs=N_RUNS, base_seed=42 + existing_runs)
 
-    fig.savefig(f'{foldername}/convergence_plot.png', dpi=150, bbox_inches='tight')
-    time_fig.savefig(f'{foldername}/convergence_vs_time_plot.png', dpi=150, bbox_inches='tight')
-    comparison.save_results_to_json(f'{foldername}/results.json')
+    if comparison.all_runs:
+        # Save each individual seed run to its own run_XX folder
+        n_individual = max(len(runs) for runs in comparison.all_runs.values())
+        orig_results = comparison.results
+        orig_all_runs = comparison.all_runs
 
-    print(f"Saved all plots and results to: {foldername}/")
-    plt.close('all')
+        for i in range(n_individual):
+            run_idx = 0
+            while os.path.exists(os.path.join(base, f'run_{run_idx:02d}', 'results.json')):
+                run_idx += 1
+            foldername = os.path.join(base, f'run_{run_idx:02d}')
+            os.makedirs(foldername, exist_ok=True)
+
+            comparison.results = {
+                key: runs[i]
+                for key, runs in orig_all_runs.items()
+                if i < len(runs)
+            }
+            comparison.all_runs = {}
+
+            print(f"\nGenerating plots for run {i}...")
+            fig_i = comparison.plot_result()
+            time_fig_i = comparison.plot_convergence_vs_time(log_scale=True)
+
+            fig_i.savefig(f'{foldername}/convergence_plot.png', dpi=150, bbox_inches='tight')
+            time_fig_i.savefig(f'{foldername}/convergence_vs_time_plot.png', dpi=150, bbox_inches='tight')
+            comparison.save_results_to_json(f'{foldername}/results.json')
+            plt.close('all')
+
+            print(f"Saved run {i} to: {foldername}/")
+
+        comparison.results = orig_results
+        comparison.all_runs = orig_all_runs
+    else:
+        # Single run
+        run_idx = 0
+        while os.path.exists(os.path.join(base, f'run_{run_idx:02d}', 'results.json')):
+            run_idx += 1
+        foldername = os.path.join(base, f'run_{run_idx:02d}')
+        os.makedirs(foldername, exist_ok=True)
+
+        print("\nGenerating plots...")
+        fig = comparison.plot_result()
+        time_fig = comparison.plot_convergence_vs_time(log_scale=True)
+
+        fig.savefig(f'{foldername}/convergence_plot.png', dpi=150, bbox_inches='tight')
+        time_fig.savefig(f'{foldername}/convergence_vs_time_plot.png', dpi=150, bbox_inches='tight')
+        comparison.save_results_to_json(f'{foldername}/results.json')
+        plt.close('all')
+
+        print(f"Saved all plots and results to: {foldername}/")
 
     return comparison, summary
 
@@ -1049,7 +1091,7 @@ if __name__ == "__main__":
     # 1e-5, 1e-6, 1e-7, 1e-8
     
     for num_coils in [2]:
-        for reg_in in [1e-5, 1e-6, 1e-7, 1e-8]:
+        for reg_in in [1e-8]:
             print(f"\n{'='*60}")
             print(f"NUM_COILS={num_coils}, REG_IN={reg_in}")
             print(f"{'='*60}")
@@ -1060,7 +1102,8 @@ if __name__ == "__main__":
                     methods=methods,
                     NUM_COILS=num_coils,
                     REG_IN=reg_in,
-                    MAX_EVALS=2**18
+                    MAX_EVALS=2**18,
+                    N_RUNS=5
                 )
             except Exception as e:
                 print(f"\nFailed for NUM_COILS={num_coils}, REG_IN={reg_in}")
