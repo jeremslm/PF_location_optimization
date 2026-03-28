@@ -1,8 +1,8 @@
 /__pycache__/
+.DS_Store
+/ignore/
 /.claude/
 /.conda/
-/random_code/
-/notes/
 /ignore/
 CLAUDE.md
 /comparisons/
