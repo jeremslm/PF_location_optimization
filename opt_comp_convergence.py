@@ -14,7 +14,7 @@ import time
 import pandas as pd
 import matplotlib.pyplot as plt
 import random
-# from itertools import permutations as _iperms
+from itertools import permutations as _iperms
 from math import factorial
 from scipy.optimize import minimize
 from scipy.stats import qmc
@@ -998,11 +998,11 @@ def main(mygs, methods=None, **kwargs):
 
     base = f'examples/comparisons/closed_boundary_DIIID/convergence/lambda:{REG_IN},coils:{NUM_COILS}'
 
-    existing_runs = 0
+    existing_runs = 1
     while os.path.exists(os.path.join(base, f'run_{existing_runs:02d}', 'results.json')):
         existing_runs += 1
 
-    summary = comparison.compare_all(methods=methods, n_runs=N_RUNS, base_seed=42 + existing_runs)
+    summary = comparison.compare_all(methods=methods, n_runs=N_RUNS, base_seed=1 + existing_runs)
 
     if comparison.all_runs:
         # Save each individual seed run to its own run_XX folder
@@ -1011,7 +1011,7 @@ def main(mygs, methods=None, **kwargs):
         orig_all_runs = comparison.all_runs
 
         for i in range(n_individual):
-            run_idx = 0
+            run_idx = 1
             while os.path.exists(os.path.join(base, f'run_{run_idx:02d}', 'results.json')):
                 run_idx += 1
             foldername = os.path.join(base, f'run_{run_idx:02d}')
@@ -1039,7 +1039,7 @@ def main(mygs, methods=None, **kwargs):
         comparison.all_runs = orig_all_runs
     else:
         # Single run
-        run_idx = 0
+        run_idx = 1
         while os.path.exists(os.path.join(base, f'run_{run_idx:02d}', 'results.json')):
             run_idx += 1
         foldername = os.path.join(base, f'run_{run_idx:02d}')
