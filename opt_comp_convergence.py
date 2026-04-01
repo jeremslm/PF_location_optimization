@@ -328,49 +328,66 @@ class OptimizationComparison:
 
         return self.results['Multi-start L-BFGS']
 
-    def _deduplicate_candidates(self, candidates, tol=1e-2, max_unique=None):
-        """Remove near-duplicate candidates in normalized parameter space.
+    def _deduplicate_candidates(self, candidates, tol=0.05, max_unique=None):
+        """Remove near-duplicate candidates in real (R, Z) coil position space.
 
-        Uses Chebyshev (L-inf) distance in [0,1]^d space.  A candidate is
-        a duplicate only if it agrees with an existing unique point in EVERY
-        dimension within tol — it is kept if it differs meaningfully in at
-        least one parameter.  tol=0.05 means a 5% range difference in any
-        single parameter is enough to keep the candidate.
+        Converts each candidate's parameter vector to physical coil positions
+        (R, Z in metres) via the same interpolation used by the objective, then
+        uses Euclidean (L2) distance over the full set of coil coordinates.  A
+        candidate is a duplicate if its closest existing unique point is within
+        tol metres.  tol=0.05 means two coil configurations must differ by more
+        than 5 cm (in the combined-coil Euclidean sense) to be kept as distinct
+        starting points.
+
+        Requires set_problem_data() to have been called first.
 
         Parameters
         ----------
         candidates : list of array-like
         tol : float
-            Chebyshev threshold in normalized space.
+            Euclidean distance threshold in metres.
         max_unique : int or None
             If set, return at most this many unique candidates (taken in
             order, so the highest-acquisition ones come first).
         """
         if not candidates:
             return []
-        lows = np.array([lo for lo, _ in self.bounds])
-        ranges = np.array([hi - lo for lo, hi in self.bounds])
-        ranges[ranges == 0] = 1.0
+        if self.coil_center_cand1 is None or self.coil_center_cand2 is None:
+            raise RuntimeError("set_problem_data() must be called before _deduplicate_candidates")
 
-        def _norm(c):
-            return (np.asarray(c) - lows) / ranges
+        inner = self.coil_center_cand1[:len(self.coil_center_cand1) // 2]
+        outer = self.coil_center_cand2[:len(self.coil_center_cand2) // 2]
+        theta_range = np.linspace(0, 180, len(inner))
+
+        def _to_rz(params):
+            thetas = params[:self.num_coils]
+            radials = params[self.num_coils:]
+            coords = []
+            for theta, rho in zip(thetas, radials):
+                R_inner = np.interp(theta, theta_range, inner[:, 0])
+                Z_inner = np.interp(theta, theta_range, inner[:, 1])
+                R_outer = np.interp(theta, theta_range, outer[:, 0])
+                Z_outer = np.interp(theta, theta_range, outer[:, 1])
+                coords.append((1 - rho) * R_inner + rho * R_outer)
+                coords.append((1 - rho) * Z_inner + rho * Z_outer)
+            return np.array(coords)
 
         unique = [candidates[0]]
-        unique_norm = [_norm(candidates[0])]
+        unique_rz = [_to_rz(candidates[0])]
         for c in candidates[1:]:
             if max_unique is not None and len(unique) >= max_unique:
                 break
-            cn = _norm(c)
-            if all(np.max(np.abs(cn - u)) > tol for u in unique_norm):
+            crz = _to_rz(c)
+            if min(np.linalg.norm(crz - u) for u in unique_rz) > tol:
                 unique.append(c)
-                unique_norm.append(cn)
+                unique_rz.append(crz)
         return unique
 
     def run_bayesian(self, n_initial=None, acq_func='EI',
                      bayesian_stagnation_window=50,
                      local_optimize=True, refinement_window=50,
                      max_perms=None, acq_multiplier=10,
-                     acq_dedup_tol=1e-2, unique_refined_points=5,
+                     acq_dedup_tol=0.05, unique_refined_points=5,
                      random_state=1):
         """
         Bayesian Optimization with GP, then L-BFGS refinement.
@@ -382,7 +399,7 @@ class OptimizationComparison:
         Phase 2 (L-BFGS refinement): asks the fitted GP's acquisition
         function for n_acq_candidates = acq_multiplier * unique_refined_points
         points via the constant-liar batch strategy, deduplicates them with
-        Chebyshev tolerance acq_dedup_tol, and refines up to
+        Euclidean tolerance acq_dedup_tol (metres), and refines up to
         unique_refined_points unique candidates on the real cost.
         unique_refined_points is a cap — if fewer unique candidates survive
         deduplication, only those are refined.  Stops when `refinement_window`
@@ -471,7 +488,7 @@ class OptimizationComparison:
             )
             n_acq_unique = len(candidates)
             print(f"  Acq candidates: {n_acq_candidates} raw -> {n_acq_unique} unique "
-                  f"(target={unique_refined_points}, tol={acq_dedup_tol})")
+                  f"(target={unique_refined_points}, tol={acq_dedup_tol} m)")
 
             for cand in candidates:
                 evals_before = self._n_evals
