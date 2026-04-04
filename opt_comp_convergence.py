@@ -323,6 +323,7 @@ class OptimizationComparison:
             'starts_completed': starts_completed,
             'start_boundaries': start_boundaries,
             'start_costs': start_costs,
+            'convergence_window': starts_window,
             'random_state': random_state,
         }
 
@@ -556,6 +557,9 @@ class OptimizationComparison:
             'acq_dedup_tol': acq_dedup_tol,
             'unique_refined_points': unique_refined_points,
             'n_acq_unique': n_acq_unique,
+            'refinement_candidates': [list(c) for c in candidates] if local_optimize and bayesian_stopped_by not in ("exceeded wall time", "max function calls") else [],
+            'convergence_window': bayesian_stagnation_window,
+            'refinement_window': refinement_window,
             'refinement_stopping': refinement_stopped_by,
             'random_state': random_state,
         }
@@ -617,7 +621,7 @@ class OptimizationComparison:
             if n_runs > 1:
                 self.run_multiple('multistart_lbfgs', n_runs=n_runs, base_seed=base_seed)
             else:
-                self.run_multistart_lbfgs()
+                self.run_multistart_lbfgs(starts_window=25)
 
         if 'bayesian' in methods:
             print("Running Bayesian Optimization...")
@@ -627,7 +631,8 @@ class OptimizationComparison:
             else:
                 self.run_bayesian(
                     max_perms=1,
-                    unique_refined_points=5)
+                    unique_refined_points=5,
+                    bayesian_stagnation_window=25)
 
         return self.summary()
 
@@ -859,6 +864,12 @@ class OptimizationComparison:
                 method_data['unique_refined_points'] = int(res['unique_refined_points'])
             if 'refinement_stopping' in res and res['refinement_stopping'] is not None:
                 method_data['refinement_stopping'] = res['refinement_stopping']
+            if 'refinement_candidates' in res:
+                method_data['refinement_candidates'] = res['refinement_candidates']
+            if 'convergence_window' in res and res['convergence_window'] is not None:
+                method_data['convergence_window'] = int(res['convergence_window'])
+            if 'refinement_window' in res and res['refinement_window'] is not None:
+                method_data['refinement_window'] = int(res['refinement_window'])
             if 'random_state' in res and res['random_state'] is not None:
                 method_data['random_state'] = int(res['random_state'])
 
@@ -1013,7 +1024,7 @@ def main(mygs, methods=None, **kwargs):
     else:
         print(f"No brute force baseline found at {bf_path}")
 
-    base = f'examples/comparisons/closed_boundary_DIIID/convergence/lambda:{REG_IN},coils:{NUM_COILS}'
+    base = f'examples/comparisons/closed_boundary_DIIID/{RUN_FOLDER}/lambda:{REG_IN},coils:{NUM_COILS}'
 
     existing_runs = 1
     while os.path.exists(os.path.join(base, f'run_{existing_runs:02d}', 'results.json')):
@@ -1076,6 +1087,13 @@ def main(mygs, methods=None, **kwargs):
     return comparison, summary
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--folder', type=str, default='convergence',
+                        help='Output folder name under examples/comparisons/closed_boundary_DIIID/')
+    args = parser.parse_args()
+    RUN_FOLDER = args.folder
+
     eqdsk = read_eqdsk('examples/data/eqdsk/g192185.02440')
     LCFS_contour = eqdsk['rzout'].copy()
     mesh_dx = 0.015
@@ -1107,8 +1125,8 @@ if __name__ == "__main__":
     # 2,3,4,5,6
     # 1e-5, 1e-6, 1e-7, 1e-8
     
-    for num_coils in [2]:
-        for reg_in in [1e-8]:
+    for num_coils in [4]:
+        for reg_in in [1e-8,1e-7,1e-6,1e-5]:
             print(f"\n{'='*60}")
             print(f"NUM_COILS={num_coils}, REG_IN={reg_in}")
             print(f"{'='*60}")
@@ -1120,7 +1138,7 @@ if __name__ == "__main__":
                     NUM_COILS=num_coils,
                     REG_IN=reg_in,
                     MAX_EVALS=2**18,
-                    N_RUNS=5
+                    N_RUNS=1
                 )
             except Exception as e:
                 print(f"\nFailed for NUM_COILS={num_coils}, REG_IN={reg_in}")
