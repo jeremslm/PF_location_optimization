@@ -5,6 +5,7 @@
 /.conda/
 /ignore/
 CLAUDE.md
-/examples/
+examples/comparisons/free_boundary_DIIID
+examples/comparisons/closed_boundary_DIIID/old
 /.pytest_cache/
 /notes/

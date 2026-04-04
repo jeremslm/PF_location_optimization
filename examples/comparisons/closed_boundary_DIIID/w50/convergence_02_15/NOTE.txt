@@ -1,0 +1,2 @@
+lbfgs: conv window = 50
+bayesian: n_initial=256, conv window = 50, refinement = 25, 
