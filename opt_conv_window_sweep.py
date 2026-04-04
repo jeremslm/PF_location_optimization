@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from opt_comp_convergence import (
     OFT_env, TokaMaker, gs_Domain,
     read_eqdsk, eval_green,
-    resize_polygon, update_boundary, place_points_pol_rad, make_3x3_thick,
+    resize_polygon, update_boundary,
     CoilPositionSpace,
     OptimizationComparison,
     np, json,
@@ -77,23 +77,43 @@ def main(mygs, CONV_WINDOW, methods=None, **kwargs):
             Z_inner = np.interp(theta, theta_range, inner[:, 1])
             R_outer = np.interp(theta, theta_range, outer[:, 0])
             Z_outer = np.interp(theta, theta_range, outer[:, 1])
-            locs.append([(1 - rho) * R_inner + rho * R_outer,
-                         (1 - rho) * Z_inner + rho * Z_outer])
+            R_pos = (1 - rho) * R_inner + rho * R_outer
+            Z_pos = (1 - rho) * Z_inner + rho * Z_outer
+            locs.append([R_pos, Z_pos])
 
-        locs_top = np.array(locs)
-        locs_bot = np.column_stack([locs_top[:, 0], -locs_top[:, 1]])
-        all_locs = np.vstack([locs_top, locs_bot])
+        coil_centers_3x3 = []
+        for loc in locs:
+            centers_top = []
+            for dx in [-1, 0, 1]:
+                for dy in [-1, 0, 1]:
+                    centers_top.append([loc[0] + 2*RFIL*dx, loc[1] + 2*RFIL*dy])
+            coil_centers_3x3.append(centers_top)
+            centers_bot = []
+            for dx in [-1, 0, 1]:
+                for dy in [-1, 0, 1]:
+                    centers_bot.append([loc[0] + 2*RFIL*dx, -loc[1] + 2*RFIL*dy])
+            coil_centers_3x3.append(centers_bot)
 
-        coil_currents = np.zeros(2 * NUM_COILS)
-        mygs.set_coils(all_locs, coil_currents)
-        mygs.set_targets(Ip=Ip_target, pax=pres_target)
-        mygs.solve()
+        n_bnd = psi_bnd.shape[0]
+        n_coils_total = len(coil_centers_3x3)
+        con = np.zeros((n_bnd - 1 + n_coils_total, n_coils_total))
 
-        psi_coil = np.zeros(len(r_bnd))
-        for loc in all_locs:
-            psi_coil += eval_green(r_bnd, psi_bnd[:, 0], loc[0], loc[1])
+        for i, filament_set in enumerate(coil_centers_3x3):
+            flux_tmp = np.zeros((n_bnd,))
+            for fil in filament_set:
+                flux_tmp += eval_green(r_bnd, fil)
+            con[:n_bnd-1, i] = flux_tmp[1:] - flux_tmp[0]
+            con[n_bnd-1+i, i] = REG_IN
 
-        flux_error_squared = np.mean((psi_bnd[:, 0] - psi_coil - REG_IN) ** 2)
+        err = np.zeros((n_bnd - 1 + n_coils_total,))
+        err[:n_bnd-1] = psi_bnd[1:] - psi_bnd[0]
+        currs, residuals, _, _ = np.linalg.lstsq(con, err, rcond=None)
+
+        if len(residuals) > 0:
+            flux_error_squared = residuals[0]
+        else:
+            flux_error_squared = np.linalg.norm(np.dot(con, currs) - err) ** 2
+
         objective.last_flux_err = flux_error_squared
 
         dist_angles = np.diff(np.sort(thetas))
@@ -187,10 +207,6 @@ if __name__ == "__main__":
 
     F0 = eqdsk['rcentr'] * eqdsk['bcentr']
     mygs.setup(order=2, F0=F0)
-
-    Ip_target = eqdsk['ip']
-    pres_target = eqdsk['pres'][0]
-    mygs.set_targets(Ip=Ip_target, pax=pres_target)
 
     print("Solving fixed-boundary equilibrium...")
     mygs.init_psi()
