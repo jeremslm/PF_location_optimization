@@ -23,7 +23,6 @@ from skopt.space import Real
 import os
 import sys
 import json
-import argparse
 
 home_dir = os.path.expanduser("~")
 oft_root_path = os.path.join(home_dir, "OpenFUSIONToolkit/install_release")
@@ -77,7 +76,7 @@ class OptimizationComparison:
 
     def __init__(self, objective_func, bounds, max_time=86400,
                  max_evals=None, convergence_threshold=0.001,
-                 NUM_COILS=3, OMEGA=1e-7, DIST_TH=5.0, REG_IN=1e-7, RFIL=0.01):
+                 NUM_COILS=3, OMEGA=1e-3, DIST_TH=5.0, REG_IN=1e-7, RFIL=0.01):
         self.objective = objective_func
         self.bounds = bounds
         self.max_time = max_time
@@ -324,7 +323,6 @@ class OptimizationComparison:
             'starts_completed': starts_completed,
             'start_boundaries': start_boundaries,
             'start_costs': start_costs,
-            'convergence_window': starts_window,
             'random_state': random_state,
         }
 
@@ -466,7 +464,7 @@ class OptimizationComparison:
 
         bayesian_evals = self._n_evals
         elapsed_bayesian = time.time() - self._start_time
-        print(f"Bayesian phase: {bayesian_evals} evals, "
+        print(f"  Bayesian phase: {bayesian_evals} evals, "
               f"{elapsed_bayesian:.1f}s, stopped by: {bayesian_stopped_by}")
 
         # Phase 2: L-BFGS refinement
@@ -489,7 +487,7 @@ class OptimizationComparison:
                 raw_candidates, tol=acq_dedup_tol, max_unique=unique_refined_points
             )
             n_acq_unique = len(candidates)
-            print(f"Acq candidates: {n_acq_candidates} raw -> {n_acq_unique} unique "
+            print(f"  Acq candidates: {n_acq_candidates} raw -> {n_acq_unique} unique "
                   f"(target={unique_refined_points}, tol={acq_dedup_tol} m)")
 
             for cand in candidates:
@@ -558,14 +556,11 @@ class OptimizationComparison:
             'acq_dedup_tol': acq_dedup_tol,
             'unique_refined_points': unique_refined_points,
             'n_acq_unique': n_acq_unique,
-            'refinement_candidates': [list(c) for c in candidates] if local_optimize and bayesian_stopped_by not in ("exceeded wall time", "max function calls") else [],
-            'convergence_window': bayesian_stagnation_window,
-            'refinement_window': refinement_window,
             'refinement_stopping': refinement_stopped_by,
             'random_state': random_state,
         }
 
-        print(f"Total: {self._n_evals} evals, {elapsed:.1f}s, "
+        print(f"  Total: {self._n_evals} evals, {elapsed:.1f}s, "
               f"refined {pts_refined} pts, stopped by: {stopped_by}")
 
         return self.results['Bayesian']
@@ -598,14 +593,14 @@ class OptimizationComparison:
         runs = []
         for i in range(n_runs):
             seed = base_seed + i
-            print(f"\n[{method}] run {i+1}/{n_runs}, random_state={seed}")
+            print(f"\n  [{method}] run {i+1}/{n_runs}, random_state={seed}")
             result = run_fn(random_state=seed, **kwargs)
             runs.append(dict(result))
 
         self.all_runs[key] = runs
         best = min(runs, key=lambda r: r['best_cost'])
         self.results[key] = best
-        print(f"\n{key}: best cost {best['best_cost']:.4e} "
+        print(f"\n  {key}: best cost {best['best_cost']:.4e} "
               f"(seed={best['random_state']}) over {n_runs} runs")
         return runs
 
@@ -622,7 +617,7 @@ class OptimizationComparison:
             if n_runs > 1:
                 self.run_multiple('multistart_lbfgs', n_runs=n_runs, base_seed=base_seed)
             else:
-                self.run_multistart_lbfgs(starts_window=25)
+                self.run_multistart_lbfgs()
 
         if 'bayesian' in methods:
             print("Running Bayesian Optimization...")
@@ -632,9 +627,7 @@ class OptimizationComparison:
             else:
                 self.run_bayesian(
                     max_perms=1,
-                    unique_refined_points=5,
-                    bayesian_stagnation_window=25, 
-                    unique_refined_points=1)
+                    unique_refined_points=5)
 
         return self.summary()
 
@@ -866,12 +859,6 @@ class OptimizationComparison:
                 method_data['unique_refined_points'] = int(res['unique_refined_points'])
             if 'refinement_stopping' in res and res['refinement_stopping'] is not None:
                 method_data['refinement_stopping'] = res['refinement_stopping']
-            if 'refinement_candidates' in res:
-                method_data['refinement_candidates'] = res['refinement_candidates']
-            if 'convergence_window' in res and res['convergence_window'] is not None:
-                method_data['convergence_window'] = int(res['convergence_window'])
-            if 'refinement_window' in res and res['refinement_window'] is not None:
-                method_data['refinement_window'] = int(res['refinement_window'])
             if 'random_state' in res and res['random_state'] is not None:
                 method_data['random_state'] = int(res['random_state'])
 
@@ -909,7 +896,7 @@ def main(mygs, methods=None, **kwargs):
     N_RUNS = kwargs.get('N_RUNS', 1)
 
     r_bnd, psi_bnd = mygs.get_vfixed()
-    print(f"Found {len(r_bnd)} boundary points")
+    print(f"  Found {len(r_bnd)} boundary points")
 
     # Coil position space (DIIID)
     lim1 = update_boundary(r0=1.69, z0=0, a0=0.67, kappa=2, delta=0.8, squar=0.15, npts=1700)
@@ -996,9 +983,9 @@ def main(mygs, methods=None, **kwargs):
     print("\n" + "=" * 60)
     print("OPTIMIZATION COMPARISON")
     print("=" * 60)
-    print(f"Coils: {NUM_COILS} | Max evals: {MAX_EVALS} | "
+    print(f"  Coils: {NUM_COILS}  |  Max evals: {MAX_EVALS}  |  "
           f"Threshold: {CONVERGENCE_THRESHOLD}")
-    print(f"omega={OMEGA} | reg_in={REG_IN} | dist_th={DIST_TH}")
+    print(f"  omega={OMEGA}  |  reg_in={REG_IN}  |  dist_th={DIST_TH}")
     print("=" * 60 + "\n")
 
     comparison = OptimizationComparison(
@@ -1026,7 +1013,7 @@ def main(mygs, methods=None, **kwargs):
     else:
         print(f"No brute force baseline found at {bf_path}")
 
-    base = f'examples/comparisons/closed_boundary_DIIID/{RUN_FOLDER}/lambda:{REG_IN},coils:{NUM_COILS}'
+    base = f'examples/comparisons/closed_boundary_DIIID/convergence/lambda:{REG_IN},coils:{NUM_COILS}'
 
     existing_runs = 1
     while os.path.exists(os.path.join(base, f'run_{existing_runs:02d}', 'results.json')):
@@ -1089,12 +1076,6 @@ def main(mygs, methods=None, **kwargs):
     return comparison, summary
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--folder', type=str, default='convergence',
-                        help='Output folder name under examples/comparisons/closed_boundary_DIIID/')
-    args = parser.parse_args()
-    RUN_FOLDER = args.folder
-
     eqdsk = read_eqdsk('examples/data/eqdsk/g192185.02440')
     LCFS_contour = eqdsk['rzout'].copy()
     mesh_dx = 0.015
@@ -1126,8 +1107,8 @@ if __name__ == "__main__":
     # 2,3,4,5,6
     # 1e-5, 1e-6, 1e-7, 1e-8
     
-    for num_coils in [2,3,4,5,6]:
-        for reg_in in [1e-8,1e-7,1e-6,1e-5]:
+    for num_coils in [2]:
+        for reg_in in [1e-8]:
             print(f"\n{'='*60}")
             print(f"NUM_COILS={num_coils}, REG_IN={reg_in}")
             print(f"{'='*60}")
@@ -1139,7 +1120,7 @@ if __name__ == "__main__":
                     NUM_COILS=num_coils,
                     REG_IN=reg_in,
                     MAX_EVALS=2**18,
-                    N_RUNS=1
+                    N_RUNS=5
                 )
             except Exception as e:
                 print(f"\nFailed for NUM_COILS={num_coils}, REG_IN={reg_in}")

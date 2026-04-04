@@ -1,4 +1,0 @@
-Configuration,Bayesian Final Cost,Multi-start Final Cost,Cost Ratio,Bayesian Evals,Multi-start Evals,Speedup
-λ=1e-07,3.310e-05,3.072e-05,0.93,1429,4239,3.0×
-λ=1e-05,2.215e-02,2.215e-02,1.00,261,963,3.7×
-λ=1e-08,4.925e-06,4.854e-06,0.99,8365,14535,1.7×
