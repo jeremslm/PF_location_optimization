@@ -157,9 +157,7 @@ def main(mygs, CONV_WINDOW, methods=None, **kwargs):
     if 'bayesian' in methods:
         print("Running Bayesian Optimization...")
         comparison.run_bayesian(
-            max_perms=1,
-            unique_refined_points=3,
-            bayesian_stagnation_window=50,
+            unique_refined_points=5,
             refinement_window=CONV_WINDOW,
         )
 
@@ -228,7 +226,7 @@ if __name__ == "__main__":
                         NUM_COILS=num_coils,
                         REG_IN=reg_in,
                         MAX_EVALS=2**18,
-                        RUN_FOLDER=f'convergence_w{window}',
+                        RUN_FOLDER=f'convergence_w{window}_sweep',
                     )
                 except Exception as e:
                     print(f"\nFailed: WINDOW={window}, NUM_COILS={num_coils}, REG_IN={reg_in}")
