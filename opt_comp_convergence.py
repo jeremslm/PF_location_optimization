@@ -620,21 +620,24 @@ class OptimizationComparison:
         if 'multistart_lbfgs' in methods:
             print("Running Multi-start L-BFGS...")
             if n_runs > 1:
-                self.run_multiple('multistart_lbfgs', n_runs=n_runs, base_seed=base_seed)
+                self.run_multiple('multistart_lbfgs', n_runs=n_runs, base_seed=base_seed,
+                                  starts_window=10)
             else:
-                self.run_multistart_lbfgs(starts_window=25)
+                self.run_multistart_lbfgs(
+                    starts_window=10)
 
         if 'bayesian' in methods:
             print("Running Bayesian Optimization...")
             if n_runs > 1:
                 self.run_multiple('bayesian', n_runs=n_runs, base_seed=base_seed,
-                                  max_perms=1, unique_refined_points=5)
+                                  max_perms=1, 
+                                  unique_refined_points=1, 
+                                  bayesian_stagnation_window=10)
             else:
                 self.run_bayesian(
                     max_perms=1,
-                    unique_refined_points=5,
-                    bayesian_stagnation_window=25, 
-                    unique_refined_points=1)
+                    unique_refined_points=1,
+                    bayesian_stagnation_window=10)
 
         return self.summary()
 
