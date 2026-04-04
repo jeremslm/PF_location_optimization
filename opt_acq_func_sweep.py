@@ -164,7 +164,13 @@ def main(mygs, acq_func, methods=None, **kwargs):
     time_fig = comparison.plot_convergence_vs_time(log_scale=True)
     fig.savefig(f'{foldername}/convergence_plot.png', dpi=150, bbox_inches='tight')
     time_fig.savefig(f'{foldername}/convergence_vs_time_plot.png', dpi=150, bbox_inches='tight')
-    comparison.save_results_to_json(f'{foldername}/results.json')
+    results_path = f'{foldername}/results.json'
+    comparison.save_results_to_json(results_path)
+    with open(results_path) as f:
+        saved = json.load(f)
+    saved['optimization_settings']['acq_func'] = acq_func
+    with open(results_path, 'w') as f:
+        json.dump(saved, f, indent=2)
     plt.close('all')
     print(f"Saved to: {foldername}/")
 
