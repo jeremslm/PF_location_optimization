@@ -138,7 +138,7 @@ def main(mygs, CONV_WINDOW, methods=None, **kwargs):
         print("Running Bayesian Optimization...")
         comparison.run_bayesian(
             max_perms=1,
-            unique_refined_points=1,
+            unique_refined_points=3,
             bayesian_stagnation_window=CONV_WINDOW,
             refinement_window=CONV_WINDOW,
         )
