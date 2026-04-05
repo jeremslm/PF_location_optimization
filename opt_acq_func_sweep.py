@@ -23,7 +23,7 @@ from opt_comp_convergence import (
     np, json,
 )
 
-ACQ_FUNCS = ['EI', 'PI', 'LCB']
+ACQ_FUNCS = ['PI', 'LCB']
 
 
 def main(mygs, acq_func, methods=None, **kwargs):
