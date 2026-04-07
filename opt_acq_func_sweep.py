@@ -151,7 +151,7 @@ def main(mygs, acq_func, methods=None, **kwargs):
 
     if 'bayesian' in methods:
         print(f"Running Bayesian Optimization (acq_func={acq_func})...")
-        comparison.run_bayesian(acq_func=acq_func)
+        comparison.run_bayesian(acq_func=acq_func, bayesian_stagnation_window=25)
 
     base = f'examples/comparisons/closed_boundary_DIIID/{RUN_FOLDER}/lambda:{REG_IN},coils:{NUM_COILS}'
     run_idx = 1
