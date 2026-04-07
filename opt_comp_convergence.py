@@ -59,10 +59,10 @@ def _check_starts_convergence(starts_bests, window, threshold):
         return False
     old_best = starts_bests[n - window - 1]
     new_best = starts_bests[-1]
-    if old_best > 0:
+    if abs(old_best) > 0:
         rel_imp = (old_best - new_best) / abs(old_best)
         return rel_imp < threshold
-    return False
+    return new_best == 0
 
 
 class OptimizationComparison:
@@ -424,11 +424,14 @@ class OptimizationComparison:
             running_min = np.minimum.accumulate(self._history)
             old_best = running_min[-(bayesian_stagnation_window + 1)]
             new_best = running_min[-1]
-            if old_best > 0:
+            if abs(old_best) > 0:
                 rel_imp = (old_best - new_best) / abs(old_best)
                 if rel_imp < self.convergence_threshold:
                     self._stopped_reason = "bayesian_stagnation"
                     return True
+            elif new_best == 0:
+                self._stopped_reason = "bayesian_stagnation"
+                return True
             return False
 
         n_perms = min(max_perms, factorial(self.num_coils))
@@ -906,6 +909,7 @@ def main(mygs, methods=None, **kwargs):
     REG_IN = kwargs.get('REG_IN', 1e-7)
     RFIL = kwargs.get('RFIL', 0.01)
     N_RUNS = kwargs.get('N_RUNS', 1)
+    RUN_FOLDER = kwargs.get('RUN_FOLDER', 'convergence')
 
     r_bnd, psi_bnd = mygs.get_vfixed()
     print(f"Found {len(r_bnd)} boundary points")
