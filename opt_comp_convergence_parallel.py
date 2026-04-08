@@ -1,6 +1,10 @@
 """
-Optimization Comparison for PF Coil Placement
-==============================================
+Optimization Comparison for PF Coil Placement (Parallel)
+=========================================================
+
+Parallel version of opt_comp_convergence.py. Each (num_coils, reg_in)
+combination runs in its own subprocess with its own temp directory,
+using multiprocessing.Pool with apply_async.
 
 Compare multi-start L-BFGS and Bayesian optimization methods for PF coil
 placement. Stopping criteria are per-start (not per function call):
@@ -14,8 +18,10 @@ import time
 import pandas as pd
 import matplotlib.pyplot as plt
 import random
+import shutil
 from itertools import permutations as _iperms
 from math import factorial
+from multiprocessing import Pool
 from scipy.optimize import minimize
 from scipy.stats import qmc
 from skopt import Optimizer
@@ -39,6 +45,8 @@ from OpenFUSIONToolkit.TokaMaker.meshing import gs_Domain
 from OpenFUSIONToolkit.TokaMaker.util import read_eqdsk, eval_green
 from helper_fct import resize_polygon, update_boundary, place_points_pol_rad, make_3x3_thick
 from OFT_pf_coil_opt_fct import CoilPositionSpace
+
+_BASE_DIR = os.path.abspath(os.getcwd())
 
 
 class TimeoutException(Exception):
@@ -447,7 +455,7 @@ class OptimizationComparison:
         # Phase 1: Bayesian exploration
         bayesian_stopped_by = "completed"
         try:
-            flag = True 
+            flag = True
             while flag:
                 x = gp_opt.ask()
                 cost = self._track_objective(x)
@@ -457,7 +465,7 @@ class OptimizationComparison:
                 gp_opt.tell(xs_perm, ys_perm)
 
                 if stopping_callback():
-                    flag = False 
+                    flag = False
 
         except TimeoutException:
             bayesian_stopped_by = "exceeded wall time"
@@ -1091,14 +1099,21 @@ def main(mygs, methods=None, **kwargs):
 
     return comparison, summary
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--folder', type=str, default='convergence',
-                        help='Output folder name under examples/comparisons/closed_boundary_DIIID/')
-    args = parser.parse_args()
-    RUN_FOLDER = args.folder
 
-    eqdsk = read_eqdsk('examples/data/eqdsk/g192185.02440')
+# ============================================
+# Parallel worker
+# ============================================
+
+def parallel_case(reg_in, num_coils, ntrials, run_folder, nthreads):
+    tmp_dir = os.path.join(_BASE_DIR, f'temp_dir_{reg_in}_{num_coils}')
+    try:
+        shutil.rmtree(tmp_dir)
+    except FileNotFoundError:
+        pass
+    os.mkdir(tmp_dir)
+    os.chdir(tmp_dir)
+
+    eqdsk = read_eqdsk(os.path.join(_BASE_DIR, 'examples/data/eqdsk/g192185.02440'))
     LCFS_contour = eqdsk['rzout'].copy()
     mesh_dx = 0.015
 
@@ -1107,10 +1122,9 @@ if __name__ == "__main__":
     gs_mesh.add_polygon(LCFS_contour, 'plasma')
     mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
 
-    myOFT = OFT_env(nthreads=2)
-    
-    mygs = TokaMaker(myOFT)
+    myOFT = OFT_env(nthreads=nthreads)
 
+    mygs = TokaMaker(myOFT)
     mygs.setup_mesh(mesh_pts, mesh_lc)
     mygs.settings.free_boundary = False
 
@@ -1121,32 +1135,54 @@ if __name__ == "__main__":
     pres_target = eqdsk['pres'][0]
     mygs.set_targets(Ip=Ip_target, pax=pres_target)
 
-    print("Solving fixed-boundary equilibrium...")
+    print(f"Solving fixed-boundary equilibrium for NUM_COILS={num_coils}, REG_IN={reg_in}...")
     mygs.init_psi()
     mygs.solve()
 
-    methods = ["multistart_lbfgs", "bayesian"]
+    os.chdir(_BASE_DIR)
 
-    # 2,3,4,5,6
-    # 1e-5, 1e-6, 1e-7, 1e-8
-    
-    for num_coils in [2,3,4,5,6]:
-        for reg_in in [1e-8,1e-7,1e-6,1e-5]:
-            print(f"\n{'='*60}")
-            print(f"NUM_COILS={num_coils}, REG_IN={reg_in}")
-            print(f"{'='*60}")
+    comparison, summary = main(
+        mygs=mygs,
+        methods=["multistart_lbfgs", "bayesian"],
+        NUM_COILS=num_coils,
+        REG_IN=reg_in,
+        MAX_EVALS=2**18,
+        N_RUNS=ntrials,
+        RUN_FOLDER=run_folder
+    )
+    return comparison, summary
 
-            try:
-                comparison, summary = main(
-                    mygs=mygs,
-                    methods=methods,
-                    NUM_COILS=num_coils,
-                    REG_IN=reg_in,
-                    MAX_EVALS=2**18,
-                    N_RUNS=20
-                )
-            except Exception as e:
-                print(f"\nFailed for NUM_COILS={num_coils}, REG_IN={reg_in}")
-                print(f"Error: {e}")
-                continue
-    
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--folder', type=str, default='convergence',
+                        help='Output folder name under examples/comparisons/closed_boundary_DIIID/')
+    parser.add_argument('--nprocs', type=int, default=20,
+                        help='Number of parallel processes')
+    parser.add_argument('--ntrials', type=int, default=20,
+                        help='Number of optimization trials (N_RUNS) per case')
+    parser.add_argument('--nthreads', type=int, default=2,
+                        help='OFT threads per process')
+    args = parser.parse_args()
+
+    lambdas = [1e-8, 1e-7, 1e-6, 1e-5]
+    coils = [4, 5, 6]
+
+    pool = Pool(processes=args.nprocs)
+
+    results = {}
+    for reg_in in lambdas:
+        for num_coils in coils:
+            results[(reg_in, num_coils)] = pool.apply_async(
+                parallel_case, args=(reg_in, num_coils, args.ntrials, args.folder, args.nthreads)
+            )
+
+    pool.close()
+    pool.join()
+
+    for (reg_in, num_coils), result in results.items():
+        try:
+            result.get()
+            print(f"NUM_COILS={num_coils}, REG_IN={reg_in}: done")
+        except Exception as e:
+            print(f"NUM_COILS={num_coils}, REG_IN={reg_in}: failed - {e}")

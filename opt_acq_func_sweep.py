@@ -23,7 +23,7 @@ from opt_comp_convergence import (
     np, json,
 )
 
-ACQ_FUNCS = ['PI', 'LCB', 'gp_hedge']
+ACQ_FUNCS = ['EI', 'gp_hedge', 'LCB']
 
 def main(mygs, acq_func, methods=None, **kwargs):
     NUM_COILS = kwargs.get('NUM_COILS', 4)
