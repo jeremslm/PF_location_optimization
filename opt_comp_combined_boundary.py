@@ -1,47 +1,46 @@
 """
-Optimization Comparison for PF Coil Placement (Parallel)
-=========================================================
+Optimization Comparison for PF Coil Placement (Combined Boundary, Parallel)
+============================================================================
 
-Parallel version of opt_comp_convergence.py. Each (num_coils, reg_in)
-combination runs in its own subprocess with its own temp directory,
-using multiprocessing.Pool with apply_async.
+Objective: (1 - alpha) * fixed_boundary_cost + alpha * free_boundary_cost + dist_penalty
 
-Compare multi-start L-BFGS and Bayesian optimization methods for PF coil
-placement. Stopping criteria are per-start (not per function call):
-after N completed starts without improvement, the method stops.
+Fixed-boundary cost: flux_error_squared from lstsq solve (cheap).
+Free-boundary cost:  boundary_distance from TokaMaker GS solve (expensive, ~1-2s/eval).
+Both evaluated at every function call. Convergence window = 5.
 
-Uses brute force parameters: OMEGA=1e-7, DIST_TH=5.0, eqdsk=g192185.02440 (DIIID).
+Sweep: weight_fb x ncoils, REG_IN = 1e-6 fixed, alpha = 0.75.
 """
 
-import numpy as np
-import time
-import pandas as pd
-import matplotlib.pyplot as plt
+import copy
+import json
+import os
 import random
 import shutil
+import sys
+import time
+import argparse
 from itertools import permutations as _iperms
 from math import factorial
 from multiprocessing import Pool
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 from scipy.stats import qmc
 from skopt import Optimizer
 from skopt.space import Real
-import os
-import sys
-import json
-import argparse
 
 home_dir = os.path.expanduser("~")
 oft_root_path = os.path.join(home_dir, "OpenFUSIONToolkit/install_release")
 os.environ["OFT_ROOTPATH"] = oft_root_path
-
 tokamaker_python_path = os.getenv("OFT_ROOTPATH")
 if tokamaker_python_path is not None:
-    sys.path.append(os.path.join(tokamaker_python_path, 'python'))
+    sys.path.append(os.path.join(tokamaker_python_path, "python"))
 
 from OpenFUSIONToolkit import OFT_env
 from OpenFUSIONToolkit.TokaMaker import TokaMaker
-from OpenFUSIONToolkit.TokaMaker.meshing import gs_Domain
+from OpenFUSIONToolkit.TokaMaker.meshing import gs_Domain, save_gs_mesh, load_gs_mesh
 from OpenFUSIONToolkit.TokaMaker.util import read_eqdsk, eval_green
 from helper_fct import resize_polygon, update_boundary, place_points_pol_rad, make_3x3_thick
 from OFT_pf_coil_opt_fct import CoilPositionSpace
@@ -58,10 +57,6 @@ class MaxEvalsException(Exception):
 
 
 def _check_starts_convergence(starts_bests, window, threshold):
-    """Check if best cost has improved over last `window` completed starts.
-
-    Returns True if converged (no meaningful improvement).
-    """
     n = len(starts_bests)
     if n <= window:
         return False
@@ -73,36 +68,131 @@ def _check_starts_convergence(starts_bests, window, threshold):
     return new_best == 0
 
 
+# ============================================
+# Free-boundary helpers
+# ============================================
+
+def boundary_distance(fixed_LCFS, free_LCFS, mag_axis):
+    R0, Z0 = mag_axis
+    theta_fixed = np.arctan2(fixed_LCFS[:, 1] - Z0, fixed_LCFS[:, 0] - R0)
+    r_fixed = np.sqrt((fixed_LCFS[:, 0] - R0)**2 + (fixed_LCFS[:, 1] - Z0)**2)
+    theta_free = np.arctan2(free_LCFS[:, 1] - Z0, free_LCFS[:, 0] - R0)
+    r_free = np.sqrt((free_LCFS[:, 0] - R0)**2 + (free_LCFS[:, 1] - Z0)**2)
+    r_fixed_interp = np.interp(theta_free, theta_fixed, r_fixed, period=2 * np.pi)
+    return np.sum(np.abs(r_free - r_fixed_interp))
+
+
+def make_new_coils(params, nCoils, coil_center_cand1, coil_center_cand2, dx=0.03, dy=0.03):
+    thetas = params[:nCoils]
+    radials = params[nCoils:2 * nCoils]
+    inner = coil_center_cand1[:len(coil_center_cand1) // 2]
+    outer = coil_center_cand2[:len(coil_center_cand2) // 2]
+    _, locs = place_points_pol_rad(nCoils, inner, outer, thetas, radials)
+    scan_geom = {"coils": {}}
+    for i, loc in enumerate(locs):
+        pts_top = np.array([
+            [loc[0] - dx, loc[1] + dy],
+            [loc[0] + dx, loc[1] + dy],
+            [loc[0] + dx, loc[1] - dy],
+            [loc[0] - dx, loc[1] - dy],
+        ])
+        pts_bot = pts_top * np.array([1, -1])
+        scan_geom["coils"][f"F{i}A"] = {"pts": copy.deepcopy(pts_top), "nturns": 1.0}
+        scan_geom["coils"][f"F{i}B"] = {"pts": copy.deepcopy(pts_bot), "nturns": 1.0}
+    return scan_geom
+
+
+def make_mesh(scan_geom, savename, lim,
+              plasma_dx=0.01, coil_dx=0.005, vac_dx=0.04, vv_dx=0.04):
+    gs_mesh = gs_Domain()
+    gs_mesh.define_region("air", vac_dx, "boundary")
+    gs_mesh.define_region("plasma", plasma_dx, "plasma")
+    gs_mesh.define_region("vacuum", vv_dx, "vacuum", allow_xpoints=True)
+    gs_mesh.define_region("vv", vv_dx, "conductor", eta=6e-7)
+    for key, coil in scan_geom["coils"].items():
+        gs_mesh.define_region(key, coil_dx, "coil", nTurns=coil["nturns"])
+    gs_mesh.add_polygon(lim, "plasma", parent_name="vacuum")
+    gs_mesh.add_annulus(resize_polygon(lim, 0.01), "vacuum", resize_polygon(lim, 0.05), "vv")
+    gs_mesh.add_enclosed([1.75, 1.25], "vacuum")
+    for key, coil in scan_geom["coils"].items():
+        gs_mesh.add_polygon(coil["pts"], key, parent_name="air")
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+    coil_dict = gs_mesh.get_coils()
+    cond_dict = gs_mesh.get_conductors()
+    save_gs_mesh(mesh_pts, mesh_lc, mesh_reg, coil_dict, cond_dict, savename)
+    return coil_dict, cond_dict
+
+
+def _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
+                        coil_center_cand1, coil_center_cand2, lim,
+                        weight_fb, nCoils, xpoint_index=55):
+    pid = os.getpid()
+    mesh_file = f"mesh_fb_{pid}.h5"
+    eqdsk_tmp = f"gTMP_{pid}"
+    try:
+        scan_geom = make_new_coils(params, nCoils, coil_center_cand1, coil_center_cand2)
+        make_mesh(scan_geom, mesh_file, lim)
+
+        mygs = TokaMaker(myOFT)
+        mesh_pts, mesh_lc, mesh_reg, coil_dict, cond_dict = load_gs_mesh(mesh_file)
+        mygs.setup_mesh(mesh_pts, mesh_lc, mesh_reg)
+        mygs.setup_regions(cond_dict=cond_dict, coil_dict=coil_dict)
+        mygs.settings.free_boundary = True
+
+        F0 = eqdsk["rcentr"] * eqdsk["bcentr"]
+        mygs.setup(order=2, F0=F0)
+
+        R0_target = float(fixed_mag_axis[0])
+        Z0_target = float(fixed_mag_axis[1])
+        mygs.set_targets(Ip=eqdsk["ip"], R0=R0_target, V0=Z0_target)
+        mygs.set_coil_bounds({key: [-6e8, 6e8] for key in mygs.coil_sets})
+
+        isoflux_pts = eqdsk["rzout"].copy()
+        w_iso = np.ones(len(isoflux_pts[:, 0]))
+        w_iso[xpoint_index] = 1e4
+        mygs.set_isoflux(isoflux_pts, weights=w_iso)
+
+        reg_terms = [mygs.coil_reg_term({name: 1.0}, target=0.0, weight=weight_fb)
+                     for name in mygs.coil_sets]
+        mygs.set_coil_reg(reg_terms=reg_terms)
+        mygs.init_psi(r0=1.8, z0=-0.040, a=0.45, kappa=1.547, delta=-0.288)
+        mygs.solve()
+
+        mygs.save_eqdsk(eqdsk_tmp, truncate_eq=False)
+        EQ_in = read_eqdsk(eqdsk_tmp)
+        return boundary_distance(fixed_LCFS, EQ_in["rzout"], fixed_mag_axis)
+    except Exception:
+        return 1e6
+    finally:
+        for f in [mesh_file, eqdsk_tmp]:
+            if os.path.exists(f):
+                os.remove(f)
+
+
+# ============================================
+# OptimizationComparison
+# ============================================
+
 class OptimizationComparison:
-    """
-    Compare optimization methods with per-start convergence stopping.
-
-    Each method lets individual L-BFGS runs converge naturally (scipy handles
-    that). Stopping is based on whether the global best improves across
-    completed starts/refinements, plus safety limits on wall-clock time
-    and total function evaluations.
-    """
-
     def __init__(self, objective_func, bounds, max_time=86400,
                  max_evals=None, convergence_threshold=0.001,
-                 NUM_COILS=3, OMEGA=1e-7, DIST_TH=5.0, REG_IN=1e-7, RFIL=0.01):
+                 NUM_COILS=3, OMEGA=1e-7, DIST_TH=5.0, REG_IN=1e-6,
+                 RFIL=0.01, ALPHA=0.75, WEIGHT_FB=1e-2):
         self.objective = objective_func
         self.bounds = bounds
         self.max_time = max_time
         self.max_evals = max_evals
         self.convergence_threshold = convergence_threshold
         self.n_params = len(bounds)
-
         self.num_coils = NUM_COILS
         self.omega = OMEGA
         self.dist_th = DIST_TH
         self.reg_in = REG_IN
         self.rfil = RFIL
-
+        self.alpha = ALPHA
+        self.weight_fb = WEIGHT_FB
         self.results = {}
         self.all_runs = {}
-
-        # Problem data for plotting (set via set_problem_data)
         self.r_bnd = None
         self.psi_bnd = None
         self.coil_center_cand1 = None
@@ -132,73 +222,52 @@ class OptimizationComparison:
         self._stopped_reason = None
 
     def _track_objective(self, params):
-        """Evaluate objective, track history, enforce time/eval limits."""
         if time.time() - self._start_time > self.max_time:
             raise TimeoutException("Wall-clock time limit reached")
-
         if self.max_evals is not None and self._n_evals >= self.max_evals:
             raise MaxEvalsException("Maximum function evaluations reached")
-
         self._n_evals += 1
         params = np.asarray(params)
         cost = self.objective(params)
         self._history.append(cost)
         self._x_history.append(params.copy())
         self._times.append(time.time() - self._start_time)
-
         flux_err = getattr(self.objective, 'last_flux_err', None)
-
         if cost < self._best_cost:
             self._best_cost = cost
             self._best_params = params.copy()
             if flux_err is not None:
                 self._best_flux_err = flux_err
-
         self._convergence.append(self._best_cost)
         return cost
 
     def _compute_flux_for_params(self, params):
-        """Compute flux and coil positions for given parameters."""
         num_coils = len(params) // 2
         thetas = params[:num_coils]
         radials = params[num_coils:]
-
-        inner_arc = self.coil_center_cand1[:len(self.coil_center_cand1)//2]
-        outer_arc = self.coil_center_cand2[:len(self.coil_center_cand2)//2]
-
+        inner_arc = self.coil_center_cand1[:len(self.coil_center_cand1) // 2]
+        outer_arc = self.coil_center_cand2[:len(self.coil_center_cand2) // 2]
         _, coil_locs = place_points_pol_rad(num_coils, inner_arc, outer_arc, thetas, radials)
-
         coil_centers_3x3 = []
         for loc in coil_locs:
             coil_centers_3x3.append(make_3x3_thick(loc, self.rfil))
             coil_centers_3x3.append(make_3x3_thick([loc[0], -loc[1]], self.rfil))
-
         n_bnd = self.psi_bnd.shape[0]
         n_coils_total = len(coil_centers_3x3)
         con = np.zeros((n_bnd - 1 + n_coils_total, n_coils_total))
-
         for i, filament_set in enumerate(coil_centers_3x3):
             flux_tmp = np.zeros((n_bnd,))
             for fil in filament_set:
                 flux_tmp += self.eval_green(self.r_bnd, fil)
-            con[:n_bnd-1, i] = flux_tmp[1:] - flux_tmp[0]
-            con[n_bnd-1+i, i] = self.reg_in
-
+            con[:n_bnd - 1, i] = flux_tmp[1:] - flux_tmp[0]
+            con[n_bnd - 1 + i, i] = self.reg_in
         err = np.zeros((n_bnd - 1 + n_coils_total,))
-        err[:n_bnd-1] = self.psi_bnd[1:] - self.psi_bnd[0]
+        err[:n_bnd - 1] = self.psi_bnd[1:] - self.psi_bnd[0]
         currs, _, _, _ = np.linalg.lstsq(con, err, rcond=None)
         psi_computed = np.dot(con, currs)[:n_bnd - 1]
-
         return coil_locs, psi_computed, currs
 
     def _get_permuted_points(self, x, cost, max_perms=None):
-        """Return permutations of coil ordering for x with the same cost.
-
-        For N coils, params are [theta_0..theta_{N-1}, rho_0..rho_{N-1}].
-        Swapping coil i and j simultaneously in both halves leaves the cost
-        unchanged. If max_perms is set, a random subset is returned instead
-        of all N! to keep GP training set size manageable.
-        """
         n = self.num_coils
         thetas = x[:n]
         radials = x[n:]
@@ -211,160 +280,11 @@ class OptimizationComparison:
             ys.append(cost)
         return xs, ys
 
-    def _extract_best_result(self):
-        """Extract parameters, coil positions, and currents from best result."""
-        best_params = self._best_params
-        num_coils = len(best_params) // 2
-        thetas = best_params[:num_coils].tolist()
-        radials = best_params[num_coils:].tolist()
-
-        if self.coil_center_cand1 is not None:
-            coil_locs, _, currents = self._compute_flux_for_params(best_params)
-            coil_positions = [[float(loc[0]), float(loc[1])] for loc in coil_locs]
-            coil_currents = currents.tolist()
-        else:
-            coil_positions = None
-            coil_currents = None
-
-        return thetas, radials, coil_positions, coil_currents
-
-    # ========================================
-    # Plotting helpers
-    # ========================================
-
-    METHOD_COLORS = {
-        'Multi-start L-BFGS': '#2ca02c',
-        'Bayesian': '#1f77b4',
-    }
-
-    def _get_sorted_methods_and_colors(self):
-        sorted_methods = sorted(self.results.items(), key=lambda x: x[1]['best_cost'])
-        colors = [self.METHOD_COLORS.get(m, '#7f7f7f') for m, _ in sorted_methods]
-        return sorted_methods, colors
-
-    def _plot_position_space_boundaries(self, ax):
-        ax.plot(self.coil_center_cand1[:, 0], self.coil_center_cand1[:, 1],
-               'k--', alpha=0.3, linewidth=1, label='Position space')
-        ax.plot(self.coil_center_cand2[:, 0], self.coil_center_cand2[:, 1],
-               'k--', alpha=0.3, linewidth=1)
-
-    def _plot_coils_on_axis(self, ax, coil_locs, color, dx=0.035, dy=0.035):
-        for loc in coil_locs:
-            rect_top = plt.Rectangle((loc[0]-dx, loc[1]-dy), 2*dx, 2*dy,
-                                    facecolor=color, edgecolor='black',
-                                    alpha=0.7, linewidth=0.5)
-            ax.add_patch(rect_top)
-            rect_bot = plt.Rectangle((loc[0]-dx, -loc[1]-dy), 2*dx, 2*dy,
-                                    facecolor=color, edgecolor='black',
-                                    alpha=0.7, linewidth=0.5)
-            ax.add_patch(rect_bot)
-
-    # ========================================
-    # Optimization methods
-    # ========================================
-
-    def run_multistart_lbfgs(self, n_starts=262144, ftol=1e-9, gtol=1e-6,
-                             starts_window=50, random_state=42):
-        """
-        Multi-start L-BFGS-B with Sobol sampling.
-
-        Each L-BFGS start runs to its own local convergence. Stops when
-        `starts_window` consecutive completed starts show no improvement,
-        or when max evals / wall-clock time is hit.
-        """
-        self._reset_tracking()
-
-        sampler = qmc.Sobol(d=self.n_params, scramble=True, seed=random_state)
-        samples = sampler.random(n_starts)
-
-        starts = []
-        for i in range(n_starts):
-            point = []
-            for j, (low, high) in enumerate(self.bounds):
-                point.append(low + samples[i, j] * (high - low))
-            starts.append(point)
-
-        starts_completed = 0
-        stopped_by = "all starts completed"
-        starts_bests = []
-        start_boundaries = []   # cumulative n_evals at end of each start
-        start_costs = []        # best cost at end of each start
-
-        for x0 in starts:
-            try:
-                minimize(
-                    self._track_objective, x0,
-                    method='L-BFGS-B', bounds=self.bounds,
-                    options={'ftol': ftol, 'gtol': gtol, 'disp': False}
-                )
-                starts_completed += 1
-                starts_bests.append(self._best_cost)
-                start_boundaries.append(self._n_evals)
-                start_costs.append(self._best_cost)
-
-                if _check_starts_convergence(starts_bests, starts_window,
-                                             self.convergence_threshold):
-                    stopped_by = "converged"
-                    break
-            except TimeoutException:
-                stopped_by = "exceeded wall time"
-                break
-            except MaxEvalsException:
-                stopped_by = "max function calls"
-                break
-
-        elapsed = time.time() - self._start_time
-        thetas, radials, coil_positions, coil_currents = self._extract_best_result()
-
-        self.results['Multi-start L-BFGS'] = {
-            'best_cost': self._best_cost,
-            'best_flux_err': self._best_flux_err,
-            'best_params': self._best_params,
-            'n_evals': self._n_evals,
-            'time': elapsed,
-            'times': self._times.copy(),
-            'stopping': stopped_by,
-            'parameters': {'thetas': thetas, 'radials': radials},
-            'coil_positions_top': coil_positions,
-            'coil_currents': coil_currents,
-            'convergence_history': list(self._convergence),
-            'cost_history': list(self._history),
-            'starts_completed': starts_completed,
-            'start_boundaries': start_boundaries,
-            'start_costs': start_costs,
-            'convergence_window': starts_window,
-            'random_state': random_state,
-        }
-
-        return self.results['Multi-start L-BFGS']
-
     def _deduplicate_candidates(self, candidates, tol=0.05, max_unique=None):
-        """Remove near-duplicate candidates in real (R, Z) coil position space.
-
-        Converts each candidate's parameter vector to physical coil positions
-        (R, Z in metres) via the same interpolation used by the objective, then
-        uses Euclidean (L2) distance over the full set of coil coordinates.  A
-        candidate is a duplicate if its closest existing unique point is within
-        tol metres.  tol=0.05 means two coil configurations must differ by more
-        than 5 cm (in the combined-coil Euclidean sense) to be kept as distinct
-        starting points.
-
-        Requires set_problem_data() to have been called first.
-
-        Parameters
-        ----------
-        candidates : list of array-like
-        tol : float
-            Euclidean distance threshold in metres.
-        max_unique : int or None
-            If set, return at most this many unique candidates (taken in
-            order, so the highest-acquisition ones come first).
-        """
         if not candidates:
             return []
         if self.coil_center_cand1 is None or self.coil_center_cand2 is None:
             raise RuntimeError("set_problem_data() must be called before _deduplicate_candidates")
-
         inner = self.coil_center_cand1[:len(self.coil_center_cand1) // 2]
         outer = self.coil_center_cand2[:len(self.coil_center_cand2) // 2]
         theta_range = np.linspace(0, 180, len(inner))
@@ -393,35 +313,102 @@ class OptimizationComparison:
                 unique_rz.append(crz)
         return unique
 
+    def _extract_best_result(self):
+        best_params = self._best_params
+        num_coils = len(best_params) // 2
+        thetas = best_params[:num_coils].tolist()
+        radials = best_params[num_coils:].tolist()
+        if self.coil_center_cand1 is not None:
+            coil_locs, _, currents = self._compute_flux_for_params(best_params)
+            coil_positions = [[float(loc[0]), float(loc[1])] for loc in coil_locs]
+            coil_currents = currents.tolist()
+        else:
+            coil_positions = None
+            coil_currents = None
+        return thetas, radials, coil_positions, coil_currents
+
+    METHOD_COLORS = {
+        'Multi-start L-BFGS': '#2ca02c',
+        'Bayesian': '#1f77b4',
+    }
+
+    def _get_sorted_methods_and_colors(self):
+        sorted_methods = sorted(self.results.items(), key=lambda x: x[1]['best_cost'])
+        colors = [self.METHOD_COLORS.get(m, '#7f7f7f') for m, _ in sorted_methods]
+        return sorted_methods, colors
+
+    def _plot_position_space_boundaries(self, ax):
+        ax.plot(self.coil_center_cand1[:, 0], self.coil_center_cand1[:, 1],
+                'k--', alpha=0.3, linewidth=1, label='Position space')
+        ax.plot(self.coil_center_cand2[:, 0], self.coil_center_cand2[:, 1],
+                'k--', alpha=0.3, linewidth=1)
+
+    def run_multistart_lbfgs(self, n_starts=262144, ftol=1e-9, gtol=1e-6,
+                             starts_window=5, random_state=42):
+        self._reset_tracking()
+        sampler = qmc.Sobol(d=self.n_params, scramble=True, seed=random_state)
+        samples = sampler.random(n_starts)
+        starts = []
+        for i in range(n_starts):
+            point = [low + samples[i, j] * (high - low) for j, (low, high) in enumerate(self.bounds)]
+            starts.append(point)
+        starts_completed = 0
+        stopped_by = "all starts completed"
+        starts_bests = []
+        start_boundaries = []
+        start_costs = []
+        for x0 in starts:
+            try:
+                minimize(self._track_objective, x0, method='L-BFGS-B', bounds=self.bounds,
+                         options={'ftol': ftol, 'gtol': gtol, 'disp': False})
+                starts_completed += 1
+                starts_bests.append(self._best_cost)
+                start_boundaries.append(self._n_evals)
+                start_costs.append(self._best_cost)
+                if _check_starts_convergence(starts_bests, starts_window, self.convergence_threshold):
+                    stopped_by = "converged"
+                    break
+            except TimeoutException:
+                stopped_by = "exceeded wall time"
+                break
+            except MaxEvalsException:
+                stopped_by = "max function calls"
+                break
+        elapsed = time.time() - self._start_time
+        thetas, radials, coil_positions, coil_currents = self._extract_best_result()
+        self.results['Multi-start L-BFGS'] = {
+            'best_cost': self._best_cost,
+            'best_flux_err': self._best_flux_err,
+            'best_params': self._best_params,
+            'n_evals': self._n_evals,
+            'time': elapsed,
+            'times': self._times.copy(),
+            'stopping': stopped_by,
+            'parameters': {'thetas': thetas, 'radials': radials},
+            'coil_positions_top': coil_positions,
+            'coil_currents': coil_currents,
+            'convergence_history': list(self._convergence),
+            'cost_history': list(self._history),
+            'starts_completed': starts_completed,
+            'start_boundaries': start_boundaries,
+            'start_costs': start_costs,
+            'convergence_window': starts_window,
+            'random_state': random_state,
+        }
+        print(f"L-BFGS: {self._n_evals} evals, {elapsed:.1f}s, "
+              f"{starts_completed} starts, stopped by: {stopped_by}")
+        return self.results['Multi-start L-BFGS']
+
     def run_bayesian(self, n_initial=None, acq_func='EI',
-                     bayesian_stagnation_window=50,
-                     local_optimize=True, refinement_window=50,
+                     bayesian_stagnation_window=5,
+                     local_optimize=True, refinement_window=5,
                      max_perms=None, acq_multiplier=10,
                      acq_dedup_tol=0.05, unique_refined_points=5,
                      random_state=1):
-        """
-        Bayesian Optimization with GP, then L-BFGS refinement.
-
-        Phase 1 (Bayesian): runs gp_minimize. Stops when the best value
-        hasn't improved in `bayesian_stagnation_window` GP-guided iterations
-        (each iteration = 1 point).
-
-        Phase 2 (L-BFGS refinement): asks the fitted GP's acquisition
-        function for n_acq_candidates = acq_multiplier * unique_refined_points
-        points via the constant-liar batch strategy, deduplicates them with
-        Euclidean tolerance acq_dedup_tol (metres), and refines up to
-        unique_refined_points unique candidates on the real cost.
-        unique_refined_points is a cap — if fewer unique candidates survive
-        deduplication, only those are refined.  Stops when `refinement_window`
-        consecutive completed refinements
-        show no improvement, or when max evals / wall-clock time is hit.
-        """
         if n_initial is None:
             n_initial = int(round(25 * self.num_coils ** 1.5))
-
         if max_perms is None:
             max_perms = self.num_coils
-
         self._reset_tracking()
         space = [Real(low, high) for low, high in self.bounds]
 
@@ -443,82 +430,62 @@ class OptimizationComparison:
             return False
 
         n_perms = min(max_perms, factorial(self.num_coils))
-        gp_opt = Optimizer(
-            space,
-            base_estimator='gp',
-            n_initial_points=n_initial * n_perms,
-            initial_point_generator="sobol",
-            acq_func=acq_func,
-            random_state=random_state,
-        )
-
-        # Phase 1: Bayesian exploration
+        gp_opt = Optimizer(space, base_estimator='gp',
+                           n_initial_points=n_initial * n_perms,
+                           initial_point_generator="sobol",
+                           acq_func=acq_func, random_state=random_state)
         bayesian_stopped_by = "completed"
         try:
             flag = True
             while flag:
                 x = gp_opt.ask()
                 cost = self._track_objective(x)
-
-                # Tell permutations — same cost by coil symmetry
                 xs_perm, ys_perm = self._get_permuted_points(x, cost, max_perms=max_perms)
                 gp_opt.tell(xs_perm, ys_perm)
-
                 if stopping_callback():
                     flag = False
-
         except TimeoutException:
             bayesian_stopped_by = "exceeded wall time"
         except MaxEvalsException:
             bayesian_stopped_by = "max function calls"
-
         if self._stopped_reason:
             bayesian_stopped_by = self._stopped_reason
-
         bayesian_evals = self._n_evals
         elapsed_bayesian = time.time() - self._start_time
-        print(f"Bayesian phase: {bayesian_evals} evals, "
-              f"{elapsed_bayesian:.1f}s, stopped by: {bayesian_stopped_by}")
+        print(f"Bayesian phase: {bayesian_evals} evals, {elapsed_bayesian:.1f}s, "
+              f"stopped by: {bayesian_stopped_by}")
 
-        # Phase 2: L-BFGS refinement
         pts_refined = 0
         refinement_stopped_by = None
         refinement_bests = []
-        refinement_evals = []        # function calls per refined point
-        refinement_times = []        # wall time per refined point
-        refinement_costs = []        # best cost at end of each refinement
+        refinement_evals = []
+        refinement_times = []
+        refinement_costs = []
         bayesian_convergence = list(self._convergence)
         refinement_convergence = []
         n_acq_candidates = acq_multiplier * unique_refined_points
         n_acq_unique = None
+        candidates = []
         if local_optimize and bayesian_stopped_by not in ("exceeded wall time", "max function calls"):
             self._convergence = []
             self._stopped_reason = None
-
             raw_candidates = gp_opt.ask(n_points=n_acq_candidates, strategy='cl_min')
-            candidates = self._deduplicate_candidates(
-                raw_candidates, tol=acq_dedup_tol, max_unique=unique_refined_points
-            )
+            candidates = self._deduplicate_candidates(raw_candidates, tol=acq_dedup_tol,
+                                                      max_unique=unique_refined_points)
             n_acq_unique = len(candidates)
             print(f"Acq candidates: {n_acq_candidates} raw -> {n_acq_unique} unique "
                   f"(target={unique_refined_points}, tol={acq_dedup_tol} m)")
-
             for cand in candidates:
                 evals_before = self._n_evals
                 time_before = time.time() - self._start_time
                 try:
-                    start = np.array(cand)
-                    minimize(
-                        self._track_objective, start,
-                        method='L-BFGS-B', bounds=self.bounds,
-                        options={'ftol': 1e-9, 'gtol': 1e-6, 'disp': False}
-                    )
+                    minimize(self._track_objective, np.array(cand), method='L-BFGS-B',
+                             bounds=self.bounds, options={'ftol': 1e-9, 'gtol': 1e-6, 'disp': False})
                     pts_refined += 1
                     refinement_bests.append(self._best_cost)
                     refinement_evals.append(self._n_evals - evals_before)
                     refinement_times.append(time.time() - self._start_time - time_before)
                     refinement_costs.append(self._best_cost)
-
                     if _check_starts_convergence(refinement_bests, refinement_window,
                                                  self.convergence_threshold):
                         refinement_stopped_by = "converged"
@@ -529,16 +496,13 @@ class OptimizationComparison:
                 except MaxEvalsException:
                     refinement_stopped_by = "max function calls"
                     break
-
             refinement_convergence = list(self._convergence)
             if refinement_stopped_by is None:
                 refinement_stopped_by = "all refinements completed"
 
         elapsed = time.time() - self._start_time
         stopped_by = refinement_stopped_by or bayesian_stopped_by
-
         thetas, radials, coil_positions, coil_currents = self._extract_best_result()
-
         self.results['Bayesian'] = {
             'best_cost': self._best_cost,
             'best_flux_err': self._best_flux_err,
@@ -569,90 +533,39 @@ class OptimizationComparison:
             'acq_dedup_tol': acq_dedup_tol,
             'unique_refined_points': unique_refined_points,
             'n_acq_unique': n_acq_unique,
-            'refinement_candidates': [list(c) for c in candidates] if local_optimize and bayesian_stopped_by not in ("exceeded wall time", "max function calls") else [],
+            'refinement_candidates': [list(c) for c in candidates],
             'convergence_window': bayesian_stagnation_window,
             'refinement_window': refinement_window,
             'refinement_stopping': refinement_stopped_by,
             'random_state': random_state,
         }
-
         print(f"Total: {self._n_evals} evals, {elapsed:.1f}s, "
               f"refined {pts_refined} pts, stopped by: {stopped_by}")
-
         return self.results['Bayesian']
 
-    # ========================================
-    # Comparison driver
-    # ========================================
-
     def run_multiple(self, method, n_runs=1, base_seed=1, **kwargs):
-        """Run the given method n_runs times with different random states.
-
-        Each run uses random_state = base_seed + i.  All individual results
-        are stored in self.all_runs[key].  self.results[key] is set to the
-        best run by best_cost.
-
-        Parameters
-        ----------
-        method : str
-            'bayesian' or 'multistart_lbfgs'
-        n_runs : int
-        base_seed : int
-        **kwargs : passed through to the underlying run method
-        """
         key_map = {'bayesian': 'Bayesian', 'multistart_lbfgs': 'Multi-start L-BFGS'}
         if method not in key_map:
             raise ValueError(f"method must be one of {list(key_map)}")
         key = key_map[method]
         run_fn = self.run_bayesian if method == 'bayesian' else self.run_multistart_lbfgs
-
         runs = []
         for i in range(n_runs):
             seed = base_seed + i
             print(f"\n[{method}] run {i+1}/{n_runs}, random_state={seed}")
             result = run_fn(random_state=seed, **kwargs)
             runs.append(dict(result))
-
         self.all_runs[key] = runs
         best = min(runs, key=lambda r: r['best_cost'])
         self.results[key] = best
         print(f"\n{key}: best cost {best['best_cost']:.4e} "
-              f"(seed={best['random_state']}) over {n_runs} runs")
+              f"over {n_runs} runs")
         return runs
-
-    def compare_all(self, methods=None, n_runs=1, base_seed=42):
-        if methods is None:
-            methods = ['multistart_lbfgs', 'bayesian']
-
-        print(f"Comparing methods: max_evals={self.max_evals}, "
-              f"conv_threshold={self.convergence_threshold}, n_runs={n_runs}")
-        print("=" * 60)
-
-        if 'multistart_lbfgs' in methods:
-            print("Running Multi-start L-BFGS...")
-            if n_runs > 1:
-                self.run_multiple('multistart_lbfgs', n_runs=n_runs, base_seed=base_seed,
-                                  starts_window=25)
-            else:
-                self.run_multistart_lbfgs(
-                    starts_window=25)
-
-        if 'bayesian' in methods:
-            print("Running Bayesian Optimization...")
-            if n_runs > 1:
-                self.run_multiple('bayesian', n_runs=n_runs, base_seed=base_seed,
-                                  bayesian_stagnation_window=25)
-            else:
-                self.run_bayesian(
-                    bayesian_stagnation_window=25)
-
-        return self.summary()
 
     def summary(self):
         print("\n" + "=" * 70)
         print("OPTIMIZATION COMPARISON RESULTS")
         print("=" * 70)
-
         data = []
         for method, res in self.results.items():
             data.append({
@@ -662,35 +575,24 @@ class OptimizationComparison:
                 'Time (s)': res['time'],
                 'Stopping': res['stopping'],
             })
-
         df = pd.DataFrame(data)
         df = df.sort_values('Best Cost')
         print(df.to_string(index=False))
-
         best = df.iloc[0]
         print(f"\nWinner: {best['Method']} with cost {best['Best Cost']:.6e}")
-
         return df
-
-    # ========================================
-    # Plotting
-    # ========================================
 
     def plot_result(self, log_scale=True, figsize=(16, 10)):
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=figsize)
         sorted_methods, colors = self._get_sorted_methods_and_colors()
-
-        # ax1: Convergence curves
         for (method, res), color in zip(sorted_methods, colors):
             conv = res['convergence_history']
-            label = f"{method} ({res['best_cost']:.2e})"
-            ax1.plot(range(1, len(conv) + 1), conv, label=label, color=color, linewidth=2)
-
+            ax1.plot(range(1, len(conv) + 1), conv,
+                     label=f"{method} ({res['best_cost']:.2e})", color=color, linewidth=2)
         if self.brute_force_cost is not None:
             ax1.axhline(y=self.brute_force_cost, color='gray', linestyle='--',
-                       linewidth=1.5, alpha=0.7,
-                       label=f'Brute force ({self.brute_force_cost:.2e})')
-
+                        linewidth=1.5, alpha=0.7,
+                        label=f'Brute force ({self.brute_force_cost:.2e})')
         ax1.set_xlabel('Function Evaluations', fontsize=12)
         ax1.set_ylabel('Best Cost Found', fontsize=12)
         ax1.set_title('Convergence Speed', fontsize=14)
@@ -698,68 +600,50 @@ class OptimizationComparison:
             ax1.set_yscale('log')
         ax1.legend(loc='upper right', fontsize=8)
         ax1.grid(True, alpha=0.3)
-
-        params_text = [
+        params_text = '\n'.join([
             f'NUM_COILS = {self.num_coils}',
             f'MAX_EVALS = {self.max_evals}',
+            f'ALPHA = {self.alpha}',
             f'OMEGA = {self.omega:.0e}',
-            f'DIST_TH = {self.dist_th}',
             f'REG_IN = {self.reg_in:.0e}',
-            f'RFIL = {self.rfil}',
-        ]
-        textstr = '\n'.join(params_text)
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-        ax1.text(0.8, 0.5, textstr, transform=ax1.transAxes, fontsize=8,
-                 verticalalignment='top', bbox=props)
-
-        # ax2: Bar chart of final costs
+            f'WEIGHT_FB = {self.weight_fb:.0e}',
+        ])
+        ax1.text(0.8, 0.5, params_text, transform=ax1.transAxes, fontsize=8,
+                 verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
         methods_names = [m for m, _ in sorted_methods]
         costs = np.array([r['best_cost'] for _, r in sorted_methods])
-
         ax2.barh(methods_names, costs, color=colors)
         ax2.set_xlabel('Final Cost', fontsize=12)
         ax2.set_title('Final Cost by Method', fontsize=14)
         ax2.axvline(x=costs[0], color='k', linestyle='--', alpha=0.3, linewidth=1.5)
         ax2.grid(True, alpha=0.3, axis='x')
-
-        # ax3: Coil placement
         if self.coil_center_cand1 is not None and self.coil_center_cand2 is not None:
             self._plot_position_space_boundaries(ax3)
-
             for (method, res), color in zip(sorted_methods, colors):
                 coil_locs, _, _ = self._compute_flux_for_params(res['best_params'])
                 for loc in coil_locs:
-                    rect_top = plt.Rectangle((loc[0]-0.035, loc[1]-0.035), 0.07, 0.07,
-                                            facecolor=color, edgecolor=color, alpha=0.6)
-                    ax3.add_patch(rect_top)
-                    rect_bot = plt.Rectangle((loc[0]-0.035, -loc[1]-0.035), 0.07, 0.07,
-                                            facecolor=color, edgecolor=color, alpha=0.6)
-                    ax3.add_patch(rect_bot)
-
+                    ax3.add_patch(plt.Rectangle((loc[0]-0.035, loc[1]-0.035), 0.07, 0.07,
+                                                facecolor=color, edgecolor=color, alpha=0.6))
+                    ax3.add_patch(plt.Rectangle((loc[0]-0.035, -loc[1]-0.035), 0.07, 0.07,
+                                                facecolor=color, edgecolor=color, alpha=0.6))
             ax3.set_xlabel('R [m]', fontsize=12)
             ax3.set_ylabel('Z [m]', fontsize=12)
             ax3.set_title('Coil Placement (All Methods)', fontsize=14)
             ax3.set_aspect('equal')
             ax3.grid(True, alpha=0.3)
-
-        # ax4: Flux comparison
         if self.r_bnd is not None and self.psi_bnd is not None:
-            theta = np.arctan2(self.r_bnd[:,1], self.r_bnd[:,0] - self.o_point[0])
+            theta = np.arctan2(self.r_bnd[:, 1], self.r_bnd[:, 0] - self.o_point[0])
             psi_desired = self.psi_bnd[1:] - self.psi_bnd[0]
-
             ax4.plot(theta[1:], psi_desired, 'ko', markersize=3, label='Desired', alpha=0.5)
-
             for (method, res), color in zip(sorted_methods, colors):
                 _, psi_computed, _ = self._compute_flux_for_params(res['best_params'])
                 ax4.plot(theta[1:], psi_computed, '+', color=color, markersize=4,
-                        label=method, alpha=0.7)
-
+                         label=method, alpha=0.7)
             ax4.set_xlabel(r'$\theta$ [rad]', fontsize=12)
             ax4.set_ylabel(r'$\psi_{boundary}$', fontsize=12)
             ax4.set_title('Desired vs Computed Flux', fontsize=14)
             ax4.legend(fontsize=8, loc='best')
             ax4.grid(True, alpha=0.3)
-
         plt.tight_layout()
         return fig
 
@@ -767,21 +651,15 @@ class OptimizationComparison:
         if not self.results:
             print("No results to plot")
             return None
-
         fig, ax = plt.subplots(1, 1, figsize=figsize)
         sorted_methods, colors = self._get_sorted_methods_and_colors()
-
         for (method, res), color in zip(sorted_methods, colors):
-            conv = res['convergence_history']
-            times = res['times']
-            label = f"{method} ({res['best_cost']:.2e})"
-            ax.plot(times, conv, label=label, color=color, linewidth=2, alpha=0.8)
-
+            ax.plot(res['times'], res['convergence_history'],
+                    label=f"{method} ({res['best_cost']:.2e})", color=color, linewidth=2, alpha=0.8)
         if self.brute_force_cost is not None:
             ax.axhline(y=self.brute_force_cost, color='gray', linestyle='--',
                        linewidth=1.5, alpha=0.7,
                        label=f'Brute force ({self.brute_force_cost:.2e})')
-
         ax.set_xlabel('Time (seconds)', fontsize=12)
         ax.set_ylabel('Best Cost Found', fontsize=12)
         ax.set_title('Convergence vs Time', fontsize=14)
@@ -789,19 +667,13 @@ class OptimizationComparison:
             ax.set_yscale('log')
         ax.legend(loc='best', fontsize=10)
         ax.grid(True, alpha=0.3)
-
         plt.tight_layout()
         return fig
-
-    # ========================================
-    # JSON save
-    # ========================================
 
     def save_results_to_json(self, filename):
         if not self.results:
             print("No results to save")
             return
-
         save_data = {
             'optimization_settings': {
                 'num_coils': int(self.num_coils),
@@ -811,14 +683,14 @@ class OptimizationComparison:
                 'omega': float(self.omega),
                 'dist_th': float(self.dist_th),
                 'reg_in': float(self.reg_in),
-                'rfil': float(self.rfil)
+                'rfil': float(self.rfil),
+                'alpha': float(self.alpha),
+                'weight_fb': float(self.weight_fb),
             },
             'methods': {}
         }
-
         if self.brute_force_cost is not None:
             save_data['brute_force_cost'] = float(self.brute_force_cost)
-
         for method, res in self.results.items():
             method_data = {
                 'best_cost': float(res['best_cost']),
@@ -833,269 +705,224 @@ class OptimizationComparison:
                 'convergence_history': res['convergence_history'],
                 'cost_history': [float(c) for c in res['cost_history']],
             }
-
-            if 'starts_completed' in res:
-                method_data['starts_completed'] = int(res['starts_completed'])
-            if 'start_boundaries' in res:
-                method_data['start_boundaries'] = [int(x) for x in res['start_boundaries']]
-            if 'start_costs' in res:
-                method_data['start_costs'] = [float(x) for x in res['start_costs']]
-            if 'n_initial' in res:
-                method_data['n_initial'] = int(res['n_initial'])
-            if 'n_perms' in res:
-                method_data['n_perms'] = int(res['n_perms'])
-            if 'n_bayesian_evals' in res:
-                method_data['n_bayesian_evals'] = int(res['n_bayesian_evals'])
-            if 'n_gp_observations' in res:
-                method_data['n_gp_observations'] = int(res['n_gp_observations'])
-            if 'time_bayesian_phase' in res:
-                method_data['time_bayesian_phase'] = float(res['time_bayesian_phase'])
-            if 'pts_refined' in res:
-                method_data['pts_refined'] = int(res['pts_refined'])
-            if 'refinement_evals' in res:
-                method_data['refinement_evals'] = [int(x) for x in res['refinement_evals']]
-            if 'refinement_times' in res:
-                method_data['refinement_times'] = [float(x) for x in res['refinement_times']]
-            if 'refinement_costs' in res:
-                method_data['refinement_costs'] = [float(x) for x in res['refinement_costs']]
-            if 'bayesian_convergence_history' in res:
-                method_data['bayesian_convergence_history'] = res['bayesian_convergence_history']
-            if 'refinement_convergence_history' in res:
-                method_data['refinement_convergence_history'] = res['refinement_convergence_history']
-            if 'bayesian_stopping' in res:
-                method_data['bayesian_stopping'] = res['bayesian_stopping']
-            if 'acq_multiplier' in res and res['acq_multiplier'] is not None:
-                method_data['acq_multiplier'] = int(res['acq_multiplier'])
-            if 'n_acq_candidates' in res and res['n_acq_candidates'] is not None:
-                method_data['n_acq_candidates'] = int(res['n_acq_candidates'])
-            if 'acq_dedup_tol' in res and res['acq_dedup_tol'] is not None:
-                method_data['acq_dedup_tol'] = float(res['acq_dedup_tol'])
-            if 'n_acq_unique' in res and res['n_acq_unique'] is not None:
-                method_data['n_acq_unique'] = int(res['n_acq_unique'])
-            if 'unique_refined_points' in res and res['unique_refined_points'] is not None:
-                method_data['unique_refined_points'] = int(res['unique_refined_points'])
-            if 'refinement_stopping' in res and res['refinement_stopping'] is not None:
-                method_data['refinement_stopping'] = res['refinement_stopping']
-            if 'refinement_candidates' in res:
-                method_data['refinement_candidates'] = res['refinement_candidates']
-            if 'convergence_window' in res and res['convergence_window'] is not None:
-                method_data['convergence_window'] = int(res['convergence_window'])
-            if 'refinement_window' in res and res['refinement_window'] is not None:
-                method_data['refinement_window'] = int(res['refinement_window'])
-            if 'random_state' in res and res['random_state'] is not None:
-                method_data['random_state'] = int(res['random_state'])
-
+            for key in ['starts_completed', 'convergence_window', 'random_state',
+                        'n_initial', 'n_perms', 'n_bayesian_evals', 'n_gp_observations',
+                        'pts_refined', 'n_acq_candidates', 'n_acq_unique',
+                        'unique_refined_points', 'refinement_window']:
+                if key in res and res[key] is not None:
+                    method_data[key] = int(res[key])
+            for key in ['time', 'time_bayesian_phase', 'acq_dedup_tol']:
+                if key in res and res[key] is not None:
+                    method_data[key] = float(res[key])
+            for key in ['stopping', 'bayesian_stopping', 'refinement_stopping']:
+                if key in res and res[key] is not None:
+                    method_data[key] = res[key]
+            for key in ['start_boundaries', 'refinement_evals']:
+                if key in res:
+                    method_data[key] = [int(x) for x in res[key]]
+            for key in ['start_costs', 'refinement_times', 'refinement_costs']:
+                if key in res:
+                    method_data[key] = [float(x) for x in res[key]]
+            for key in ['bayesian_convergence_history', 'refinement_convergence_history',
+                        'refinement_candidates']:
+                if key in res:
+                    method_data[key] = res[key]
             save_data['methods'][method] = method_data
-
         if self.all_runs:
             save_data['all_runs'] = {}
             for method_key, runs in self.all_runs.items():
                 save_data['all_runs'][method_key] = [
                     {k: (v.tolist() if hasattr(v, 'tolist') else v)
-                     for k, v in run.items()
-                     if k != 'best_params'}
+                     for k, v in run.items() if k != 'best_params'}
                     for run in runs
                 ]
-
         with open(filename, 'w') as f:
             json.dump(save_data, f, indent=2)
-
         print(f"Saved results to {filename}")
 
 
 # ============================================
-# Main function
+# Combined objective factory
 # ============================================
 
-def main(mygs, methods=None, **kwargs):
-    NUM_COILS = kwargs.get('NUM_COILS', 4)
-    MAX_EVALS = kwargs.get('MAX_EVALS', 2**18)
-    MAX_TIME = kwargs.get('MAX_TIME', 86400)
-    CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.001)
-    OMEGA = kwargs.get('OMEGA', 1e-3)
-    DIST_TH = kwargs.get('DIST_TH', 5.0)
-    REG_IN = kwargs.get('REG_IN', 1e-7)
-    RFIL = kwargs.get('RFIL', 0.01)
-    N_RUNS = kwargs.get('N_RUNS', 1)
-    RUN_FOLDER = kwargs.get('RUN_FOLDER', 'convergence')
-
-    r_bnd, psi_bnd = mygs.get_vfixed()
-    print(f"Found {len(r_bnd)} boundary points")
-
-    # Coil position space (DIIID)
-    lim1 = update_boundary(r0=1.69, z0=0, a0=0.67, kappa=2, delta=0.8, squar=0.15, npts=1700)
-    coil_center_cand1 = resize_polygon(lim1, dx=0.1)
-    lim2 = update_boundary(r0=1.94, z0=0, a0=0.95, kappa=1.55, delta=0.8, squar=0.15, npts=1700)
-    coil_center_cand2 = resize_polygon(lim2, dx=0.15)
-
-    # Bounds
-    coil_space = CoilPositionSpace(
-        inner_boundary=coil_center_cand1,
-        outer_boundary=coil_center_cand2,
-        method='coords'
-    )
-    coil_space.set_bounds(angular_bounds=(10, 170), radial_bounds=(0, 1))
-
-    bounds = []
-    theta_bounds, radial_bounds = coil_space.get_bounds()
-    for _ in range(NUM_COILS):
-        bounds.append(theta_bounds)
-    for _ in range(NUM_COILS):
-        bounds.append(radial_bounds)
-
-    # Objective function
-    theta_range = np.linspace(0, 180, len(coil_center_cand1) // 2)
-    inner = coil_center_cand1[:len(coil_center_cand1) // 2]
-    outer = coil_center_cand2[:len(coil_center_cand2) // 2]
-
+def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
+                            coil_center_cand1, coil_center_cand2, lim,
+                            r_bnd, psi_bnd, weight_fb, NUM_COILS, RFIL,
+                            REG_IN, OMEGA, DIST_TH, theta_range, inner, outer):
     def objective(params):
         thetas = params[:NUM_COILS]
         radials = params[NUM_COILS:]
 
         locs = []
         for theta, rho in zip(thetas, radials):
-            R_inner = np.interp(theta, theta_range, inner[:, 0])
-            Z_inner = np.interp(theta, theta_range, inner[:, 1])
-            R_outer = np.interp(theta, theta_range, outer[:, 0])
-            Z_outer = np.interp(theta, theta_range, outer[:, 1])
-            R_pos = (1 - rho) * R_inner + rho * R_outer
-            Z_pos = (1 - rho) * Z_inner + rho * Z_outer
+            R_pos = (1 - rho) * np.interp(theta, theta_range, inner[:, 0]) + rho * np.interp(theta, theta_range, outer[:, 0])
+            Z_pos = (1 - rho) * np.interp(theta, theta_range, inner[:, 1]) + rho * np.interp(theta, theta_range, outer[:, 1])
             locs.append([R_pos, Z_pos])
 
         coil_centers_3x3 = []
         for loc in locs:
-            centers_top = []
-            for dx in [-1, 0, 1]:
-                for dy in [-1, 0, 1]:
-                    centers_top.append([loc[0] + 2*RFIL*dx, loc[1] + 2*RFIL*dy])
+            centers_top = [[loc[0] + 2*RFIL*dx, loc[1] + 2*RFIL*dy]
+                           for dx in [-1, 0, 1] for dy in [-1, 0, 1]]
+            centers_bot = [[loc[0] + 2*RFIL*dx, -loc[1] + 2*RFIL*dy]
+                           for dx in [-1, 0, 1] for dy in [-1, 0, 1]]
             coil_centers_3x3.append(centers_top)
-            centers_bot = []
-            for dx in [-1, 0, 1]:
-                for dy in [-1, 0, 1]:
-                    centers_bot.append([loc[0] + 2*RFIL*dx, -loc[1] + 2*RFIL*dy])
             coil_centers_3x3.append(centers_bot)
 
         n_bnd = psi_bnd.shape[0]
         n_coils_total = len(coil_centers_3x3)
         con = np.zeros((n_bnd - 1 + n_coils_total, n_coils_total))
-
         for i, filament_set in enumerate(coil_centers_3x3):
             flux_tmp = np.zeros((n_bnd,))
             for fil in filament_set:
                 flux_tmp += eval_green(r_bnd, fil)
-            con[:n_bnd-1, i] = flux_tmp[1:] - flux_tmp[0]
-            con[n_bnd-1+i, i] = REG_IN
-
+            con[:n_bnd - 1, i] = flux_tmp[1:] - flux_tmp[0]
+            con[n_bnd - 1 + i, i] = REG_IN
         err = np.zeros((n_bnd - 1 + n_coils_total,))
-        err[:n_bnd-1] = psi_bnd[1:] - psi_bnd[0]
+        err[:n_bnd - 1] = psi_bnd[1:] - psi_bnd[0]
         currs, residuals, _, _ = np.linalg.lstsq(con, err, rcond=None)
-
         if len(residuals) > 0:
-            flux_error_squared = residuals[0]
+            fixed_cost = residuals[0]
         else:
-            flux_error_squared = np.linalg.norm(np.dot(con, currs) - err) ** 2
+            fixed_cost = np.linalg.norm(np.dot(con, currs) - err) ** 2
 
-        objective.last_flux_err = flux_error_squared
+        objective.last_flux_err = fixed_cost
 
-        dist_angles = np.diff(np.sort(thetas))
-        pen_terms = np.maximum(DIST_TH - dist_angles, 0.0) ** 2
-        dist_penalty = OMEGA * np.sum(pen_terms)
+        fb_cost = _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
+                                      coil_center_cand1, coil_center_cand2, lim,
+                                      weight_fb, NUM_COILS)
 
-        return flux_error_squared + dist_penalty
+        dist_penalty = OMEGA * np.sum(np.maximum(DIST_TH - np.diff(np.sort(thetas)), 0.0) ** 2)
+
+        return (1 - alpha) * fixed_cost + alpha * fb_cost + dist_penalty
+
+    return objective
 
 
-    # Run comparison
+# ============================================
+# Main function
+# ============================================
+
+def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
+         methods=None, **kwargs):
+    NUM_COILS = kwargs.get('NUM_COILS', 4)
+    MAX_EVALS = kwargs.get('MAX_EVALS', 2**18)
+    MAX_TIME = kwargs.get('MAX_TIME', 86400)
+    CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.001)
+    OMEGA = kwargs.get('OMEGA', 1e-3)
+    DIST_TH = kwargs.get('DIST_TH', 5.0)
+    REG_IN = kwargs.get('REG_IN', 1e-6)
+    RFIL = kwargs.get('RFIL', 0.01)
+    N_RUNS = kwargs.get('N_RUNS', 1)
+    RUN_FOLDER = kwargs.get('RUN_FOLDER', 'combined')
+    ALPHA = kwargs.get('ALPHA', 0.75)
+    WEIGHT_FB = kwargs.get('WEIGHT_FB', 1e-2)
+
+    r_bnd, psi_bnd = mygs.get_vfixed()
+    print(f"Found {len(r_bnd)} boundary points")
+
+    lim1 = update_boundary(r0=1.69, z0=0, a0=0.67, kappa=2, delta=0.8, squar=0.15, npts=1700)
+    coil_center_cand1 = resize_polygon(lim1, dx=0.1)
+    lim2 = update_boundary(r0=1.94, z0=0, a0=0.95, kappa=1.55, delta=0.8, squar=0.15, npts=1700)
+    coil_center_cand2 = resize_polygon(lim2, dx=0.15)
+
+    coil_space = CoilPositionSpace(inner_boundary=coil_center_cand1,
+                                   outer_boundary=coil_center_cand2, method='coords')
+    coil_space.set_bounds(angular_bounds=(10, 170), radial_bounds=(0, 1))
+    theta_bounds, radial_bounds = coil_space.get_bounds()
+    bounds = [theta_bounds] * NUM_COILS + [radial_bounds] * NUM_COILS
+
+    theta_range = np.linspace(0, 180, len(coil_center_cand1) // 2)
+    inner = coil_center_cand1[:len(coil_center_cand1) // 2]
+    outer = coil_center_cand2[:len(coil_center_cand2) // 2]
+
+    objective = make_combined_objective(
+        ALPHA, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
+        coil_center_cand1, coil_center_cand2, lim,
+        r_bnd, psi_bnd, WEIGHT_FB, NUM_COILS, RFIL,
+        REG_IN, OMEGA, DIST_TH, theta_range, inner, outer
+    )
+
     print("\n" + "=" * 60)
-    print("OPTIMIZATION COMPARISON")
+    print("OPTIMIZATION COMPARISON (COMBINED BOUNDARY)")
     print("=" * 60)
-    print(f"Coils: {NUM_COILS} | Max evals: {MAX_EVALS} | "
-          f"Threshold: {CONVERGENCE_THRESHOLD}")
-    print(f"omega={OMEGA} | reg_in={REG_IN} | dist_th={DIST_TH}")
+    print(f"Coils:{NUM_COILS} alpha:{ALPHA} weight_fb:{WEIGHT_FB:.0e} reg_in:{REG_IN:.0e}")
+    print(f"Max evals:{MAX_EVALS} threshold:{CONVERGENCE_THRESHOLD}")
     print("=" * 60 + "\n")
 
     comparison = OptimizationComparison(
         objective, bounds,
-        max_time=MAX_TIME,
-        max_evals=MAX_EVALS,
+        max_time=MAX_TIME, max_evals=MAX_EVALS,
         convergence_threshold=CONVERGENCE_THRESHOLD,
-        NUM_COILS=NUM_COILS,
-        OMEGA=OMEGA,
-        DIST_TH=DIST_TH,
-        REG_IN=REG_IN,
-        RFIL=RFIL
+        NUM_COILS=NUM_COILS, OMEGA=OMEGA, DIST_TH=DIST_TH,
+        REG_IN=REG_IN, RFIL=RFIL, ALPHA=ALPHA, WEIGHT_FB=WEIGHT_FB
     )
-
     comparison.set_problem_data(r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2,
                                 mygs.o_point, eval_green)
 
-    # Load brute force baseline
-    bf_path = f'examples/comparisons/closed_boundary_DIIID/brute_force/lambda:{REG_IN},coils:{NUM_COILS}/results.json'
-    if os.path.exists(bf_path):
-        with open(bf_path, 'r') as f:
-            bf_data = json.load(f)
-        comparison.brute_force_cost = bf_data['best_cost']
-        print(f"Brute force baseline: {comparison.brute_force_cost:.6e}")
-    else:
-        print(f"No brute force baseline found at {bf_path}")
-
-    base = f'examples/comparisons/closed_boundary_DIIID/{RUN_FOLDER}/lambda:{REG_IN},coils:{NUM_COILS}'
+    base = (f'examples/comparisons/combined_boundary_DIIID/{RUN_FOLDER}/'
+            f'alpha:{ALPHA},weight:{WEIGHT_FB:.0e},lambda:{REG_IN:.0e},coils:{NUM_COILS}')
 
     existing_runs = 1
     while os.path.exists(os.path.join(base, f'run_{existing_runs:02d}', 'results.json')):
         existing_runs += 1
 
-    summary = comparison.compare_all(methods=methods, n_runs=N_RUNS, base_seed=1 + existing_runs)
+    seed_offset = existing_runs
+
+    if methods is None:
+        methods = ['multistart_lbfgs', 'bayesian']
+
+    if 'multistart_lbfgs' in methods:
+        print("Running Multi-start L-BFGS...")
+        if N_RUNS > 1:
+            comparison.run_multiple('multistart_lbfgs', n_runs=N_RUNS,
+                                    base_seed=seed_offset, starts_window=5)
+        else:
+            comparison.run_multistart_lbfgs(starts_window=5, random_state=seed_offset)
+
+    if 'bayesian' in methods:
+        print("Running Bayesian Optimization...")
+        if N_RUNS > 1:
+            comparison.run_multiple('bayesian', n_runs=N_RUNS, base_seed=seed_offset,
+                                    bayesian_stagnation_window=5, refinement_window=5)
+        else:
+            comparison.run_bayesian(bayesian_stagnation_window=5, refinement_window=5,
+                                    random_state=seed_offset)
+
+    summary = comparison.summary()
 
     if comparison.all_runs:
-        # Save each individual seed run to its own run_XX folder
         n_individual = max(len(runs) for runs in comparison.all_runs.values())
         orig_results = comparison.results
         orig_all_runs = comparison.all_runs
-
         for i in range(n_individual):
-            run_idx = 1
+            run_idx = existing_runs
             while os.path.exists(os.path.join(base, f'run_{run_idx:02d}', 'results.json')):
                 run_idx += 1
             foldername = os.path.join(base, f'run_{run_idx:02d}')
             os.makedirs(foldername, exist_ok=True)
-
-            comparison.results = {
-                key: runs[i]
-                for key, runs in orig_all_runs.items()
-                if i < len(runs)
-            }
+            comparison.results = {k: runs[i] for k, runs in orig_all_runs.items() if i < len(runs)}
             comparison.all_runs = {}
-
-            print(f"\nGenerating plots for run {i}...")
             fig_i = comparison.plot_result()
             time_fig_i = comparison.plot_convergence_vs_time(log_scale=True)
-
             fig_i.savefig(f'{foldername}/convergence_plot.png', dpi=150, bbox_inches='tight')
             time_fig_i.savefig(f'{foldername}/convergence_vs_time_plot.png', dpi=150, bbox_inches='tight')
             comparison.save_results_to_json(f'{foldername}/results.json')
             plt.close('all')
-
             print(f"Saved run {i} to: {foldername}/")
-
         comparison.results = orig_results
         comparison.all_runs = orig_all_runs
     else:
-        # Single run
-        run_idx = 1
+        run_idx = existing_runs
         while os.path.exists(os.path.join(base, f'run_{run_idx:02d}', 'results.json')):
             run_idx += 1
         foldername = os.path.join(base, f'run_{run_idx:02d}')
         os.makedirs(foldername, exist_ok=True)
-
-        print("\nGenerating plots...")
         fig = comparison.plot_result()
         time_fig = comparison.plot_convergence_vs_time(log_scale=True)
-
         fig.savefig(f'{foldername}/convergence_plot.png', dpi=150, bbox_inches='tight')
         time_fig.savefig(f'{foldername}/convergence_vs_time_plot.png', dpi=150, bbox_inches='tight')
         comparison.save_results_to_json(f'{foldername}/results.json')
         plt.close('all')
-
         print(f"Saved all plots and results to: {foldername}/")
 
     return comparison, summary
@@ -1105,8 +932,8 @@ def main(mygs, methods=None, **kwargs):
 # Parallel worker
 # ============================================
 
-def parallel_case(reg_in, num_coils, ntrials, run_folder, nthreads):
-    tmp_dir = os.path.join(_BASE_DIR, 'tmp', f'temp_dir_{reg_in}_{num_coils}')
+def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
+    tmp_dir = os.path.join(_BASE_DIR, 'tmp', f'temp_combined_{weight_fb}_{num_coils}')
     try:
         shutil.rmtree(tmp_dir)
     except FileNotFoundError:
@@ -1116,74 +943,88 @@ def parallel_case(reg_in, num_coils, ntrials, run_folder, nthreads):
 
     eqdsk = read_eqdsk(os.path.join(_BASE_DIR, 'examples/data/eqdsk/g192185.02440'))
     LCFS_contour = eqdsk['rzout'].copy()
-    mesh_dx = 0.015
+    fixed_LCFS = LCFS_contour
 
+    lim = update_boundary(r0=1.69, z0=0, a0=0.67, kappa=2, delta=0.8, squar=0.15, npts=1700)
+
+    mesh_dx = 0.015
     gs_mesh = gs_Domain()
     gs_mesh.define_region('plasma', mesh_dx, 'plasma')
     gs_mesh.add_polygon(LCFS_contour, 'plasma')
     mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
 
     myOFT = OFT_env(nthreads=nthreads)
-
     mygs = TokaMaker(myOFT)
     mygs.setup_mesh(mesh_pts, mesh_lc)
     mygs.settings.free_boundary = False
 
     F0 = eqdsk['rcentr'] * eqdsk['bcentr']
     mygs.setup(order=2, F0=F0)
+    mygs.set_targets(Ip=eqdsk['ip'], pax=eqdsk['pres'][0])
 
-    Ip_target = eqdsk['ip']
-    pres_target = eqdsk['pres'][0]
-    mygs.set_targets(Ip=Ip_target, pax=pres_target)
-
-    print(f"Solving fixed-boundary equilibrium for NUM_COILS={num_coils}, REG_IN={reg_in}...")
+    print(f"Solving fixed-boundary EQ for num_coils={num_coils}, weight_fb={weight_fb}...")
     mygs.init_psi()
     mygs.solve()
+
+    # fixed_mag_axis = np.array(mygs.o_point)
+    fixed_mag_axis = np.array([1.77764093, -0.04014656])
 
     os.chdir(_BASE_DIR)
 
     comparison, summary = main(
         mygs=mygs,
+        myOFT=myOFT,
+        eqdsk=eqdsk,
+        fixed_mag_axis=fixed_mag_axis,
+        fixed_LCFS=fixed_LCFS,
+        lim=lim,
         methods=["multistart_lbfgs", "bayesian"],
         NUM_COILS=num_coils,
-        REG_IN=reg_in,
+        REG_IN=1e-6,
+        ALPHA=alpha,
+        WEIGHT_FB=weight_fb,
         MAX_EVALS=2**18,
         N_RUNS=ntrials,
-        RUN_FOLDER=run_folder
+        RUN_FOLDER=run_folder,
     )
     return comparison, summary
 
 
+# ============================================
+# Entry point
+# ============================================
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--folder', type=str, default='convergence',
-                        help='Output folder name under examples/comparisons/closed_boundary_DIIID/')
+    parser.add_argument('--folder', type=str, default='combined',
+                        help='Output folder under examples/comparisons/combined_boundary_DIIID/')
     parser.add_argument('--nprocs', type=int, default=20,
                         help='Number of parallel processes')
     parser.add_argument('--ntrials', type=int, default=20,
-                        help='Number of optimization trials (N_RUNS) per case')
+                        help='Optimization trials (N_RUNS) per case')
     parser.add_argument('--nthreads', type=int, default=2,
                         help='OFT threads per process')
+    parser.add_argument('--alpha', type=float, default=0.75,
+                        help='Blending weight for free-boundary cost')
     args = parser.parse_args()
 
-    lambdas = [1e-8, 1e-7, 1e-6, 1e-5]
-    coils = [4, 5, 6]
+    weights = [1e-4, 1e-3, 1e-2, 1e-1]
+    coils = [3, 4, 5, 6]
 
     pool = Pool(processes=args.nprocs)
-
     results = {}
-    for reg_in in lambdas:
-        for num_coils in coils:
-            results[(reg_in, num_coils)] = pool.apply_async(
-                parallel_case, args=(reg_in, num_coils, args.ntrials, args.folder, args.nthreads)
+    for w in weights:
+        for nc in coils:
+            results[(w, nc)] = pool.apply_async(
+                parallel_case, args=(w, nc, args.ntrials, args.folder, args.nthreads, args.alpha)
             )
 
     pool.close()
     pool.join()
 
-    for (reg_in, num_coils), result in results.items():
+    for (w, nc), result in results.items():
         try:
             result.get()
-            print(f"NUM_COILS={num_coils}, REG_IN={reg_in}: done")
+            print(f"weight_fb={w}, num_coils={nc}: done")
         except Exception as e:
-            print(f"NUM_COILS={num_coils}, REG_IN={reg_in}: failed - {e}")
+            print(f"weight_fb={w}, num_coils={nc}: failed - {e}")
