@@ -229,10 +229,15 @@ class OptimizationComparison:
         self._times = []
         self._best_cost = float('inf')
         self._best_flux_err = None
+        self._best_fb_cost = None
+        self._initial_fixed_cost = None
+        self._initial_fb_cost = None
         self._best_params = None
         self._start_time = time.time()
         self._convergence = []
         self._stopped_reason = None
+        self.objective.norm_fixed = None
+        self.objective.norm_fb = None
 
     def _track_objective(self, params):
         if time.time() - self._start_time > self.max_time:
@@ -246,11 +251,18 @@ class OptimizationComparison:
         self._x_history.append(params.copy())
         self._times.append(time.time() - self._start_time)
         flux_err = getattr(self.objective, 'last_flux_err', None)
+        fb_cost = getattr(self.objective, 'last_fb_cost', None)
+        if self._initial_fixed_cost is None and flux_err is not None:
+            self._initial_fixed_cost = flux_err
+        if self._initial_fb_cost is None and fb_cost is not None:
+            self._initial_fb_cost = fb_cost
         if cost < self._best_cost:
             self._best_cost = cost
             self._best_params = params.copy()
             if flux_err is not None:
                 self._best_flux_err = flux_err
+            if fb_cost is not None:
+                self._best_fb_cost = fb_cost
         self._convergence.append(self._best_cost)
         return cost
 
@@ -392,6 +404,9 @@ class OptimizationComparison:
         self.results['Multi-start L-BFGS'] = {
             'best_cost': self._best_cost,
             'best_flux_err': self._best_flux_err,
+            'best_fb_cost': self._best_fb_cost,
+            'initial_fixed_cost': self._initial_fixed_cost,
+            'initial_fb_cost': self._initial_fb_cost,
             'best_params': self._best_params,
             'n_evals': self._n_evals,
             'time': elapsed,
@@ -519,6 +534,9 @@ class OptimizationComparison:
         self.results['Bayesian'] = {
             'best_cost': self._best_cost,
             'best_flux_err': self._best_flux_err,
+            'best_fb_cost': self._best_fb_cost,
+            'initial_fixed_cost': self._initial_fixed_cost,
+            'initial_fb_cost': self._initial_fb_cost,
             'best_params': self._best_params,
             'n_evals': self._n_evals,
             'time': elapsed,
@@ -708,6 +726,9 @@ class OptimizationComparison:
             method_data = {
                 'best_cost': float(res['best_cost']),
                 'best_flux_err': float(res['best_flux_err']) if res['best_flux_err'] is not None else None,
+                'best_fb_cost': float(res['best_fb_cost']) if res.get('best_fb_cost') is not None else None,
+                'initial_fixed_cost': float(res['initial_fixed_cost']) if res.get('initial_fixed_cost') is not None else None,
+                'initial_fb_cost': float(res['initial_fb_cost']) if res.get('initial_fb_cost') is not None else None,
                 'n_evals': int(res['n_evals']),
                 'time': float(res['time']),
                 'times': [float(t) for t in res['times']],
@@ -721,7 +742,7 @@ class OptimizationComparison:
             for key in ['starts_completed', 'convergence_window', 'random_state',
                         'n_initial', 'n_perms', 'n_bayesian_evals', 'n_gp_observations',
                         'pts_refined', 'n_acq_candidates', 'n_acq_unique',
-                        'unique_refined_points', 'refinement_window']:
+                        'unique_refined_points', 'refinement_window', 'acq_multiplier']:
                 if key in res and res[key] is not None:
                     method_data[key] = int(res[key])
             for key in ['time', 'time_bayesian_phase', 'acq_dedup_tol']:
@@ -803,11 +824,22 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
         fb_cost = _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
                                       coil_center_cand1, coil_center_cand2, lim,
                                       weight_fb, NUM_COILS)
+        objective.last_fb_cost = fb_cost
+
+        if objective.norm_fixed is None:
+            objective.norm_fixed = fixed_cost
+        if objective.norm_fb is None:
+            objective.norm_fb = fb_cost
+
+        norm_fixed = fixed_cost / objective.norm_fixed if objective.norm_fixed > 0 else fixed_cost
+        norm_fb = fb_cost / objective.norm_fb if objective.norm_fb > 0 else fb_cost
 
         dist_penalty = OMEGA * np.sum(np.maximum(DIST_TH - np.diff(np.sort(thetas)), 0.0) ** 2)
 
-        return (1 - alpha) * fixed_cost + alpha * fb_cost + dist_penalty
+        return (1 - alpha) * norm_fixed + alpha * norm_fb + dist_penalty
 
+    objective.norm_fixed = None
+    objective.norm_fb = None
     return objective
 
 
@@ -1023,7 +1055,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     weights = [1e-4, 1e-3, 1e-2, 1e-1]
-    coils = [3, 4, 5, 6]
+    coils = [2, 3, 4, 5, 6]
 
     pool = Pool(processes=args.nprocs)
     results = {}
