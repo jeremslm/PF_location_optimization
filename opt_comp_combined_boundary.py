@@ -1054,8 +1054,11 @@ if __name__ == "__main__":
                         help='Blending weight for free-boundary cost')
     args = parser.parse_args()
 
-    weights = [1e-4, 1e-3, 1e-2, 1e-1]
-    coils = [2, 3, 4, 5, 6]
+    # weights = [1e-4, 1e-3, 1e-2, 1e-1]
+    # coils = [2, 3, 4, 5, 6]
+
+    weights = [1e-3]
+    coils = [3]
 
     pool = Pool(processes=args.nprocs)
     results = {}
