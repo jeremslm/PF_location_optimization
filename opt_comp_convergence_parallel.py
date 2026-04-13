@@ -46,7 +46,7 @@ from OpenFUSIONToolkit.TokaMaker.util import read_eqdsk, eval_green
 from helper_fct import resize_polygon, update_boundary, place_points_pol_rad, make_3x3_thick
 from OFT_pf_coil_opt_fct import CoilPositionSpace
 
-_BASE_DIR = os.path.abspath(os.getcwd())
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class TimeoutException(Exception):
@@ -1029,7 +1029,7 @@ def main(mygs, methods=None, **kwargs):
                                 mygs.o_point, eval_green)
 
     # Load brute force baseline
-    bf_path = f'examples/comparisons/closed_boundary_DIIID/brute_force/lambda:{REG_IN},coils:{NUM_COILS}/results.json'
+    bf_path = os.path.join(_BASE_DIR, f'examples/comparisons/closed_boundary_DIIID/brute_force/lambda:{REG_IN},coils:{NUM_COILS}/results.json')
     if os.path.exists(bf_path):
         with open(bf_path, 'r') as f:
             bf_data = json.load(f)
@@ -1038,7 +1038,7 @@ def main(mygs, methods=None, **kwargs):
     else:
         print(f"No brute force baseline found at {bf_path}")
 
-    base = f'examples/comparisons/closed_boundary_DIIID/{RUN_FOLDER}/lambda:{REG_IN},coils:{NUM_COILS}'
+    base = os.path.join(_BASE_DIR, f'examples/comparisons/closed_boundary_DIIID/{RUN_FOLDER}/lambda:{REG_IN},coils:{NUM_COILS}')
 
     existing_runs = 1
     while os.path.exists(os.path.join(base, f'run_{existing_runs:02d}', 'results.json')):
@@ -1151,6 +1151,7 @@ def parallel_case(reg_in, num_coils, ntrials, run_folder, nthreads):
         N_RUNS=ntrials,
         RUN_FOLDER=run_folder
     )
+    shutil.rmtree(tmp_dir, ignore_errors=True)
     return comparison, summary
 
 

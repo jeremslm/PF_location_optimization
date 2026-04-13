@@ -13,11 +13,13 @@ Sweep: weight_fb x ncoils, REG_IN = 1e-6 fixed, alpha = 0.75.
 
 import copy
 import json
+import logging
 import os
 import random
 import shutil
 import sys
 import time
+import traceback
 import argparse
 from itertools import permutations as _iperms
 from math import factorial
@@ -45,7 +47,13 @@ from OpenFUSIONToolkit.TokaMaker.util import read_eqdsk, eval_green
 from helper_fct import resize_polygon, update_boundary, place_points_pol_rad, make_3x3_thick
 from OFT_pf_coil_opt_fct import CoilPositionSpace
 
-_BASE_DIR = os.path.abspath(os.getcwd())
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+_crash_logger = logging.getLogger('fb_crashes')
+_crash_logger.setLevel(logging.ERROR)
+_crash_handler = logging.FileHandler(os.path.join(_BASE_DIR, 'fb_crashes.log'))
+_crash_handler.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+_crash_logger.addHandler(_crash_handler)
 
 
 class TimeoutException(Exception):
@@ -162,6 +170,11 @@ def _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
         EQ_in = read_eqdsk(eqdsk_tmp)
         return boundary_distance(fixed_LCFS, EQ_in["rzout"], fixed_mag_axis)
     except Exception:
+        _crash_logger.error(
+            "pid=%d weight_fb=%.2e params=%s\n%s",
+            os.getpid(), weight_fb, np.array2string(np.asarray(params), precision=4),
+            traceback.format_exc()
+        )
         return 1e6
     finally:
         for f in [mesh_file, eqdsk_tmp]:
@@ -859,8 +872,8 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     comparison.set_problem_data(r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2,
                                 mygs.o_point, eval_green)
 
-    base = (f'examples/comparisons/combined_boundary_DIIID/{RUN_FOLDER}/'
-            f'alpha:{ALPHA},weight:{WEIGHT_FB:.0e},lambda:{REG_IN:.0e},coils:{NUM_COILS}')
+    base = os.path.join(_BASE_DIR, f'examples/comparisons/combined_boundary_DIIID/{RUN_FOLDER}/'
+                        f'alpha:{ALPHA},weight:{WEIGHT_FB:.0e},lambda:{REG_IN:.0e},coils:{NUM_COILS}')
 
     existing_runs = 1
     while os.path.exists(os.path.join(base, f'run_{existing_runs:02d}', 'results.json')):
@@ -987,6 +1000,7 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
         N_RUNS=ntrials,
         RUN_FOLDER=run_folder,
     )
+    shutil.rmtree(tmp_dir, ignore_errors=True)
     return comparison, summary
 
 
