@@ -252,6 +252,8 @@ class OptimizationComparison:
         self._convergence_window = None
         self._random_state = None
         self._fb_failures = 0
+        self._flux_err_history = []
+        self._fb_cost_history = []
         self.objective.norm_fixed = None
         self.objective.norm_fb = None
         self.objective.fb_failures = 0
@@ -298,6 +300,8 @@ class OptimizationComparison:
             'convergence_history': list(self._convergence),
             'cost_history': list(self._history),
             'times': list(self._times),
+            'flux_err_history': list(self._flux_err_history),
+            'fb_cost_history': list(self._fb_cost_history),
         }
         with open(self.checkpoint_path, 'w') as f:
             json.dump(data, f)
@@ -317,6 +321,8 @@ class OptimizationComparison:
         flux_err = getattr(self.objective, 'last_flux_err', None)
         fb_cost = getattr(self.objective, 'last_fb_cost', None)
         self._fb_failures = getattr(self.objective, 'fb_failures', 0)
+        self._flux_err_history.append(flux_err)
+        self._fb_cost_history.append(fb_cost)
         if self._initial_fixed_cost is None and flux_err is not None:
             self._initial_fixed_cost = flux_err
         if self._initial_fb_cost is None and fb_cost is not None:
@@ -493,6 +499,8 @@ class OptimizationComparison:
             'start_costs': self._start_costs,
             'convergence_window': starts_window,
             'random_state': random_state,
+            'flux_err_history': list(self._flux_err_history),
+            'fb_cost_history': list(self._fb_cost_history),
         }
         print(f"L-BFGS: {self._n_evals} evals, {elapsed:.1f}s, "
               f"{self._starts_completed} starts, stopped by: {stopped_by}")
@@ -642,6 +650,8 @@ class OptimizationComparison:
             'refinement_window': refinement_window,
             'refinement_stopping': refinement_stopped_by,
             'random_state': random_state,
+            'flux_err_history': list(self._flux_err_history),
+            'fb_cost_history': list(self._fb_cost_history),
         }
         print(f"Total: {self._n_evals} evals, {elapsed:.1f}s, "
               f"refined {pts_refined} pts, stopped by: {stopped_by}")
@@ -834,6 +844,8 @@ class OptimizationComparison:
             method_data['convergence_history'] = res['convergence_history']
             method_data['cost_history'] = [float(c) for c in res['cost_history']]
             method_data['times'] = [float(t) for t in res['times']]
+            method_data['flux_err_history'] = res['flux_err_history']
+            method_data['fb_cost_history'] = res['fb_cost_history']
             save_data['methods'][method] = method_data
         if self.all_runs:
             save_data['all_runs'] = {}
