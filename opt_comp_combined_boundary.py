@@ -245,6 +245,7 @@ class OptimizationComparison:
         self._convergence = []
         self._stopped_reason = None
         self._current_method = None
+        self._current_start = 0
         self.objective.norm_fixed = None
         self.objective.norm_fb = None
 
@@ -254,6 +255,7 @@ class OptimizationComparison:
         data = {
             'method': self._current_method,
             'n_evals': self._n_evals,
+            'current_start': self._current_start,
             'elapsed': self._times[-1] if self._times else 0.0,
             'best_cost': self._best_cost,
             'best_flux_err': self._best_flux_err,
@@ -295,7 +297,7 @@ class OptimizationComparison:
         self._convergence.append(self._best_cost)
         if self._n_evals % 5 == 0 and elapsed > 0:
             rate = self._n_evals / elapsed
-            print(f"[{self._current_method}] eval={self._n_evals} best={self._best_cost:.4e} {rate:.2f}eval/s", flush=True)
+            print(f"[{self._current_method}] eval={self._n_evals} start={self._current_start} best={self._best_cost:.4e} {rate:.2f}eval/s", flush=True)
             self._save_checkpoint()
         return cost
 
@@ -418,6 +420,7 @@ class OptimizationComparison:
         start_costs = []
         for x0 in starts:
             try:
+                self._current_start += 1
                 minimize(self._track_objective, x0, method='L-BFGS-B', bounds=self.bounds,
                          options={'ftol': ftol, 'gtol': gtol, 'disp': False})
                 starts_completed += 1
