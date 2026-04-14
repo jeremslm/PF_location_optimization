@@ -104,3 +104,15 @@ comparison, summary = main(
 ```
 
 Each run is saved to its own `run_XX/` folder. Running the script again with existing results automatically continues from the next index and uses a fresh random seed offset, so runs accumulate safely across multiple sessions.
+
+
+
+
+
+
+
+export OMP_NUM_THREADS=1 export MKL_NUM_THREADS=1 export OPENBLAS_NUM_THREADS=1 export NUMEXPR_NUM_THREADS=1
+python opt_comp_convergence_parallel.py --nprocs 12 --nthreads 2 --folder convergence_w5
+
+export OMP_NUM_THREADS=1 export MKL_NUM_THREADS=1 export OPENBLAS_NUM_THREADS=1 export NUMEXPR_NUM_THREADS=1
+python opt_comp_combined_boundary.py --nprocs 1 --nthreads 2 --ntrials 1 --folder convergence_w5

@@ -632,19 +632,19 @@ class OptimizationComparison:
             print("Running Multi-start L-BFGS...")
             if n_runs > 1:
                 self.run_multiple('multistart_lbfgs', n_runs=n_runs, base_seed=base_seed,
-                                  starts_window=25)
+                                  starts_window=5)
             else:
                 self.run_multistart_lbfgs(
-                    starts_window=25)
+                    starts_window=5)
 
         if 'bayesian' in methods:
             print("Running Bayesian Optimization...")
             if n_runs > 1:
                 self.run_multiple('bayesian', n_runs=n_runs, base_seed=base_seed,
-                                  bayesian_stagnation_window=25)
+                                  bayesian_stagnation_window=5)
             else:
                 self.run_bayesian(
-                    bayesian_stagnation_window=25)
+                    bayesian_stagnation_window=5)
 
         return self.summary()
 
@@ -1168,7 +1168,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     lambdas = [1e-8, 1e-7, 1e-6, 1e-5]
-    coils = [4, 5, 6]
+    coils = [4,5,6]
 
     pool = Pool(processes=args.nprocs)
 
