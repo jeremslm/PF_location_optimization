@@ -236,8 +236,24 @@ class OptimizationComparison:
         self._start_time = time.time()
         self._convergence = []
         self._stopped_reason = None
+        self._current_method = None
         self.objective.norm_fixed = None
         self.objective.norm_fb = None
+
+    def _save_checkpoint(self):
+        if self.checkpoint_path is None or self._best_params is None:
+            return
+        data = {
+            'method': self._current_method,
+            'n_evals': self._n_evals,
+            'elapsed': self._times[-1] if self._times else 0.0,
+            'best_cost': self._best_cost,
+            'best_flux_err': self._best_flux_err,
+            'best_fb_cost': self._best_fb_cost,
+            'best_params': self._best_params.tolist(),
+        }
+        with open(self.checkpoint_path, 'w') as f:
+            json.dump(data, f)
 
     def _track_objective(self, params):
         if time.time() - self._start_time > self.max_time:
@@ -247,9 +263,10 @@ class OptimizationComparison:
         self._n_evals += 1
         params = np.asarray(params)
         cost = self.objective(params)
+        elapsed = time.time() - self._start_time
         self._history.append(cost)
         self._x_history.append(params.copy())
-        self._times.append(time.time() - self._start_time)
+        self._times.append(elapsed)
         flux_err = getattr(self.objective, 'last_flux_err', None)
         fb_cost = getattr(self.objective, 'last_fb_cost', None)
         if self._initial_fixed_cost is None and flux_err is not None:
@@ -264,6 +281,10 @@ class OptimizationComparison:
             if fb_cost is not None:
                 self._best_fb_cost = fb_cost
         self._convergence.append(self._best_cost)
+        if self._n_evals % 10 == 0 and elapsed > 0:
+            rate = self._n_evals / elapsed
+            print(f"[{self._current_method}] eval={self._n_evals} best={self._best_cost:.4e} {rate:.2f}eval/s", flush=True)
+            self._save_checkpoint()
         return cost
 
     def _compute_flux_for_params(self, params):
@@ -371,6 +392,7 @@ class OptimizationComparison:
     def run_multistart_lbfgs(self, n_starts=262144, ftol=1e-9, gtol=1e-6,
                              starts_window=5, random_state=42):
         self._reset_tracking()
+        self._current_method = 'L-BFGS'
         sampler = qmc.Sobol(d=self.n_params, scramble=True, seed=random_state)
         samples = sampler.random(n_starts)
         starts = []
@@ -438,6 +460,7 @@ class OptimizationComparison:
         if max_perms is None:
             max_perms = self.num_coils
         self._reset_tracking()
+        self._current_method = 'Bayesian'
         space = [Real(low, high) for low, high in self.bounds]
 
         def stopping_callback():
@@ -583,7 +606,7 @@ class OptimizationComparison:
         runs = []
         for i in range(n_runs):
             seed = base_seed + i
-            print(f"\n[{method}] run {i+1}/{n_runs}, random_state={seed}")
+            print(f"\n[{method}] run {i+1}/{n_runs}, random_state={seed}, coils={self.num_coils}, weight_fb={self.weight_fb:.0e}")
             result = run_fn(random_state=seed, **kwargs)
             runs.append(dict(result))
         self.all_runs[key] = runs
@@ -892,6 +915,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     print("=" * 60)
     print(f"Coils:{NUM_COILS} alpha:{ALPHA} weight_fb:{WEIGHT_FB:.0e} reg_in:{REG_IN:.0e}")
     print(f"Max evals:{MAX_EVALS} threshold:{CONVERGENCE_THRESHOLD}")
+    print("1 eval = lstsq + TokaMaker GS solve (mesh rebuild per eval)")
     print("=" * 60 + "\n")
 
     comparison = OptimizationComparison(
@@ -913,11 +937,22 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
 
     seed_offset = existing_runs
 
+    if N_RUNS == 1:
+        run_idx = existing_runs
+        while os.path.exists(os.path.join(base, f'run_{run_idx:02d}', 'results.json')):
+            run_idx += 1
+        foldername_pre = os.path.join(base, f'run_{run_idx:02d}')
+        os.makedirs(foldername_pre, exist_ok=True)
+        comparison.checkpoint_path = os.path.join(foldername_pre, 'checkpoint.json')
+    else:
+        os.makedirs(base, exist_ok=True)
+        comparison.checkpoint_path = os.path.join(base, f'checkpoint_{os.getpid()}.json')
+
     if methods is None:
         methods = ['multistart_lbfgs', 'bayesian']
 
     if 'multistart_lbfgs' in methods:
-        print("Running Multi-start L-BFGS...")
+        print(f"Running Multi-start L-BFGS... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}")
         if N_RUNS > 1:
             comparison.run_multiple('multistart_lbfgs', n_runs=N_RUNS,
                                     base_seed=seed_offset, starts_window=5)
@@ -925,7 +960,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
             comparison.run_multistart_lbfgs(starts_window=5, random_state=seed_offset)
 
     if 'bayesian' in methods:
-        print("Running Bayesian Optimization...")
+        print(f"Running Bayesian Optimization... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}")
         if N_RUNS > 1:
             comparison.run_multiple('bayesian', n_runs=N_RUNS, base_seed=seed_offset,
                                     bayesian_stagnation_window=5, refinement_window=5)
@@ -957,11 +992,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
         comparison.results = orig_results
         comparison.all_runs = orig_all_runs
     else:
-        run_idx = existing_runs
-        while os.path.exists(os.path.join(base, f'run_{run_idx:02d}', 'results.json')):
-            run_idx += 1
-        foldername = os.path.join(base, f'run_{run_idx:02d}')
-        os.makedirs(foldername, exist_ok=True)
+        foldername = foldername_pre
         fig = comparison.plot_result()
         time_fig = comparison.plot_convergence_vs_time(log_scale=True)
         fig.savefig(f'{foldername}/convergence_plot.png', dpi=150, bbox_inches='tight')
