@@ -940,7 +940,8 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     NUM_COILS = kwargs.get('NUM_COILS', 4)
     MAX_EVALS = kwargs.get('MAX_EVALS', 2**18)
     MAX_TIME = kwargs.get('MAX_TIME', 86400)
-    CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.001)
+    # CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.001)
+    CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.01)
     OMEGA = kwargs.get('OMEGA', 1e-3)
     DIST_TH = kwargs.get('DIST_TH', 5.0)
     REG_IN = kwargs.get('REG_IN', 1e-6)
@@ -1119,7 +1120,8 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
         fixed_mag_axis=fixed_mag_axis,
         fixed_LCFS=fixed_LCFS,
         lim=lim,
-        methods=["multistart_lbfgs", "bayesian"],
+        # methods=["multistart_lbfgs", "bayesian"],
+        methods = ["multistart_lbfgs"], 
         NUM_COILS=num_coils,
         REG_IN=1e-6,
         ALPHA=alpha,
