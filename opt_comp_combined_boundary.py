@@ -251,8 +251,10 @@ class OptimizationComparison:
         self._start_costs = []
         self._convergence_window = None
         self._random_state = None
+        self._fb_failures = 0
         self.objective.norm_fixed = None
         self.objective.norm_fb = None
+        self.objective.fb_failures = 0
 
     def _save_checkpoint(self):
         if self.checkpoint_path is None or self._best_params is None:
@@ -284,6 +286,7 @@ class OptimizationComparison:
             'best_norm_fixed': self._best_flux_err / self._initial_fixed_cost if self._initial_fixed_cost else None,
             'best_norm_fb': self._best_fb_cost / self._initial_fb_cost if self._initial_fb_cost else None,
             'best_params': self._best_params.tolist(),
+            'fb_failures': self._fb_failures,
             'starts_completed': self._starts_completed,
             'convergence_window': self._convergence_window,
             'random_state': self._random_state,
@@ -313,6 +316,7 @@ class OptimizationComparison:
         self._times.append(elapsed)
         flux_err = getattr(self.objective, 'last_flux_err', None)
         fb_cost = getattr(self.objective, 'last_fb_cost', None)
+        self._fb_failures = getattr(self.objective, 'fb_failures', 0)
         if self._initial_fixed_cost is None and flux_err is not None:
             self._initial_fixed_cost = flux_err
         if self._initial_fb_cost is None and fb_cost is not None:
@@ -483,6 +487,7 @@ class OptimizationComparison:
             'coil_currents': coil_currents,
             'convergence_history': list(self._convergence),
             'cost_history': list(self._history),
+            'fb_failures': self._fb_failures,
             'starts_completed': self._starts_completed,
             'start_boundaries': self._start_boundaries,
             'start_costs': self._start_costs,
@@ -616,6 +621,7 @@ class OptimizationComparison:
             'bayesian_convergence_history': bayesian_convergence,
             'refinement_convergence_history': refinement_convergence,
             'cost_history': list(self._history),
+            'fb_failures': self._fb_failures,
             'n_initial': n_initial,
             'n_perms': n_perms,
             'n_bayesian_evals': bayesian_evals,
@@ -800,7 +806,7 @@ class OptimizationComparison:
                 'time': float(res['time']),
                 'stopping': res['stopping'],
             }
-            for key in ['starts_completed', 'convergence_window', 'random_state',
+            for key in ['fb_failures', 'starts_completed', 'convergence_window', 'random_state',
                         'n_initial', 'n_perms', 'n_bayesian_evals', 'n_gp_observations',
                         'pts_refined', 'n_acq_candidates', 'n_acq_unique',
                         'unique_refined_points', 'refinement_window', 'acq_multiplier']:
@@ -892,6 +898,8 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
                                       coil_center_cand1, coil_center_cand2, lim,
                                       weight_fb, NUM_COILS)
         objective.last_fb_cost = fb_cost
+        if fb_cost >= 1e6:
+            objective.fb_failures += 1
 
         if objective.norm_fixed is None:
             objective.norm_fixed = fixed_cost
@@ -907,6 +915,7 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
 
     objective.norm_fixed = None
     objective.norm_fb = None
+    objective.fb_failures = 0
     return objective
 
 
