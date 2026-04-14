@@ -135,8 +135,10 @@ def _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
                         coil_center_cand1, coil_center_cand2, lim,
                         weight_fb, nCoils, xpoint_index=55):
     pid = os.getpid()
-    mesh_file = f"mesh_fb_{pid}.h5"
-    eqdsk_tmp = f"gTMP_{pid}"
+    _tmp_dir = os.path.join(_BASE_DIR, 'tmp')
+    os.makedirs(_tmp_dir, exist_ok=True)
+    mesh_file = os.path.join(_tmp_dir, f"mesh_fb_{pid}.h5")
+    eqdsk_tmp = os.path.join(_tmp_dir, f"gTMP_{pid}")
     try:
         t0 = time.time()
         scan_geom = make_new_coils(params, nCoils, coil_center_cand1, coil_center_cand2)
