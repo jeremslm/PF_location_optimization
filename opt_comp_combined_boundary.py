@@ -505,7 +505,7 @@ class OptimizationComparison:
                      acq_dedup_tol=0.05, unique_refined_points=1,
                      random_state=1):
         if n_initial is None:
-            n_initial = int(round(25 * self.num_coils ** 1.5))
+            n_initial = int(round(5 * self.num_coils))
         if max_perms is None:
             max_perms = self.num_coils
         self._reset_tracking()
@@ -1043,7 +1043,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
             plt.close('all')
             print(f"Saved run {i} to: {foldername}/")
         comparison.results = orig_results
-        comparison.all_runs = orig_all_runs
+        comparison.all_runs = orig_all_runs 
     else:
         foldername = foldername_pre
         fig = comparison.plot_result()
