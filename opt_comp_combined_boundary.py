@@ -111,7 +111,7 @@ def make_new_coils(params, nCoils, coil_center_cand1, coil_center_cand2, dx=0.03
 
 
 def make_mesh(scan_geom, savename, lim,
-              plasma_dx=0.01, coil_dx=0.005, vac_dx=0.04, vv_dx=0.04):
+              plasma_dx=0.08, coil_dx=0.02, vac_dx=0.04, vv_dx=0.04):
     gs_mesh = gs_Domain()
     gs_mesh.define_region("air", vac_dx, "boundary")
     gs_mesh.define_region("plasma", plasma_dx, "plasma")
@@ -138,8 +138,10 @@ def _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
     mesh_file = f"mesh_fb_{pid}.h5"
     eqdsk_tmp = f"gTMP_{pid}"
     try:
+        t0 = time.time()
         scan_geom = make_new_coils(params, nCoils, coil_center_cand1, coil_center_cand2)
         make_mesh(scan_geom, mesh_file, lim)
+        t_mesh = time.time()
 
         mygs = TokaMaker(myOFT)
         mesh_pts, mesh_lc, mesh_reg, coil_dict, cond_dict = load_gs_mesh(mesh_file)
@@ -149,6 +151,7 @@ def _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
 
         F0 = eqdsk["rcentr"] * eqdsk["bcentr"]
         mygs.setup(order=2, F0=F0)
+        t_setup = time.time()
 
         R0_target = float(fixed_mag_axis[0])
         Z0_target = float(fixed_mag_axis[1])
@@ -165,9 +168,12 @@ def _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
         mygs.set_coil_reg(reg_terms=reg_terms)
         mygs.init_psi(r0=1.8, z0=-0.040, a=0.45, kappa=1.547, delta=-0.288)
         mygs.solve()
+        t_solve = time.time()
 
         mygs.save_eqdsk(eqdsk_tmp, truncate_eq=False)
         EQ_in = read_eqdsk(eqdsk_tmp)
+        t_total = time.time()
+        print(f"[fb_cost] mesh={t_mesh-t0:.2f}s setup={t_setup-t_mesh:.2f}s solve={t_solve-t_setup:.2f}s other={t_total-t_solve:.2f}s total={t_total-t0:.2f}s", flush=True)
         return boundary_distance(fixed_LCFS, EQ_in["rzout"], fixed_mag_axis)
     except Exception:
         _crash_logger.error(
@@ -250,6 +256,10 @@ class OptimizationComparison:
             'best_cost': self._best_cost,
             'best_flux_err': self._best_flux_err,
             'best_fb_cost': self._best_fb_cost,
+            'initial_fixed_cost': self._initial_fixed_cost,
+            'initial_fb_cost': self._initial_fb_cost,
+            'best_norm_fixed': self._best_flux_err / self._initial_fixed_cost if self._initial_fixed_cost else None,
+            'best_norm_fb': self._best_fb_cost / self._initial_fb_cost if self._initial_fb_cost else None,
             'best_params': self._best_params.tolist(),
         }
         with open(self.checkpoint_path, 'w') as f:
@@ -281,7 +291,7 @@ class OptimizationComparison:
             if fb_cost is not None:
                 self._best_fb_cost = fb_cost
         self._convergence.append(self._best_cost)
-        if self._n_evals % 10 == 0 and elapsed > 0:
+        if self._n_evals % 5 == 0 and elapsed > 0:
             rate = self._n_evals / elapsed
             print(f"[{self._current_method}] eval={self._n_evals} best={self._best_cost:.4e} {rate:.2f}eval/s", flush=True)
             self._save_checkpoint()
