@@ -246,14 +246,33 @@ class OptimizationComparison:
         self._stopped_reason = None
         self._current_method = None
         self._current_start = 0
+        self._starts_completed = 0
+        self._start_boundaries = []
+        self._start_costs = []
+        self._convergence_window = None
+        self._random_state = None
         self.objective.norm_fixed = None
         self.objective.norm_fb = None
 
     def _save_checkpoint(self):
         if self.checkpoint_path is None or self._best_params is None:
             return
+        thetas, radials, coil_positions, coil_currents = self._extract_best_result()
         data = {
+            'optimization_settings': {
+                'num_coils': int(self.num_coils),
+                'max_evals': int(self.max_evals) if self.max_evals is not None else None,
+                'max_time': float(self.max_time),
+                'convergence_threshold': float(self.convergence_threshold),
+                'omega': float(self.omega),
+                'dist_th': float(self.dist_th),
+                'reg_in': float(self.reg_in),
+                'rfil': float(self.rfil),
+                'alpha': float(self.alpha),
+                'weight_fb': float(self.weight_fb),
+            },
             'method': self._current_method,
+            'stopping': 'in_progress',
             'n_evals': self._n_evals,
             'current_start': self._current_start,
             'elapsed': self._times[-1] if self._times else 0.0,
@@ -265,6 +284,17 @@ class OptimizationComparison:
             'best_norm_fixed': self._best_flux_err / self._initial_fixed_cost if self._initial_fixed_cost else None,
             'best_norm_fb': self._best_fb_cost / self._initial_fb_cost if self._initial_fb_cost else None,
             'best_params': self._best_params.tolist(),
+            'starts_completed': self._starts_completed,
+            'convergence_window': self._convergence_window,
+            'random_state': self._random_state,
+            'parameters': {'thetas': thetas, 'radials': radials},
+            'coil_positions_top': coil_positions,
+            'coil_currents': coil_currents,
+            'start_boundaries': list(self._start_boundaries),
+            'start_costs': list(self._start_costs),
+            'convergence_history': list(self._convergence),
+            'cost_history': list(self._history),
+            'times': list(self._times),
         }
         with open(self.checkpoint_path, 'w') as f:
             json.dump(data, f)
@@ -295,9 +325,9 @@ class OptimizationComparison:
             if fb_cost is not None:
                 self._best_fb_cost = fb_cost
         self._convergence.append(self._best_cost)
-        if self._n_evals % 5 == 0 and elapsed > 0:
+        if self._n_evals % 3 == 0 and elapsed > 0:
             rate = self._n_evals / elapsed
-            print(f"[{self._current_method}] eval={self._n_evals} start={self._current_start} best={self._best_cost:.4e} {rate:.2f}eval/s", flush=True)
+            print(f"[{self._current_method}] eval={self._n_evals} start={self._current_start} best={self._best_cost:.4e} {1/rate:.2f}s/eval", flush=True)
             self._save_checkpoint()
         return cost
 
@@ -407,26 +437,25 @@ class OptimizationComparison:
                              starts_window=5, random_state=42):
         self._reset_tracking()
         self._current_method = 'L-BFGS'
+        self._convergence_window = starts_window
+        self._random_state = random_state
         sampler = qmc.Sobol(d=self.n_params, scramble=True, seed=random_state)
         samples = sampler.random(n_starts)
         starts = []
         for i in range(n_starts):
             point = [low + samples[i, j] * (high - low) for j, (low, high) in enumerate(self.bounds)]
             starts.append(point)
-        starts_completed = 0
         stopped_by = "all starts completed"
         starts_bests = []
-        start_boundaries = []
-        start_costs = []
         for x0 in starts:
             try:
                 self._current_start += 1
                 minimize(self._track_objective, x0, method='L-BFGS-B', bounds=self.bounds,
                          options={'ftol': ftol, 'gtol': gtol, 'disp': False})
-                starts_completed += 1
+                self._starts_completed += 1
                 starts_bests.append(self._best_cost)
-                start_boundaries.append(self._n_evals)
-                start_costs.append(self._best_cost)
+                self._start_boundaries.append(self._n_evals)
+                self._start_costs.append(self._best_cost)
                 if _check_starts_convergence(starts_bests, starts_window, self.convergence_threshold):
                     stopped_by = "converged"
                     break
@@ -454,14 +483,14 @@ class OptimizationComparison:
             'coil_currents': coil_currents,
             'convergence_history': list(self._convergence),
             'cost_history': list(self._history),
-            'starts_completed': starts_completed,
-            'start_boundaries': start_boundaries,
-            'start_costs': start_costs,
+            'starts_completed': self._starts_completed,
+            'start_boundaries': self._start_boundaries,
+            'start_costs': self._start_costs,
             'convergence_window': starts_window,
             'random_state': random_state,
         }
         print(f"L-BFGS: {self._n_evals} evals, {elapsed:.1f}s, "
-              f"{starts_completed} starts, stopped by: {stopped_by}")
+              f"{self._starts_completed} starts, stopped by: {stopped_by}")
         return self.results['Multi-start L-BFGS']
 
     def run_bayesian(self, n_initial=None, acq_func='EI',
@@ -769,13 +798,7 @@ class OptimizationComparison:
                 'initial_fb_cost': float(res['initial_fb_cost']) if res.get('initial_fb_cost') is not None else None,
                 'n_evals': int(res['n_evals']),
                 'time': float(res['time']),
-                'times': [float(t) for t in res['times']],
                 'stopping': res['stopping'],
-                'parameters': res['parameters'],
-                'coil_positions_top': res['coil_positions_top'],
-                'coil_currents': res['coil_currents'],
-                'convergence_history': res['convergence_history'],
-                'cost_history': [float(c) for c in res['cost_history']],
             }
             for key in ['starts_completed', 'convergence_window', 'random_state',
                         'n_initial', 'n_perms', 'n_bayesian_evals', 'n_gp_observations',
@@ -783,12 +806,15 @@ class OptimizationComparison:
                         'unique_refined_points', 'refinement_window', 'acq_multiplier']:
                 if key in res and res[key] is not None:
                     method_data[key] = int(res[key])
-            for key in ['time', 'time_bayesian_phase', 'acq_dedup_tol']:
+            for key in ['time_bayesian_phase', 'acq_dedup_tol']:
                 if key in res and res[key] is not None:
                     method_data[key] = float(res[key])
-            for key in ['stopping', 'bayesian_stopping', 'refinement_stopping']:
+            for key in ['bayesian_stopping', 'refinement_stopping']:
                 if key in res and res[key] is not None:
                     method_data[key] = res[key]
+            method_data['parameters'] = res['parameters']
+            method_data['coil_positions_top'] = res['coil_positions_top']
+            method_data['coil_currents'] = res['coil_currents']
             for key in ['start_boundaries', 'refinement_evals']:
                 if key in res:
                     method_data[key] = [int(x) for x in res[key]]
@@ -799,6 +825,9 @@ class OptimizationComparison:
                         'refinement_candidates']:
                 if key in res:
                     method_data[key] = res[key]
+            method_data['convergence_history'] = res['convergence_history']
+            method_data['cost_history'] = [float(c) for c in res['cost_history']]
+            method_data['times'] = [float(t) for t in res['times']]
             save_data['methods'][method] = method_data
         if self.all_runs:
             save_data['all_runs'] = {}
