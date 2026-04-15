@@ -509,7 +509,7 @@ class OptimizationComparison:
     def run_bayesian(self, n_initial=None, acq_func='EI',
                      bayesian_stagnation_window=5,
                      local_optimize=True, refinement_window=5,
-                     max_perms=None, acq_multiplier=5,
+                     max_perms=None, acq_multiplier=10,
                      acq_dedup_tol=0.05, unique_refined_points=1,
                      random_state=1):
         if n_initial is None:
@@ -1029,10 +1029,10 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
         print(f"Running Bayesian Optimization... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}")
         if N_RUNS > 1:
             comparison.run_multiple('bayesian', n_runs=N_RUNS, base_seed=seed_offset,
-                                    bayesian_stagnation_window=5, refinement_window=5, unique_refined_points=1)
+                                    bayesian_stagnation_window=5, refinement_window=5, unique_refined_points=3, acq_multiplier=10)
         else:
             comparison.run_bayesian(bayesian_stagnation_window=5, refinement_window=5,
-                                    random_state=seed_offset, unique_refined_points=1)
+                                    random_state=seed_offset, unique_refined_points=3, acq_multiplier=5)
 
     summary = comparison.summary()
 
@@ -1121,7 +1121,8 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
         fixed_LCFS=fixed_LCFS,
         lim=lim,
         # methods=["multistart_lbfgs", "bayesian"],
-        methods = ["multistart_lbfgs"], 
+        # methods = ["multistart_lbfgs"], 
+        methods = ["bayesian"], 
         NUM_COILS=num_coils,
         REG_IN=1e-6,
         ALPHA=alpha,
