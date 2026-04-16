@@ -1168,7 +1168,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     lambdas = [1e-8, 1e-7, 1e-6, 1e-5]
-    coils = [4,5,6]
+    coils = [5,6]
 
     pool = Pool(processes=args.nprocs)
 
