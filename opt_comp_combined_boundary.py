@@ -1132,7 +1132,7 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
         RUN_FOLDER=run_folder,
     )
     shutil.rmtree(tmp_dir, ignore_errors=True)
-    return comparison, summary
+    return summary
 
 
 # ============================================
