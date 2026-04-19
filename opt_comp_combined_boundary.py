@@ -257,6 +257,7 @@ class OptimizationComparison:
         self.objective.norm_fixed = None
         self.objective.norm_fb = None
         self.objective.fb_failures = 0
+        self.objective.last_valid_fb_cost = None
 
     def _save_checkpoint(self):
         if self.checkpoint_path is None or self._best_params is None:
@@ -909,9 +910,12 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
         fb_cost = _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
                                       coil_center_cand1, coil_center_cand2, lim,
                                       weight_fb, NUM_COILS)
-        objective.last_fb_cost = fb_cost
         if fb_cost >= 1e6:
             objective.fb_failures += 1
+            fb_cost = objective.last_valid_fb_cost * 10 if objective.last_valid_fb_cost is not None else 1e6
+        else:
+            objective.last_valid_fb_cost = fb_cost
+        objective.last_fb_cost = fb_cost
 
         if objective.norm_fixed is None:
             objective.norm_fixed = fixed_cost
@@ -928,6 +932,7 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
     objective.norm_fixed = None
     objective.norm_fb = None
     objective.fb_failures = 0
+    objective.last_valid_fb_cost = None
     return objective
 
 
@@ -1122,8 +1127,8 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
         fixed_LCFS=fixed_LCFS,
         lim=lim,
         # methods=["multistart_lbfgs", "bayesian"],
-        # methods = ["multistart_lbfgs"], 
-        methods = ["bayesian"], 
+        methods = ["multistart_lbfgs"], 
+        # methods = ["bayesian"], 
         NUM_COILS=num_coils,
         REG_IN=1e-6,
         ALPHA=alpha,

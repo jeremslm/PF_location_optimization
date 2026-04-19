@@ -5,8 +5,12 @@ ftol=1e-9, gtol=1e-6,
 no maxiter 
 
 hit 24h time limit 
-lots of fb crashes 
 
 
+lots of fb crashes -> set the error to 10e6... messes up the gradient 
+
+
+
+should I do? 
 minimize(self._track_objective, x0, method='L-BFGS-B', bounds=self.bounds,
            options={'ftol': 1e-5?, 'gtol': 1e-3?, 'maxiter': 20?, 'disp': False})
