@@ -1,0 +1,4 @@
+
+
+convergence window = 5
+points refined = 3 (however, beats lbfgs decisively without it)

@@ -444,7 +444,7 @@ class OptimizationComparison:
                 'k--', alpha=0.3, linewidth=1)
 
     def run_multistart_lbfgs(self, n_starts=262144, ftol=1e-9, gtol=1e-6,
-                             starts_window=5, random_state=42):
+                             starts_window=5, random_state=42, maxiter=1000000000):
         self._reset_tracking()
         self._current_method = 'L-BFGS'
         self._convergence_window = starts_window
@@ -461,7 +461,7 @@ class OptimizationComparison:
             try:
                 self._current_start += 1
                 minimize(self._track_objective, x0, method='L-BFGS-B', bounds=self.bounds,
-                         options={'ftol': ftol, 'gtol': gtol, 'disp': False})
+                         options={'ftol': ftol, 'gtol': gtol, 'maxiter': maxiter, 'disp': False})
                 self._starts_completed += 1
                 starts_bests.append(self._best_cost)
                 self._start_boundaries.append(self._n_evals)
@@ -511,7 +511,7 @@ class OptimizationComparison:
                      local_optimize=True, refinement_window=5,
                      max_perms=None, acq_multiplier=10,
                      acq_dedup_tol=0.05, unique_refined_points=1,
-                     random_state=1):
+                     random_state=1, maxiter=1000000000):
         if n_initial is None:
             n_initial = int(round(5 * self.num_coils))
         if max_perms is None:
@@ -588,7 +588,7 @@ class OptimizationComparison:
                 time_before = time.time() - self._start_time
                 try:
                     minimize(self._track_objective, np.array(cand), method='L-BFGS-B',
-                             bounds=self.bounds, options={'ftol': 1e-9, 'gtol': 1e-6, 'disp': False})
+                             bounds=self.bounds, options={'ftol': 1e-9, 'gtol': 1e-6, 'maxiter': maxiter, 'disp': False})
                     pts_refined += 1
                     refinement_bests.append(self._best_cost)
                     refinement_evals.append(self._n_evals - evals_before)
@@ -1021,18 +1021,19 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
         print(f"Running Multi-start L-BFGS... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}")
         if N_RUNS > 1:
             comparison.run_multiple('multistart_lbfgs', n_runs=N_RUNS,
-                                    base_seed=seed_offset, starts_window=5)
+                                    base_seed=seed_offset, starts_window=5, maxiter=20)
         else:
-            comparison.run_multistart_lbfgs(starts_window=5, random_state=seed_offset)
+            comparison.run_multistart_lbfgs(starts_window=5, random_state=seed_offset, maxiter=20)
 
     if 'bayesian' in methods:
         print(f"Running Bayesian Optimization... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}")
         if N_RUNS > 1:
             comparison.run_multiple('bayesian', n_runs=N_RUNS, base_seed=seed_offset,
-                                    bayesian_stagnation_window=5, refinement_window=5, unique_refined_points=3, acq_multiplier=10)
+                                    bayesian_stagnation_window=5, refinement_window=5, unique_refined_points=1, acq_multiplier=10,
+                                    maxiter=20)
         else:
             comparison.run_bayesian(bayesian_stagnation_window=5, refinement_window=5,
-                                    random_state=seed_offset, unique_refined_points=3, acq_multiplier=5)
+                                    random_state=seed_offset, unique_refined_points=1, acq_multiplier=10, maxiter=20)
 
     summary = comparison.summary()
 
