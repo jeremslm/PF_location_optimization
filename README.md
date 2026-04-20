@@ -125,4 +125,10 @@ python opt_comp_convergence_parallel.py --nprocs 8 --nthreads 2 --folder converg
 
 
 
-5,6 w5
+
+export OMP_NUM_THREADS=1 export MKL_NUM_THREADS=1 export OPENBLAS_NUM_THREADS=1 export NUMEXPR_NUM_THREADS=1
+python opt_comp_convergence_parallel.py --nprocs 5 --nthreads 2 --folder convergence_w5
+
+
+export OMP_NUM_THREADS=1 export MKL_NUM_THREADS=1 export OPENBLAS_NUM_THREADS=1 export NUMEXPR_NUM_THREADS=1
+python opt_comp_convergence_parallel.py --nprocs 8 --nthreads 2 --folder convergence_w10

@@ -632,19 +632,19 @@ class OptimizationComparison:
             print("Running Multi-start L-BFGS...")
             if n_runs > 1:
                 self.run_multiple('multistart_lbfgs', n_runs=n_runs, base_seed=base_seed,
-                                  starts_window=25)
+                                  starts_window=10)
             else:
                 self.run_multistart_lbfgs(
-                    starts_window=25)
+                    starts_window=10)
 
         if 'bayesian' in methods:
             print("Running Bayesian Optimization...")
             if n_runs > 1:
                 self.run_multiple('bayesian', n_runs=n_runs, base_seed=base_seed,
-                                  bayesian_stagnation_window=25)
+                                  bayesian_stagnation_window=10, unique_refined_points=3)
             else:
-                self.run_bayesian(
-                    bayesian_stagnation_window=25)
+                self.run_bayesian(unique_refined_points=3,
+                    bayesian_stagnation_window=10)
 
         return self.summary()
 
@@ -1167,8 +1167,8 @@ if __name__ == "__main__":
                         help='OFT threads per process')
     args = parser.parse_args()
 
-    lambdas = [1e-8, 1e-7, 1e-6, 1e-5]
-    coils = [5,6]
+    lambdas = [1e-5,1e-6,1e-7,1e-8]
+    coils = [6,5,4]
 
     pool = Pool(processes=args.nprocs)
 
