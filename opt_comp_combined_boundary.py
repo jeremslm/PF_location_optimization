@@ -259,7 +259,6 @@ class OptimizationComparison:
         self.objective.norm_fixed = None
         self.objective.norm_fb = None
         self.objective.fb_failures = 0
-        self.objective.last_valid_fb_cost = None
 
     def _save_checkpoint(self):
         if self.checkpoint_path is None or self._best_params is None:
@@ -921,9 +920,7 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
                                       weight_fb, NUM_COILS)
         if fb_cost >= 1e6:
             objective.fb_failures += 1
-            fb_cost = objective.last_valid_fb_cost * 10 if objective.last_valid_fb_cost is not None else 1e6
-        else:
-            objective.last_valid_fb_cost = fb_cost
+            fb_cost = objective.norm_fb if objective.norm_fb is not None else 1e6
         objective.last_fb_cost = fb_cost
 
         if objective.norm_fixed is None:
@@ -941,7 +938,6 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
     objective.norm_fixed = None
     objective.norm_fb = None
     objective.fb_failures = 0
-    objective.last_valid_fb_cost = None
     return objective
 
 
@@ -956,7 +952,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     MAX_TIME = kwargs.get('MAX_TIME', 3*86400)
     # CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.001)
     CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.01)
-    OMEGA = kwargs.get('OMEGA', 1e-3)
+    OMEGA = kwargs.get('OMEGA', 1e-2)
     DIST_TH = kwargs.get('DIST_TH', 5.0)
     REG_IN = kwargs.get('REG_IN', 1e-6)
     RFIL = kwargs.get('RFIL', 0.01)
