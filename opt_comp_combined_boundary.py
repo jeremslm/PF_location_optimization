@@ -915,18 +915,22 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
 
         objective.last_flux_err = fixed_cost
 
-        fb_cost = _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
-                                      coil_center_cand1, coil_center_cand2, lim,
-                                      weight_fb, NUM_COILS)
-        if fb_cost >= 1e6:
-            objective.fb_failures += 1
-            fb_cost = objective.norm_fb if objective.norm_fb is not None else 1e6
-        objective.last_fb_cost = fb_cost
+        fb_cost_raw = _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
+                                          coil_center_cand1, coil_center_cand2, lim,
+                                          weight_fb, NUM_COILS)
+        failed = fb_cost_raw >= 1e6
 
         if objective.norm_fixed is None:
             objective.norm_fixed = fixed_cost
-        if objective.norm_fb is None:
-            objective.norm_fb = fb_cost
+        if objective.norm_fb is None and not failed:
+            objective.norm_fb = fb_cost_raw
+
+        if failed:
+            objective.fb_failures += 1
+            fb_cost = objective.norm_fb if objective.norm_fb is not None else 1e6
+        else:
+            fb_cost = fb_cost_raw
+        objective.last_fb_cost = fb_cost
 
         norm_fixed = fixed_cost / objective.norm_fixed if objective.norm_fixed > 0 else fixed_cost
         norm_fb = fb_cost / objective.norm_fb if objective.norm_fb > 0 else fb_cost
