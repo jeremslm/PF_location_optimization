@@ -520,7 +520,7 @@ class OptimizationComparison:
                      acq_dedup_tol=0.05, unique_refined_points=1,
                      random_state=1, maxiter=1000000000):
         if n_initial is None:
-            n_initial = int(round(5 * self.num_coils))
+            n_initial = int(round(25 * self.num_coils))
         if max_perms is None:
             max_perms = self.num_coils
         self._reset_tracking()

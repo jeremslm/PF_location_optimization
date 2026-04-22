@@ -1,5 +1,5 @@
 maxiter is not the right thing
-maxfun is the right thing! 
+maxfun is the right thing! did not implement it here
 
 
 first run where i did fb crash != 10e6 but rather last val * 10 

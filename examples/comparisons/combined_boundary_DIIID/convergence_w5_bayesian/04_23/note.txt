@@ -1,0 +1,4 @@
+
+
+n_initial = 75
+convergence_window = 25 
