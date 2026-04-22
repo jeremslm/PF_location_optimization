@@ -119,7 +119,7 @@ class OptimizationComparison:
         self.o_point = o_point
         self.eval_green = eval_green
 
-    def _reset_tracking(self):
+    def _reset_tracking(self, start_time=None):
         self._n_evals = 0
         self._history = []
         self._x_history = []
@@ -127,7 +127,7 @@ class OptimizationComparison:
         self._best_cost = float('inf')
         self._best_flux_err = None
         self._best_params = None
-        self._start_time = time.time()
+        self._start_time = start_time if start_time is not None else time.time()
         self._convergence = []
         self._stopped_reason = None
 
@@ -264,15 +264,8 @@ class OptimizationComparison:
     # ========================================
 
     def run_multistart_lbfgs(self, n_starts=262144, ftol=1e-9, gtol=1e-6,
-                             starts_window=50, random_state=42):
-        """
-        Multi-start L-BFGS-B with Sobol sampling.
-
-        Each L-BFGS start runs to its own local convergence. Stops when
-        `starts_window` consecutive completed starts show no improvement,
-        or when max evals / wall-clock time is hit.
-        """
-        self._reset_tracking()
+                             starts_window=50, random_state=42, start_time=None):
+        self._reset_tracking(start_time=start_time)
 
         sampler = qmc.Sobol(d=self.n_params, scramble=True, seed=random_state)
         samples = sampler.random(n_starts)
@@ -620,7 +613,7 @@ class OptimizationComparison:
               f"(seed={best['random_state']}) over {n_runs} runs")
         return runs
 
-    def compare_all(self, methods=None, n_runs=1, base_seed=42):
+    def compare_all(self, methods=None, n_runs=1, base_seed=42, start_time=None):
         if methods is None:
             methods = ['multistart_lbfgs', 'bayesian']
 
@@ -634,8 +627,7 @@ class OptimizationComparison:
                 self.run_multiple('multistart_lbfgs', n_runs=n_runs, base_seed=base_seed,
                                   starts_window=10)
             else:
-                self.run_multistart_lbfgs(
-                    starts_window=10)
+                self.run_multistart_lbfgs(starts_window=10, start_time=start_time)
 
         if 'bayesian' in methods:
             print("Running Bayesian Optimization...")
@@ -910,7 +902,7 @@ class OptimizationComparison:
 def main(mygs, methods=None, **kwargs):
     NUM_COILS = kwargs.get('NUM_COILS', 4)
     MAX_EVALS = kwargs.get('MAX_EVALS', 2**18)
-    MAX_TIME = kwargs.get('MAX_TIME', 86400)
+    MAX_TIME = kwargs.get('MAX_TIME', 3*86400)
     CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.001)
     OMEGA = kwargs.get('OMEGA', 1e-3)
     DIST_TH = kwargs.get('DIST_TH', 5.0)
@@ -1044,7 +1036,9 @@ def main(mygs, methods=None, **kwargs):
     while os.path.exists(os.path.join(base, f'run_{existing_runs:02d}', 'results.json')):
         existing_runs += 1
 
-    summary = comparison.compare_all(methods=methods, n_runs=N_RUNS, base_seed=1 + existing_runs)
+    PROCESS_START = kwargs.get('PROCESS_START', None)
+    summary = comparison.compare_all(methods=methods, n_runs=N_RUNS, base_seed=1 + existing_runs,
+                                     start_time=PROCESS_START)
 
     if comparison.all_runs:
         # Save each individual seed run to its own run_XX folder
@@ -1106,6 +1100,7 @@ def main(mygs, methods=None, **kwargs):
 # ============================================
 
 def parallel_case(reg_in, num_coils, ntrials, run_folder, nthreads):
+    t0 = time.time()
     tmp_dir = os.path.join(_BASE_DIR, 'tmp', f'temp_dir_{reg_in}_{num_coils}')
     try:
         shutil.rmtree(tmp_dir)
@@ -1149,7 +1144,8 @@ def parallel_case(reg_in, num_coils, ntrials, run_folder, nthreads):
         REG_IN=reg_in,
         MAX_EVALS=2**18,
         N_RUNS=ntrials,
-        RUN_FOLDER=run_folder
+        RUN_FOLDER=run_folder,
+        PROCESS_START=t0,
     )
     shutil.rmtree(tmp_dir, ignore_errors=True)
     return comparison, summary

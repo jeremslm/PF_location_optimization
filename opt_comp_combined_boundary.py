@@ -230,7 +230,7 @@ class OptimizationComparison:
         self.o_point = o_point
         self.eval_green = eval_green
 
-    def _reset_tracking(self):
+    def _reset_tracking(self, start_time=None):
         self._n_evals = 0
         self._history = []
         self._x_history = []
@@ -241,7 +241,7 @@ class OptimizationComparison:
         self._initial_fixed_cost = None
         self._initial_fb_cost = None
         self._best_params = None
-        self._start_time = time.time()
+        self._start_time = start_time if start_time is not None else time.time()
         self._convergence = []
         self._stopped_reason = None
         self._current_method = None
@@ -251,6 +251,8 @@ class OptimizationComparison:
         self._start_costs = []
         self._convergence_window = None
         self._random_state = None
+        self._maxiter = None
+        self._maxfun = None
         self._fb_failures = 0
         self._flux_err_history = []
         self._fb_cost_history = []
@@ -275,6 +277,8 @@ class OptimizationComparison:
                 'rfil': float(self.rfil),
                 'alpha': float(self.alpha),
                 'weight_fb': float(self.weight_fb),
+                'maxiter': self._maxiter,
+                'maxfun': self._maxfun,
             },
             'method': self._current_method,
             'stopping': 'in_progress',
@@ -445,10 +449,13 @@ class OptimizationComparison:
                 'k--', alpha=0.3, linewidth=1)
 
     def run_multistart_lbfgs(self, n_starts=262144, ftol=1e-9, gtol=1e-6,
-                             starts_window=5, random_state=42, maxiter=1000000000):
-        self._reset_tracking()
+                             starts_window=5, random_state=42, maxiter=1000000000, maxfun=1000000000,
+                             start_time=None):
+        self._reset_tracking(start_time=start_time)
         self._current_method = 'L-BFGS'
         self._convergence_window = starts_window
+        self._maxiter = maxiter
+        self._maxfun = maxfun
         self._random_state = random_state
         sampler = qmc.Sobol(d=self.n_params, scramble=True, seed=random_state)
         samples = sampler.random(n_starts)
@@ -462,7 +469,7 @@ class OptimizationComparison:
             try:
                 self._current_start += 1
                 minimize(self._track_objective, x0, method='L-BFGS-B', bounds=self.bounds,
-                         options={'ftol': ftol, 'gtol': gtol, 'maxiter': maxiter, 'disp': False})
+                         options={'ftol': ftol, 'gtol': gtol, 'maxiter': maxiter, 'maxfun': maxfun, 'disp': False})
                 self._starts_completed += 1
                 starts_bests.append(self._best_cost)
                 self._start_boundaries.append(self._n_evals)
@@ -801,6 +808,8 @@ class OptimizationComparison:
                 'rfil': float(self.rfil),
                 'alpha': float(self.alpha),
                 'weight_fb': float(self.weight_fb),
+                'maxiter': self._maxiter,
+                'maxfun': self._maxfun,
             },
             'methods': {}
         }
@@ -944,7 +953,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
          methods=None, **kwargs):
     NUM_COILS = kwargs.get('NUM_COILS', 4)
     MAX_EVALS = kwargs.get('MAX_EVALS', 2**18)
-    MAX_TIME = kwargs.get('MAX_TIME', 86400)
+    MAX_TIME = kwargs.get('MAX_TIME', 3*86400)
     # CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.001)
     CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.01)
     OMEGA = kwargs.get('OMEGA', 1e-3)
@@ -1022,23 +1031,24 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     if methods is None:
         methods = ['multistart_lbfgs', 'bayesian']
 
+    PROCESS_START = kwargs.get('PROCESS_START', None)
     if 'multistart_lbfgs' in methods:
         print(f"Running Multi-start L-BFGS... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}")
         if N_RUNS > 1:
             comparison.run_multiple('multistart_lbfgs', n_runs=N_RUNS,
-                                    base_seed=seed_offset, starts_window=5, maxiter=20)
+                                    base_seed=seed_offset, starts_window=5, maxfun=100)
         else:
-            comparison.run_multistart_lbfgs(starts_window=5, random_state=seed_offset, maxiter=20)
+            comparison.run_multistart_lbfgs(starts_window=5, random_state=seed_offset, maxfun=100,
+                                            start_time=PROCESS_START)
 
     if 'bayesian' in methods:
         print(f"Running Bayesian Optimization... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}")
         if N_RUNS > 1:
             comparison.run_multiple('bayesian', n_runs=N_RUNS, base_seed=seed_offset,
-                                    bayesian_stagnation_window=5, refinement_window=5, unique_refined_points=1, acq_multiplier=10,
-                                    maxiter=20)
+                                    bayesian_stagnation_window=5, refinement_window=5, unique_refined_points=1, acq_multiplier=10)
         else:
             comparison.run_bayesian(bayesian_stagnation_window=5, refinement_window=5,
-                                    random_state=seed_offset, unique_refined_points=1, acq_multiplier=10, maxiter=20)
+                                    random_state=seed_offset, unique_refined_points=1, acq_multiplier=10)
 
     summary = comparison.summary()
 
@@ -1081,6 +1091,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
 # ============================================
 
 def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
+    t0 = time.time()
     tmp_dir = os.path.join(_BASE_DIR, 'tmp', f'temp_combined_{weight_fb}_{num_coils}')
     try:
         shutil.rmtree(tmp_dir)
@@ -1134,8 +1145,10 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
         ALPHA=alpha,
         WEIGHT_FB=weight_fb,
         MAX_EVALS=2**18,
+        MAX_TIME=3*86400,
         N_RUNS=ntrials,
         RUN_FOLDER=run_folder,
+        PROCESS_START=t0,
     )
     shutil.rmtree(tmp_dir, ignore_errors=True)
     return summary
