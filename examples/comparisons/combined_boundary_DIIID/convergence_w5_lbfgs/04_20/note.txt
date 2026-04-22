@@ -1,0 +1,6 @@
+maxiter is not the right thing
+maxfun is the right thing! 
+
+
+first run where i did fb crash != 10e6 but rather last val * 10 
+    realized that this is wrong since it messes up final cost 
