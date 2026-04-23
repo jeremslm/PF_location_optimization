@@ -87,7 +87,8 @@ def boundary_distance(fixed_LCFS, free_LCFS, mag_axis):
     theta_free = np.arctan2(free_LCFS[:, 1] - Z0, free_LCFS[:, 0] - R0)
     r_free = np.sqrt((free_LCFS[:, 0] - R0)**2 + (free_LCFS[:, 1] - Z0)**2)
     r_fixed_interp = np.interp(theta_free, theta_fixed, r_fixed, period=2 * np.pi)
-    return np.sum(np.abs(r_free - r_fixed_interp))
+    # return np.sum(np.abs(r_free - r_fixed_interp))
+    return np.mean((r_free - r_fixed_interp) ** 2)
 
 
 def make_new_coils(params, nCoils, coil_center_cand1, coil_center_cand2, dx=0.03, dy=0.03):
@@ -252,7 +253,7 @@ class OptimizationComparison:
         self._convergence_window = None
         self._random_state = None
         self._maxiter = None
-        self._maxfun = None
+        self._lbfgs_maxfun = None
         self._fb_failures = 0
         self._flux_err_history = []
         self._fb_cost_history = []
@@ -277,7 +278,7 @@ class OptimizationComparison:
                 'alpha': float(self.alpha),
                 'weight_fb': float(self.weight_fb),
                 'maxiter': self._maxiter,
-                'maxfun': self._maxfun,
+                'lbfgs_maxfun': self._lbfgs_maxfun,
             },
             'method': self._current_method,
             'stopping': 'in_progress',
@@ -448,13 +449,13 @@ class OptimizationComparison:
                 'k--', alpha=0.3, linewidth=1)
 
     def run_multistart_lbfgs(self, n_starts=262144, ftol=1e-9, gtol=1e-6,
-                             starts_window=5, random_state=42, maxiter=1000000000, maxfun=1000000000,
+                             starts_window=5, random_state=42, maxiter=1000000000, lbfgs_maxfun=1000000000,
                              start_time=None):
         self._reset_tracking(start_time=start_time)
         self._current_method = 'L-BFGS'
         self._convergence_window = starts_window
         self._maxiter = maxiter
-        self._maxfun = maxfun
+        self._lbfgs_maxfun = lbfgs_maxfun
         self._random_state = random_state
         sampler = qmc.Sobol(d=self.n_params, scramble=True, seed=random_state)
         samples = sampler.random(n_starts)
@@ -468,7 +469,7 @@ class OptimizationComparison:
             try:
                 self._current_start += 1
                 minimize(self._track_objective, x0, method='L-BFGS-B', bounds=self.bounds,
-                         options={'ftol': ftol, 'gtol': gtol, 'maxiter': maxiter, 'maxfun': maxfun, 'disp': False})
+                         options={'ftol': ftol, 'gtol': gtol, 'maxiter': maxiter, 'maxfun': lbfgs_maxfun, 'disp': False})
                 self._starts_completed += 1
                 starts_bests.append(self._best_cost)
                 self._start_boundaries.append(self._n_evals)
@@ -508,6 +509,8 @@ class OptimizationComparison:
             'random_state': random_state,
             'flux_err_history': list(self._flux_err_history),
             'fb_cost_history': list(self._fb_cost_history),
+            'maxiter': maxiter,
+            'lbfgs_maxfun': lbfgs_maxfun,
         }
         print(f"L-BFGS: {self._n_evals} evals, {elapsed:.1f}s, "
               f"{self._starts_completed} starts, stopped by: {stopped_by}")
@@ -518,12 +521,15 @@ class OptimizationComparison:
                      local_optimize=True, refinement_window=5,
                      max_perms=None, acq_multiplier=10,
                      acq_dedup_tol=0.05, unique_refined_points=1,
-                     random_state=1, maxiter=1000000000):
+                     random_state=1, maxiter=1000000000, lbfgs_maxfun=1000000000,
+                     start_time=None):
         if n_initial is None:
             n_initial = int(round(25 * self.num_coils))
         if max_perms is None:
             max_perms = self.num_coils
-        self._reset_tracking()
+        self._reset_tracking(start_time=start_time)
+        self._maxiter = maxiter
+        self._lbfgs_maxfun = lbfgs_maxfun
         self._current_method = 'Bayesian'
         space = [Real(low, high) for low, high in self.bounds]
 
@@ -595,7 +601,7 @@ class OptimizationComparison:
                 time_before = time.time() - self._start_time
                 try:
                     minimize(self._track_objective, np.array(cand), method='L-BFGS-B',
-                             bounds=self.bounds, options={'ftol': 1e-9, 'gtol': 1e-6, 'maxiter': maxiter, 'disp': False})
+                             bounds=self.bounds, options={'ftol': 1e-9, 'gtol': 1e-6, 'maxiter': maxiter, 'maxfun': lbfgs_maxfun, 'disp': False})
                     pts_refined += 1
                     refinement_bests.append(self._best_cost)
                     refinement_evals.append(self._n_evals - evals_before)
@@ -659,6 +665,8 @@ class OptimizationComparison:
             'random_state': random_state,
             'flux_err_history': list(self._flux_err_history),
             'fb_cost_history': list(self._fb_cost_history),
+            'maxiter': maxiter,
+            'lbfgs_maxfun': lbfgs_maxfun,
         }
         print(f"Total: {self._n_evals} evals, {elapsed:.1f}s, "
               f"refined {pts_refined} pts, stopped by: {stopped_by}")
@@ -808,7 +816,7 @@ class OptimizationComparison:
                 'alpha': float(self.alpha),
                 'weight_fb': float(self.weight_fb),
                 'maxiter': self._maxiter,
-                'maxfun': self._maxfun,
+                'lbfgs_maxfun': self._lbfgs_maxfun,
             },
             'methods': {}
         }
@@ -953,7 +961,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
          methods=None, **kwargs):
     NUM_COILS = kwargs.get('NUM_COILS', 4)
     MAX_EVALS = kwargs.get('MAX_EVALS', 2**18)
-    MAX_TIME = kwargs.get('MAX_TIME', 3*86400)
+    MAX_TIME = kwargs.get('MAX_TIME', 86400)
     # CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.001)
     CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.01)
     OMEGA = kwargs.get('OMEGA', 1e-2)
@@ -1036,19 +1044,31 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
         print(f"Running Multi-start L-BFGS... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}")
         if N_RUNS > 1:
             comparison.run_multiple('multistart_lbfgs', n_runs=N_RUNS,
-                                    base_seed=seed_offset, starts_window=5, maxfun=100)
+                                    base_seed=seed_offset, 
+                                    starts_window=5, 
+                                    lbfgs_maxfun=100)
         else:
-            comparison.run_multistart_lbfgs(starts_window=5, random_state=seed_offset, maxfun=100,
+            comparison.run_multistart_lbfgs(starts_window=5, 
+                                            random_state=seed_offset, 
+                                            lbfgs_maxfun=100,
                                             start_time=PROCESS_START)
 
     if 'bayesian' in methods:
         print(f"Running Bayesian Optimization... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}")
         if N_RUNS > 1:
-            comparison.run_multiple('bayesian', n_runs=N_RUNS, base_seed=seed_offset,
-                                    bayesian_stagnation_window=5, refinement_window=5, unique_refined_points=1, acq_multiplier=10)
+            comparison.run_multiple('bayesian', n_runs=N_RUNS, 
+                                    base_seed=seed_offset,
+                                    bayesian_stagnation_window=25, 
+                                    unique_refined_points=3, 
+                                    acq_multiplier=10,
+                                    lbfgs_maxfun=100)
         else:
-            comparison.run_bayesian(bayesian_stagnation_window=5, refinement_window=5,
-                                    random_state=seed_offset, unique_refined_points=1, acq_multiplier=10)
+            comparison.run_bayesian(bayesian_stagnation_window=25,
+                                    random_state=seed_offset, 
+                                    unique_refined_points=3, 
+                                    acq_multiplier=10,
+                                    lbfgs_maxfun=100,
+                                    start_time=PROCESS_START,)
 
     summary = comparison.summary()
 

@@ -7,11 +7,12 @@ opt_comp_combined_boundary.py
   - Elapsed time fix: _reset_tracking now accepts start_time=None; run_multistart_lbfgs passes it through; parallel_case records t0 = time.time() at   
   process launch and passes it via PROCESS_START through main() → so elapsed and the timeout both count from process start including setup, not just   
   the optimization phase                                                                                                                               
-  - Max time: default changed from 86400 (1 day) to 3*86400 (3 days)                                                                                   
+  - Max time: 86400 is better enforced now                                                                                  
   - OMEGA: default changed from 1e-3 to 1e-2 — penalty at one-pair full stacking goes from 2.5% to 25% of typical good cost (~0.1)                   
   - FB failure handling: on GS solve failure, fb_cost is now set to objective.norm_fb (so normalized fb cost = exactly 1.0, same as initial) instead of
    last_valid_fb_cost * 10; removed last_valid_fb_cost entirely since it's no longer needed                                                            
                                                                                                                                                        
 
+for boundary distance -> np.mean((r_free - r_fixed_interp) ** 2)
 
                                                                                                                                                       

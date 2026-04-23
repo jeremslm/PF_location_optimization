@@ -264,7 +264,8 @@ class OptimizationComparison:
     # ========================================
 
     def run_multistart_lbfgs(self, n_starts=262144, ftol=1e-9, gtol=1e-6,
-                             starts_window=50, random_state=42, start_time=None):
+                             starts_window=50, random_state=42, start_time=None,
+                             maxiter=1000000000, lbfgs_maxfun=1000000000):
         self._reset_tracking(start_time=start_time)
 
         sampler = qmc.Sobol(d=self.n_params, scramble=True, seed=random_state)
@@ -288,7 +289,7 @@ class OptimizationComparison:
                 minimize(
                     self._track_objective, x0,
                     method='L-BFGS-B', bounds=self.bounds,
-                    options={'ftol': ftol, 'gtol': gtol, 'disp': False}
+                    options={'ftol': ftol, 'gtol': gtol, 'maxiter': maxiter, 'maxfun': lbfgs_maxfun, 'disp': False}
                 )
                 starts_completed += 1
                 starts_bests.append(self._best_cost)
@@ -327,6 +328,8 @@ class OptimizationComparison:
             'start_costs': start_costs,
             'convergence_window': starts_window,
             'random_state': random_state,
+            'maxiter': maxiter,
+            'lbfgs_maxfun': lbfgs_maxfun,
         }
 
         return self.results['Multi-start L-BFGS']
@@ -391,7 +394,8 @@ class OptimizationComparison:
                      local_optimize=True, refinement_window=50,
                      max_perms=None, acq_multiplier=10,
                      acq_dedup_tol=0.05, unique_refined_points=5,
-                     random_state=1):
+                     random_state=1, maxiter=1000000000, lbfgs_maxfun=1000000000,
+                     start_time=None):
         """
         Bayesian Optimization with GP, then L-BFGS refinement.
 
@@ -415,7 +419,7 @@ class OptimizationComparison:
         if max_perms is None:
             max_perms = self.num_coils
 
-        self._reset_tracking()
+        self._reset_tracking(start_time=start_time)
         space = [Real(low, high) for low, high in self.bounds]
 
         def stopping_callback():
@@ -504,7 +508,7 @@ class OptimizationComparison:
                     minimize(
                         self._track_objective, start,
                         method='L-BFGS-B', bounds=self.bounds,
-                        options={'ftol': 1e-9, 'gtol': 1e-6, 'disp': False}
+                        options={'ftol': 1e-9, 'gtol': 1e-6, 'maxiter': maxiter, 'maxfun': lbfgs_maxfun, 'disp': False}
                     )
                     pts_refined += 1
                     refinement_bests.append(self._best_cost)
@@ -567,6 +571,8 @@ class OptimizationComparison:
             'refinement_window': refinement_window,
             'refinement_stopping': refinement_stopped_by,
             'random_state': random_state,
+            'maxiter': maxiter,
+            'lbfgs_maxfun': lbfgs_maxfun,
         }
 
         print(f"Total: {self._n_evals} evals, {elapsed:.1f}s, "
@@ -636,7 +642,7 @@ class OptimizationComparison:
                                   bayesian_stagnation_window=10, unique_refined_points=3)
             else:
                 self.run_bayesian(unique_refined_points=3,
-                    bayesian_stagnation_window=10)
+                    bayesian_stagnation_window=10, start_time=start_time)
 
         return self.summary()
 
