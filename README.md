@@ -117,7 +117,7 @@ python opt_comp_convergence_parallel.py --nprocs 12 --nthreads 2 --folder conver
 
 open: 
 export OMP_NUM_THREADS=1 export MKL_NUM_THREADS=1 export OPENBLAS_NUM_THREADS=1 export NUMEXPR_NUM_THREADS=1
-python opt_comp_combined_boundary.py --nprocs 4 --nthreads 2 --ntrials 1 --folder convergence_w5
+python opt_comp_combined_boundary.py --nprocs 12 --nthreads 2 --ntrials 1 --folder convergence_w5_l_temp
 
 w25: 
 export OMP_NUM_THREADS=1 export MKL_NUM_THREADS=1 export OPENBLAS_NUM_THREADS=1 export NUMEXPR_NUM_THREADS=1
