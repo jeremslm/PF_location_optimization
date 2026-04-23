@@ -51,9 +51,6 @@ _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 _crash_logger = logging.getLogger('fb_crashes')
 _crash_logger.setLevel(logging.ERROR)
-_crash_handler = logging.FileHandler(os.path.join(_BASE_DIR, 'fb_crashes.log'))
-_crash_handler.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
-_crash_logger.addHandler(_crash_handler)
 
 
 class TimeoutException(Exception):
@@ -1175,6 +1172,53 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
 
 
 # ============================================
+# Per-case run logging
+# ============================================
+
+def _make_case_logger(base, weight_fb, num_coils):
+    name = f'run_{weight_fb}_{num_coils}'
+    log = logging.getLogger(name)
+    if log.handlers:
+        return log
+    log.setLevel(logging.INFO)
+    fmt = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    fh = logging.FileHandler(os.path.join(base, 'run.log'))
+    fh.setFormatter(fmt)
+    sh = logging.StreamHandler(sys.stdout)
+    sh.setFormatter(fmt)
+    log.addHandler(fh)
+    log.addHandler(sh)
+    return log
+
+
+def logged_parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
+    base = os.path.join(_BASE_DIR,
+        f'examples/comparisons/combined_boundary_DIIID/{run_folder}/'
+        f'alpha:{alpha},weight:{weight_fb:.0e},lambda:1e-06,coils:{num_coils}')
+    os.makedirs(base, exist_ok=True)
+
+    # redirect fb_crashes logger to per-case file
+    crash_log = logging.getLogger('fb_crashes')
+    for h in crash_log.handlers[:]:
+        crash_log.removeHandler(h)
+    crash_handler = logging.FileHandler(os.path.join(base, 'fb_crashes.log'))
+    crash_handler.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+    crash_log.addHandler(crash_handler)
+
+    log = _make_case_logger(base, weight_fb, num_coils)
+    params = f"weight_fb={weight_fb:.0e} num_coils={num_coils} ntrials={ntrials} alpha={alpha}"
+    t0 = time.time()
+    log.info(f"START {params}")
+    try:
+        result = parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha)
+        log.info(f"DONE {params} elapsed={time.time()-t0:.1f}s")
+        return result
+    except Exception as e:
+        log.error(f"FAILED {params} elapsed={time.time()-t0:.1f}s error={e}")
+        raise
+
+
+# ============================================
 # Entry point
 # ============================================
 
@@ -1192,24 +1236,24 @@ if __name__ == "__main__":
                         help='Blending weight for free-boundary cost')
     args = parser.parse_args()
 
-    # weights = [1e-4, 1e-3, 1e-2, 1e-1]
-    # coils = [2, 3, 4, 5, 6]
-
     weights = [1e-4, 1e-3, 1e-2, 1e-1]
-    coils = [3]
+    coils = [2, 3, 4, 5, 6]
+
+    # weights = [1e-4, 1e-3, 1e-2, 1e-1]
+    # coils = [3]
 
     pool = Pool(processes=args.nprocs)
-    results = {}
+    async_results = {}
     for w in weights:
         for nc in coils:
-            results[(w, nc)] = pool.apply_async(
-                parallel_case, args=(w, nc, args.ntrials, args.folder, args.nthreads, args.alpha)
+            async_results[(w, nc)] = pool.apply_async(
+                logged_parallel_case, args=(w, nc, args.ntrials, args.folder, args.nthreads, args.alpha)
             )
 
     pool.close()
     pool.join()
 
-    for (w, nc), result in results.items():
+    for (w, nc), result in async_results.items():
         try:
             result.get()
             print(f"weight_fb={w}, num_coils={nc}: done")
