@@ -1155,8 +1155,8 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
         fixed_LCFS=fixed_LCFS,
         lim=lim,
         # methods=["multistart_lbfgs", "bayesian"],
-        methods = ["multistart_lbfgs"], 
-        # methods = ["bayesian"], 
+        # methods = ["multistart_lbfgs"], 
+        methods = ["bayesian"], 
         NUM_COILS=num_coils,
         REG_IN=1e-6,
         ALPHA=alpha,
@@ -1237,7 +1237,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     weights = [1e-4, 1e-3, 1e-2, 1e-1]
-    coils = [3, 4, 5]
+    coils = [3]
 
     # weights = [1e-4, 1e-3, 1e-2, 1e-1]
     # coils = [3]

@@ -1,4 +1,4 @@
-2026-04-23 12:51:16,994 pid=41896 weight_fb=1.00e-03 params=[1.1742e+02 1.1486e+02 6.5303e+01 9.2689e-01 6.4943e-01 1.0768e-01]
+2026-04-25 10:49:35,209 pid=96651 weight_fb=1.00e-03 params=[1.1742e+02 1.1486e+02 6.5303e+01 9.2689e-01 6.4943e-01 1.0768e-01]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
     make_mesh(scan_geom, mesh_file, lim)
@@ -9,7 +9,7 @@ Traceback (most recent call last):
     raise ValueError('Meshing error: unclaimed region detected!')
 ValueError: Meshing error: unclaimed region detected!
 
-2026-04-23 12:55:42,265 pid=41896 weight_fb=1.00e-03 params=[149.9232 162.3643 147.8027   0.5988   0.5713   0.4046]
+2026-04-25 10:54:24,921 pid=96651 weight_fb=1.00e-03 params=[149.9232 162.3643 147.8027   0.5988   0.5713   0.4046]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
     make_mesh(scan_geom, mesh_file, lim)
@@ -20,7 +20,7 @@ Traceback (most recent call last):
     raise ValueError('Meshing error: unclaimed region detected!')
 ValueError: Meshing error: unclaimed region detected!
 
-2026-04-23 12:58:51,704 pid=41896 weight_fb=1.00e-03 params=[14.9232 17.3643 72.8027  0.38    0.2276  0.1233]
+2026-04-25 10:57:50,468 pid=96651 weight_fb=1.00e-03 params=[14.9232 17.3643 72.8027  0.38    0.2276  0.1233]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -28,7 +28,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 13:11:15,428 pid=41896 weight_fb=1.00e-03 params=[168.6732 161.1143  19.0527   0.7472   0.251    0.6155]
+2026-04-25 11:11:24,381 pid=96651 weight_fb=1.00e-03 params=[168.6732 161.1143  19.0527   0.7472   0.251    0.6155]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -36,7 +36,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 13:20:41,929 pid=41896 weight_fb=1.00e-03 params=[144.2982  12.9893  95.9277   0.212    0.333    0.1819]
+2026-04-25 11:21:38,887 pid=96651 weight_fb=1.00e-03 params=[144.2982  12.9893  95.9277   0.212    0.333    0.1819]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -44,7 +44,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 13:21:28,571 pid=41896 weight_fb=1.00e-03 params=[114.2982  62.9893 125.9277   0.1495   0.6455   0.9944]
+2026-04-25 11:22:29,530 pid=96651 weight_fb=1.00e-03 params=[114.2982  62.9893 125.9277   0.1495   0.6455   0.9944]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -52,7 +52,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 13:30:03,463 pid=41896 weight_fb=1.00e-03 params=[ 41.7982 100.4893 113.4277   0.2277   0.5674   0.135 ]
+2026-04-25 11:31:48,345 pid=96651 weight_fb=1.00e-03 params=[ 41.7982 100.4893 113.4277   0.2277   0.5674   0.135 ]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -60,18 +60,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 13:46:22,555 pid=41896 weight_fb=1.00e-03 params=[126.7135  22.6032 131.8276   0.2895   0.5226   0.4625]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 13:51:09,315 pid=41896 weight_fb=1.00e-03 params=[1.1535e+02 1.6901e+02 1.1303e+02 1.4479e-01 8.3162e-01 1.4387e-01]
+2026-04-25 11:59:37,048 pid=96651 weight_fb=1.00e-03 params=[163.0151 164.6784 166.0826   0.5398   0.6607   0.6216]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
     make_mesh(scan_geom, mesh_file, lim)
@@ -82,216 +71,7 @@ Traceback (most recent call last):
     raise ValueError('Meshing error: unclaimed region detected!')
 ValueError: Meshing error: unclaimed region detected!
 
-2026-04-23 13:52:34,722 pid=41896 weight_fb=1.00e-03 params=[118.4449 102.6362 112.6808   0.4169   0.4377   0.1513]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 14:01:31,927 pid=41896 weight_fb=1.00e-03 params=[54.4183 52.762  66.3391  0.9101  0.9417  0.5206]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 14:07:21,346 pid=41896 weight_fb=1.00e-03 params=[ 68.9377 128.7035  66.3925   0.5172   0.817    0.5138]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 14:14:15,342 pid=41896 weight_fb=1.00e-03 params=[21.3947 74.7071 77.4726  0.3229  0.5668  0.5663]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 14:14:52,953 pid=41896 weight_fb=1.00e-03 params=[ 73.9499 166.4587  76.1153   0.4519   0.8089   0.5702]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:04:55,303 pid=41896 weight_fb=1.00e-03 params=[ 69.296  160.1926  72.5257   0.3641   0.1874   0.4543]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:05:26,104 pid=41896 weight_fb=1.00e-03 params=[ 69.296  160.1926  72.5257   0.3641   0.1874   0.4543]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:05:56,990 pid=41896 weight_fb=1.00e-03 params=[ 69.296  160.1926  72.5257   0.3641   0.1874   0.4543]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:06:27,867 pid=41896 weight_fb=1.00e-03 params=[ 69.296  160.1926  72.5257   0.3641   0.1874   0.4543]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:06:58,828 pid=41896 weight_fb=1.00e-03 params=[ 69.296  160.1926  72.5257   0.3641   0.1874   0.4543]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:07:29,760 pid=41896 weight_fb=1.00e-03 params=[ 69.296  160.1926  72.5257   0.3641   0.1874   0.4543]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:08:00,887 pid=41896 weight_fb=1.00e-03 params=[ 69.296  160.1926  72.5257   0.3641   0.1874   0.4543]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:13:54,813 pid=41896 weight_fb=1.00e-03 params=[ 69.2959 160.1928  72.5258   0.3639   0.1878   0.4551]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:14:25,689 pid=41896 weight_fb=1.00e-03 params=[ 69.2959 160.1928  72.5258   0.3639   0.1878   0.4551]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:14:56,713 pid=41896 weight_fb=1.00e-03 params=[ 69.2959 160.1928  72.5258   0.3639   0.1878   0.4551]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:15:27,588 pid=41896 weight_fb=1.00e-03 params=[ 69.2959 160.1928  72.5258   0.3639   0.1878   0.4551]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:15:58,816 pid=41896 weight_fb=1.00e-03 params=[ 69.2959 160.1928  72.5258   0.3639   0.1878   0.4551]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:16:29,870 pid=41896 weight_fb=1.00e-03 params=[ 69.2959 160.1928  72.5258   0.3639   0.1878   0.4551]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:17:00,605 pid=41896 weight_fb=1.00e-03 params=[ 69.2959 160.1928  72.5258   0.3639   0.1878   0.4551]
-Traceback (most recent call last):
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 143, in _free_boundary_cost
-    make_mesh(scan_geom, mesh_file, lim)
-  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 125, in make_mesh
-    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
-                                  ^^^^^^^^^^^^^^^^^^^^
-  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
-    raise ValueError('Meshing error: unclaimed region detected!')
-ValueError: Meshing error: unclaimed region detected!
-
-2026-04-23 18:17:47,060 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2612  72.5443   0.3058   0.2864   0.6868]
+2026-04-25 12:00:33,426 pid=96651 weight_fb=1.00e-03 params=[ 10.     132.0256 102.2353   0.5157   1.       0.61  ]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -299,7 +79,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:18:33,121 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2612  72.5443   0.3058   0.2864   0.6868]
+2026-04-25 12:02:29,487 pid=96651 weight_fb=1.00e-03 params=[146.5069  10.     139.4639   0.7289   1.       0.5336]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -307,7 +87,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:19:19,320 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2612  72.5443   0.3058   0.2864   0.6868]
+2026-04-25 12:03:26,935 pid=96651 weight_fb=1.00e-03 params=[124.8235 153.9396  10.       0.664    0.8074   0.753 ]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -315,7 +95,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:20:05,740 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2612  72.5443   0.3058   0.2864   0.6868]
+2026-04-25 12:13:40,205 pid=96651 weight_fb=1.00e-03 params=[ 10.     146.3293  86.4345   0.5744   0.842    0.4487]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -323,7 +103,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:20:51,899 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2612  72.5443   0.3058   0.2864   0.6868]
+2026-04-25 12:14:33,800 pid=96651 weight_fb=1.00e-03 params=[ 10.     146.3293  86.4345   0.5744   0.842    0.4487]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -331,7 +111,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:21:37,970 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2612  72.5443   0.3058   0.2864   0.6868]
+2026-04-25 12:15:26,819 pid=96651 weight_fb=1.00e-03 params=[ 10.     146.3293  86.4345   0.5744   0.842    0.4487]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -339,7 +119,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:22:24,348 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2612  72.5443   0.3058   0.2864   0.6868]
+2026-04-25 12:16:20,067 pid=96651 weight_fb=1.00e-03 params=[ 10.     146.3293  86.4345   0.5744   0.842    0.4487]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -347,7 +127,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:23:10,461 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2613  72.5443   0.3057   0.2866   0.6872]
+2026-04-25 12:17:13,517 pid=96651 weight_fb=1.00e-03 params=[ 10.     146.3293  86.4345   0.5744   0.842    0.4487]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -355,7 +135,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:23:56,773 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2613  72.5443   0.3057   0.2866   0.6872]
+2026-04-25 12:18:07,101 pid=96651 weight_fb=1.00e-03 params=[ 10.     146.3293  86.4345   0.5744   0.842    0.4487]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -363,7 +143,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:24:42,929 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2613  72.5443   0.3057   0.2866   0.6872]
+2026-04-25 12:19:00,353 pid=96651 weight_fb=1.00e-03 params=[ 10.     146.3293  86.4345   0.5744   0.842    0.4487]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -371,7 +151,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:25:29,077 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2613  72.5443   0.3057   0.2866   0.6872]
+2026-04-25 12:19:53,747 pid=96651 weight_fb=1.00e-03 params=[ 10.0076 146.3335  86.4328   0.5296   0.79     0.4686]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -379,7 +159,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:26:15,109 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2613  72.5443   0.3057   0.2866   0.6872]
+2026-04-25 12:20:47,159 pid=96651 weight_fb=1.00e-03 params=[ 10.0076 146.3335  86.4328   0.5296   0.79     0.4686]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -387,7 +167,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:27:01,252 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2613  72.5443   0.3057   0.2866   0.6872]
+2026-04-25 12:21:40,758 pid=96651 weight_fb=1.00e-03 params=[ 10.0076 146.3335  86.4328   0.5296   0.79     0.4686]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -395,7 +175,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:27:47,324 pid=41896 weight_fb=1.00e-03 params=[ 69.2735 160.2613  72.5443   0.3057   0.2866   0.6872]
+2026-04-25 12:22:34,143 pid=96651 weight_fb=1.00e-03 params=[ 10.0076 146.3335  86.4328   0.5296   0.79     0.4686]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -403,7 +183,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:28:33,340 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:23:27,587 pid=96651 weight_fb=1.00e-03 params=[ 10.0076 146.3335  86.4328   0.5296   0.79     0.4686]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -411,7 +191,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:29:19,604 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:24:21,130 pid=96651 weight_fb=1.00e-03 params=[ 10.0076 146.3335  86.4328   0.5296   0.79     0.4686]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -419,7 +199,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:30:05,618 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:25:14,741 pid=96651 weight_fb=1.00e-03 params=[ 10.0076 146.3335  86.4328   0.5296   0.79     0.4686]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -427,7 +207,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:30:51,697 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:32:02,221 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -435,7 +215,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:31:37,841 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:32:55,621 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -443,7 +223,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:32:23,976 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:33:48,595 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -451,7 +231,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:33:10,113 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:34:41,976 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -459,7 +239,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:44:42,269 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:35:35,168 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -467,7 +247,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:45:28,348 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:36:28,396 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -475,7 +255,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:46:14,711 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:37:21,529 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -483,7 +263,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:47:00,845 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:44:15,469 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -491,7 +271,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:47:47,078 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:45:08,514 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -499,7 +279,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:48:33,251 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:46:01,692 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -507,7 +287,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:49:19,320 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:46:54,640 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -515,7 +295,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:50:05,264 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:47:47,435 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -523,7 +303,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:50:51,604 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:48:40,824 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -531,7 +311,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:51:37,473 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:49:33,593 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -539,7 +319,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:52:23,537 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:56:29,942 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -547,7 +327,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:53:09,609 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:57:23,537 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -555,7 +335,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:53:55,514 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:58:16,423 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -563,7 +343,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 18:54:41,509 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 12:59:09,796 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -571,7 +351,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:00:51,421 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 13:00:02,825 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -579,7 +359,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:01:37,473 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 13:00:55,972 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -587,7 +367,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:02:23,727 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 13:01:49,174 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7882   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -595,7 +375,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:03:09,651 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 13:08:49,659 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -603,7 +383,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:03:55,582 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 13:09:42,959 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -611,7 +391,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:04:41,783 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 13:10:35,871 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -619,7 +399,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:05:28,017 pid=41896 weight_fb=1.00e-03 params=[ 69.2734 160.2614  72.5444   0.3056   0.2867   0.6877]
+2026-04-25 13:11:29,066 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -627,7 +407,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:11:37,378 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.305    0.287    0.6882]
+2026-04-25 13:12:22,206 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -635,7 +415,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:12:23,403 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.305    0.287    0.6882]
+2026-04-25 13:13:15,447 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -643,7 +423,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:13:09,290 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.305    0.287    0.6882]
+2026-04-25 13:14:08,496 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -651,7 +431,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:13:55,225 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.305    0.287    0.6882]
+2026-04-25 13:21:09,284 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -659,7 +439,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:14:41,455 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.305    0.287    0.6882]
+2026-04-25 13:22:02,366 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -667,7 +447,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:15:27,589 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.305    0.287    0.6882]
+2026-04-25 13:22:50,662 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -675,7 +455,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:16:13,682 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.305    0.287    0.6882]
+2026-04-25 13:23:34,488 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -683,7 +463,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:22:21,846 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.3048   0.2871   0.6884]
+2026-04-25 13:24:18,444 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -691,7 +471,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:23:07,808 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.3048   0.2871   0.6884]
+2026-04-25 13:25:02,450 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -699,7 +479,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:23:54,042 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.3048   0.2871   0.6884]
+2026-04-25 13:25:46,359 pid=96651 weight_fb=1.00e-03 params=[ 10.0085 146.3337  86.4328   0.5284   0.7881   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -707,7 +487,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:24:40,475 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.3048   0.2871   0.6884]
+2026-04-25 13:26:30,039 pid=96651 weight_fb=1.00e-03 params=[ 10.0086 146.3337  86.4328   0.5282   0.7879   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -715,7 +495,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:25:26,583 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.3048   0.2871   0.6884]
+2026-04-25 13:27:13,903 pid=96651 weight_fb=1.00e-03 params=[ 10.0086 146.3337  86.4328   0.5282   0.7879   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -723,7 +503,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:26:12,432 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.3048   0.2871   0.6884]
+2026-04-25 13:27:57,753 pid=96651 weight_fb=1.00e-03 params=[ 10.0086 146.3337  86.4328   0.5282   0.7879   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -731,7 +511,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:26:58,372 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2617  72.5444   0.3048   0.2871   0.6884]
+2026-04-25 13:28:41,953 pid=96651 weight_fb=1.00e-03 params=[ 10.0086 146.3337  86.4328   0.5282   0.7879   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -739,7 +519,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:27:44,360 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2618  72.5444   0.3046   0.2872   0.6886]
+2026-04-25 13:29:25,902 pid=96651 weight_fb=1.00e-03 params=[ 10.0086 146.3337  86.4328   0.5282   0.7879   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -747,7 +527,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:28:30,416 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2618  72.5444   0.3046   0.2872   0.6886]
+2026-04-25 13:30:09,964 pid=96651 weight_fb=1.00e-03 params=[ 10.0086 146.3337  86.4328   0.5282   0.7879   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -755,7 +535,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:29:16,297 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2618  72.5444   0.3046   0.2872   0.6886]
+2026-04-25 13:30:53,877 pid=96651 weight_fb=1.00e-03 params=[ 10.0086 146.3337  86.4328   0.5282   0.7879   0.4691]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -763,7 +543,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:30:02,275 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2618  72.5444   0.3046   0.2872   0.6886]
+2026-04-25 13:36:42,332 pid=96651 weight_fb=1.00e-03 params=[ 10.0181 146.3353  86.4322   0.5156   0.7691   0.4745]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -771,7 +551,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:30:48,238 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2618  72.5444   0.3046   0.2872   0.6886]
+2026-04-25 13:37:26,426 pid=96651 weight_fb=1.00e-03 params=[ 10.0181 146.3353  86.4322   0.5156   0.7691   0.4745]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -779,7 +559,7 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:31:34,316 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2618  72.5444   0.3046   0.2872   0.6886]
+2026-04-25 13:38:19,232 pid=96651 weight_fb=1.00e-03 params=[ 10.0181 146.3353  86.4322   0.5156   0.7691   0.4745]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
@@ -787,7 +567,295 @@ Traceback (most recent call last):
     raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
 ValueError: Error in solve: Exceeded "maxits"                       
 
-2026-04-23 19:32:20,463 pid=41896 weight_fb=1.00e-03 params=[ 69.2733 160.2618  72.5444   0.3046   0.2872   0.6886]
+2026-04-25 13:39:12,784 pid=96651 weight_fb=1.00e-03 params=[ 10.0181 146.3353  86.4322   0.5156   0.7691   0.4745]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:40:05,974 pid=96651 weight_fb=1.00e-03 params=[ 10.0181 146.3353  86.4322   0.5156   0.7691   0.4745]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:40:59,157 pid=96651 weight_fb=1.00e-03 params=[ 10.0181 146.3353  86.4322   0.5156   0.7691   0.4745]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:41:52,433 pid=96651 weight_fb=1.00e-03 params=[ 10.0181 146.3353  86.4322   0.5156   0.7691   0.4745]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:42:45,302 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:43:38,200 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:44:31,246 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:45:24,385 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:46:17,414 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:47:10,594 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:48:03,885 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:55:05,225 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:55:58,520 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:56:51,719 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:57:44,967 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:58:38,122 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 13:59:31,678 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:00:24,911 pid=96651 weight_fb=1.00e-03 params=[ 10.0306 146.3374  86.4315   0.4989   0.7442   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:01:17,737 pid=96651 weight_fb=1.00e-03 params=[ 10.0307 146.3374  86.4315   0.4988   0.7441   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:02:10,892 pid=96651 weight_fb=1.00e-03 params=[ 10.0307 146.3374  86.4315   0.4988   0.7441   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:03:03,659 pid=96651 weight_fb=1.00e-03 params=[ 10.0307 146.3374  86.4315   0.4988   0.7441   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:03:56,524 pid=96651 weight_fb=1.00e-03 params=[ 10.0307 146.3374  86.4315   0.4988   0.7441   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:04:49,871 pid=96651 weight_fb=1.00e-03 params=[ 10.0307 146.3374  86.4315   0.4988   0.7441   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:05:43,194 pid=96651 weight_fb=1.00e-03 params=[ 10.0307 146.3374  86.4315   0.4988   0.7441   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:06:36,321 pid=96651 weight_fb=1.00e-03 params=[ 10.0307 146.3374  86.4315   0.4988   0.7441   0.4815]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:07:29,419 pid=96651 weight_fb=1.00e-03 params=[ 10.0328 146.3378  86.4313   0.496    0.7399   0.4827]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:08:22,484 pid=96651 weight_fb=1.00e-03 params=[ 10.0328 146.3378  86.4313   0.496    0.7399   0.4827]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:09:15,439 pid=96651 weight_fb=1.00e-03 params=[ 10.0328 146.3378  86.4313   0.496    0.7399   0.4827]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:10:08,803 pid=96651 weight_fb=1.00e-03 params=[ 10.0328 146.3378  86.4313   0.496    0.7399   0.4827]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:11:01,886 pid=96651 weight_fb=1.00e-03 params=[ 10.0328 146.3378  86.4313   0.496    0.7399   0.4827]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:11:54,921 pid=96651 weight_fb=1.00e-03 params=[ 10.0328 146.3378  86.4313   0.496    0.7399   0.4827]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:12:48,098 pid=96651 weight_fb=1.00e-03 params=[ 10.0328 146.3378  86.4313   0.496    0.7399   0.4827]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:26:16,875 pid=96651 weight_fb=1.00e-03 params=[ 10.     168.2723 148.6448   0.4913   0.4593   0.7645]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:28:55,553 pid=96651 weight_fb=1.00e-03 params=[ 10.     168.2723 148.6448   0.4913   0.4593   0.7645]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:29:48,662 pid=96651 weight_fb=1.00e-03 params=[ 10.     168.2723 148.6448   0.4913   0.4593   0.7645]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:30:41,663 pid=96651 weight_fb=1.00e-03 params=[ 10.     168.2723 148.6448   0.4913   0.4593   0.7645]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-04-25 14:31:34,548 pid=96651 weight_fb=1.00e-03 params=[ 10.     168.2723 148.6448   0.4913   0.4593   0.7645]
 Traceback (most recent call last):
   File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 170, in _free_boundary_cost
     mygs.solve()
