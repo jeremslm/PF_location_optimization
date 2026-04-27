@@ -1,0 +1,2 @@
+2026-04-23 12:45:32,255 INFO START weight_fb=1e-04 num_coils=4 ntrials=1 alpha=0.75
+2026-04-23 12:46:28,439 ERROR FAILED weight_fb=1e-04 num_coils=4 ntrials=1 alpha=0.75 elapsed=56.2s error='>' not supported between instances of 'NoneType' and 'int'
