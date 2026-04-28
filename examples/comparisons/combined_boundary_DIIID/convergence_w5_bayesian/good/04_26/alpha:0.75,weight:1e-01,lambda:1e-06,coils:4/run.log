@@ -1,0 +1,3 @@
+2026-04-26 23:08:34,649 INFO START weight_fb=1e-01 num_coils=4 ntrials=1 alpha=0.75
+2026-04-26 23:10:29,966 INFO START weight_fb=1e-01 num_coils=4 ntrials=1 alpha=0.75
+2026-04-27 05:50:04,973 INFO DONE weight_fb=1e-01 num_coils=4 ntrials=1 alpha=0.75 elapsed=23975.0s

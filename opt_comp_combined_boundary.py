@@ -1237,7 +1237,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     weights = [1e-4, 1e-3, 1e-2, 1e-1]
-    coils = [3]
+    coils = [2,5,6]
 
     # weights = [1e-4, 1e-3, 1e-2, 1e-1]
     # coils = [3]
