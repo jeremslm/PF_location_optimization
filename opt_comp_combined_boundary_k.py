@@ -1,12 +1,14 @@
 """
-Optimization Comparison for PF Coil Placement (Combined Boundary, Parallel)
-============================================================================
+Optimization Comparison for PF Coil Placement (Combined Boundary, Parallel, Every-K Free-Boundary)
+==================================================================================================
+
+Same as opt_comp_combined_boundary.py but free-boundary GS solve is performed only
+every K-th objective evaluation. Other calls reuse the most recent free-boundary cost.
 
 Objective: (1 - alpha) * fixed_boundary_cost + alpha * free_boundary_cost + dist_penalty
 
-Fixed-boundary cost: flux_error_squared from lstsq solve (cheap).
-Free-boundary cost:  boundary_distance from TokaMaker GS solve (expensive, ~1-2s/eval).
-Both evaluated at every function call. Convergence window = 5.
+Fixed-boundary cost: flux_error_squared from lstsq solve (cheap, every call).
+Free-boundary cost:  boundary_distance from TokaMaker GS solve (expensive, every K calls).
 
 Sweep: weight_fb x ncoils, REG_IN = 1e-6 fixed, alpha = 0.75.
 """
@@ -84,7 +86,6 @@ def boundary_distance(fixed_LCFS, free_LCFS, mag_axis):
     theta_free = np.arctan2(free_LCFS[:, 1] - Z0, free_LCFS[:, 0] - R0)
     r_free = np.sqrt((free_LCFS[:, 0] - R0)**2 + (free_LCFS[:, 1] - Z0)**2)
     r_fixed_interp = np.interp(theta_free, theta_fixed, r_fixed, period=2 * np.pi)
-    # return np.sum(np.abs(r_free - r_fixed_interp))
     return np.mean((r_free - r_fixed_interp) ** 2)
 
 
@@ -196,7 +197,7 @@ class OptimizationComparison:
     def __init__(self, objective_func, bounds, max_time=86400,
                  max_evals=None, convergence_threshold=0.001,
                  NUM_COILS=3, OMEGA=1e-7, DIST_TH=5.0, REG_IN=1e-6,
-                 RFIL=0.01, ALPHA=0.75, WEIGHT_FB=1e-2):
+                 RFIL=0.01, ALPHA=0.75, WEIGHT_FB=1e-2, K_FB=1):
         self.objective = objective_func
         self.bounds = bounds
         self.max_time = max_time
@@ -210,6 +211,7 @@ class OptimizationComparison:
         self.rfil = RFIL
         self.alpha = ALPHA
         self.weight_fb = WEIGHT_FB
+        self.k_fb = K_FB
         self.results = {}
         self.all_runs = {}
         self.r_bnd = None
@@ -257,6 +259,8 @@ class OptimizationComparison:
         self.objective.norm_fixed = None
         self.objective.norm_fb = None
         self.objective.fb_failures = 0
+        self.objective.call_count = 0
+        self.objective.last_fb_cost_raw = None
 
     def _save_checkpoint(self):
         if self.checkpoint_path is None or self._best_params is None:
@@ -274,6 +278,7 @@ class OptimizationComparison:
                 'rfil': float(self.rfil),
                 'alpha': float(self.alpha),
                 'weight_fb': float(self.weight_fb),
+                'k_fb': int(self.k_fb),
                 'maxiter': self._maxiter,
                 'lbfgs_maxfun': self._lbfgs_maxfun,
             },
@@ -678,7 +683,7 @@ class OptimizationComparison:
         runs = []
         for i in range(n_runs):
             seed = base_seed + i
-            print(f"\n[{method}] run {i+1}/{n_runs}, random_state={seed}, coils={self.num_coils}, weight_fb={self.weight_fb:.0e}")
+            print(f"\n[{method}] run {i+1}/{n_runs}, random_state={seed}, coils={self.num_coils}, weight_fb={self.weight_fb:.0e}, k_fb={self.k_fb}")
             result = run_fn(random_state=seed, **kwargs)
             runs.append(dict(result))
         self.all_runs[key] = runs
@@ -733,6 +738,7 @@ class OptimizationComparison:
             f'OMEGA = {self.omega:.0e}',
             f'REG_IN = {self.reg_in:.0e}',
             f'WEIGHT_FB = {self.weight_fb:.0e}',
+            f'K_FB = {self.k_fb}',
         ])
         ax1.text(0.8, 0.5, params_text, transform=ax1.transAxes, fontsize=8,
                  verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
@@ -812,6 +818,7 @@ class OptimizationComparison:
                 'rfil': float(self.rfil),
                 'alpha': float(self.alpha),
                 'weight_fb': float(self.weight_fb),
+                'k_fb': int(self.k_fb),
                 'maxiter': self._maxiter,
                 'lbfgs_maxfun': self._lbfgs_maxfun,
             },
@@ -881,7 +888,7 @@ class OptimizationComparison:
 def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
                             coil_center_cand1, coil_center_cand2, lim,
                             r_bnd, psi_bnd, weight_fb, NUM_COILS, RFIL,
-                            REG_IN, OMEGA, DIST_TH, theta_range, inner, outer):
+                            REG_IN, OMEGA, DIST_TH, theta_range, inner, outer, K_FB):
     def objective(params):
         thetas = params[:NUM_COILS]
         radials = params[NUM_COILS:]
@@ -920,25 +927,33 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
 
         objective.last_flux_err = fixed_cost
 
-        fb_cost_raw = _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
-                                          coil_center_cand1, coil_center_cand2, lim,
-                                          weight_fb, NUM_COILS)
-        failed = fb_cost_raw >= 1e6
+        objective.call_count += 1
+        do_fb = (objective.call_count % K_FB == 1) or (K_FB == 1) or (objective.last_fb_cost_raw is None)
+        if do_fb:
+            fb_cost_raw = _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
+                                              coil_center_cand1, coil_center_cand2, lim,
+                                              weight_fb, NUM_COILS)
+            failed = fb_cost_raw >= 1e6
+            if not failed:
+                objective.last_fb_cost_raw = fb_cost_raw
+        else:
+            fb_cost_raw = objective.last_fb_cost_raw
+            failed = False
 
         if objective.norm_fixed is None:
             objective.norm_fixed = fixed_cost
-        if objective.norm_fb is None and not failed:
+        if objective.norm_fb is None and not failed and fb_cost_raw is not None:
             objective.norm_fb = fb_cost_raw
 
         if failed:
             objective.fb_failures += 1
             fb_cost = objective.norm_fb if objective.norm_fb is not None else 1e6
         else:
-            fb_cost = fb_cost_raw
+            fb_cost = fb_cost_raw if fb_cost_raw is not None else (objective.norm_fb if objective.norm_fb is not None else 1e6)
         objective.last_fb_cost = fb_cost
 
         norm_fixed = fixed_cost / objective.norm_fixed if objective.norm_fixed > 0 else fixed_cost
-        norm_fb = fb_cost / objective.norm_fb if objective.norm_fb is not None and objective.norm_fb > 0 else fb_cost
+        norm_fb = fb_cost / objective.norm_fb if objective.norm_fb and objective.norm_fb > 0 else fb_cost
 
         dist_penalty = OMEGA * np.sum(np.maximum(DIST_TH - np.diff(np.sort(thetas)), 0.0) ** 2)
 
@@ -947,6 +962,8 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
     objective.norm_fixed = None
     objective.norm_fb = None
     objective.fb_failures = 0
+    objective.call_count = 0
+    objective.last_fb_cost_raw = None
     return objective
 
 
@@ -959,7 +976,6 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     NUM_COILS = kwargs.get('NUM_COILS', 4)
     MAX_EVALS = kwargs.get('MAX_EVALS', 2**18)
     MAX_TIME = kwargs.get('MAX_TIME', 86400)
-    # CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.001)
     CONVERGENCE_THRESHOLD = kwargs.get('CONVERGENCE_THRESHOLD', 0.01)
     OMEGA = kwargs.get('OMEGA', 1e-2)
     DIST_TH = kwargs.get('DIST_TH', 5.0)
@@ -969,6 +985,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     RUN_FOLDER = kwargs.get('RUN_FOLDER', 'combined')
     ALPHA = kwargs.get('ALPHA', 0.75)
     WEIGHT_FB = kwargs.get('WEIGHT_FB', 1e-2)
+    K_FB = kwargs.get('K_FB', 1)
 
     r_bnd, psi_bnd = mygs.get_vfixed()
     print(f"Found {len(r_bnd)} boundary points")
@@ -992,15 +1009,15 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
         ALPHA, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
         coil_center_cand1, coil_center_cand2, lim,
         r_bnd, psi_bnd, WEIGHT_FB, NUM_COILS, RFIL,
-        REG_IN, OMEGA, DIST_TH, theta_range, inner, outer
+        REG_IN, OMEGA, DIST_TH, theta_range, inner, outer, K_FB
     )
 
     print("\n" + "=" * 60)
-    print("OPTIMIZATION COMPARISON (COMBINED BOUNDARY)")
+    print("OPTIMIZATION COMPARISON (COMBINED BOUNDARY, EVERY-K FB)")
     print("=" * 60)
-    print(f"Coils:{NUM_COILS} alpha:{ALPHA} weight_fb:{WEIGHT_FB:.0e} reg_in:{REG_IN:.0e}")
+    print(f"Coils:{NUM_COILS} alpha:{ALPHA} weight_fb:{WEIGHT_FB:.0e} reg_in:{REG_IN:.0e} k_fb:{K_FB}")
     print(f"Max evals:{MAX_EVALS} threshold:{CONVERGENCE_THRESHOLD}")
-    print("1 eval = lstsq + TokaMaker GS solve (mesh rebuild per eval)")
+    print(f"1 eval = lstsq + (TokaMaker GS solve every {K_FB} calls)")
     print("=" * 60 + "\n")
 
     comparison = OptimizationComparison(
@@ -1008,13 +1025,13 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
         max_time=MAX_TIME, max_evals=MAX_EVALS,
         convergence_threshold=CONVERGENCE_THRESHOLD,
         NUM_COILS=NUM_COILS, OMEGA=OMEGA, DIST_TH=DIST_TH,
-        REG_IN=REG_IN, RFIL=RFIL, ALPHA=ALPHA, WEIGHT_FB=WEIGHT_FB
+        REG_IN=REG_IN, RFIL=RFIL, ALPHA=ALPHA, WEIGHT_FB=WEIGHT_FB, K_FB=K_FB
     )
     comparison.set_problem_data(r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2,
                                 mygs.o_point, eval_green)
 
     base = os.path.join(_BASE_DIR, f'examples/comparisons/combined_boundary_DIIID/{RUN_FOLDER}/'
-                        f'alpha:{ALPHA},weight:{WEIGHT_FB:.0e},lambda:{REG_IN:.0e},coils:{NUM_COILS}')
+                        f'alpha:{ALPHA},weight:{WEIGHT_FB:.0e},lambda:{REG_IN:.0e},coils:{NUM_COILS},k:{K_FB}')
 
     existing_runs = 1
     while os.path.exists(os.path.join(base, f'run_{existing_runs:02d}', 'results.json')):
@@ -1038,31 +1055,31 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
 
     PROCESS_START = kwargs.get('PROCESS_START', None)
     if 'multistart_lbfgs' in methods:
-        print(f"Running Multi-start L-BFGS... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}")
+        print(f"Running Multi-start L-BFGS... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}, k_fb={K_FB}")
         if N_RUNS > 1:
             comparison.run_multiple('multistart_lbfgs', n_runs=N_RUNS,
-                                    base_seed=seed_offset, 
-                                    starts_window=5, 
+                                    base_seed=seed_offset,
+                                    starts_window=5,
                                     lbfgs_maxfun=100)
         else:
-            comparison.run_multistart_lbfgs(starts_window=5, 
-                                            random_state=seed_offset, 
+            comparison.run_multistart_lbfgs(starts_window=5,
+                                            random_state=seed_offset,
                                             lbfgs_maxfun=100,
                                             start_time=PROCESS_START)
 
     if 'bayesian' in methods:
-        print(f"Running Bayesian Optimization... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}")
+        print(f"Running Bayesian Optimization... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}, k_fb={K_FB}")
         if N_RUNS > 1:
-            comparison.run_multiple('bayesian', n_runs=N_RUNS, 
+            comparison.run_multiple('bayesian', n_runs=N_RUNS,
                                     base_seed=seed_offset,
-                                    bayesian_stagnation_window=25, 
-                                    unique_refined_points=3, 
+                                    bayesian_stagnation_window=25,
+                                    unique_refined_points=3,
                                     acq_multiplier=10,
                                     lbfgs_maxfun=100)
         else:
             comparison.run_bayesian(bayesian_stagnation_window=25,
-                                    random_state=seed_offset, 
-                                    unique_refined_points=3, 
+                                    random_state=seed_offset,
+                                    unique_refined_points=3,
                                     acq_multiplier=10,
                                     lbfgs_maxfun=100,
                                     start_time=PROCESS_START,)
@@ -1089,7 +1106,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
             plt.close('all')
             print(f"Saved run {i} to: {foldername}/")
         comparison.results = orig_results
-        comparison.all_runs = orig_all_runs 
+        comparison.all_runs = orig_all_runs
     else:
         foldername = foldername_pre
         fig = comparison.plot_result()
@@ -1107,9 +1124,9 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
 # Parallel worker
 # ============================================
 
-def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
+def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, k_fb):
     t0 = time.time()
-    tmp_dir = os.path.join(_BASE_DIR, 'tmp', f'temp_combined_{weight_fb}_{num_coils}')
+    tmp_dir = os.path.join(_BASE_DIR, 'tmp', f'temp_combined_{weight_fb}_{num_coils}_k{k_fb}')
     try:
         shutil.rmtree(tmp_dir)
     except FileNotFoundError:
@@ -1138,11 +1155,10 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
     mygs.setup(order=2, F0=F0)
     mygs.set_targets(Ip=eqdsk['ip'], pax=eqdsk['pres'][0])
 
-    print(f"Solving fixed-boundary EQ for num_coils={num_coils}, weight_fb={weight_fb}...")
+    print(f"Solving fixed-boundary EQ for num_coils={num_coils}, weight_fb={weight_fb}, k_fb={k_fb}...")
     mygs.init_psi()
     mygs.solve()
 
-    # fixed_mag_axis = np.array(mygs.o_point)
     fixed_mag_axis = np.array([1.77764093, -0.04014656])
 
     os.chdir(_BASE_DIR)
@@ -1154,13 +1170,12 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
         fixed_mag_axis=fixed_mag_axis,
         fixed_LCFS=fixed_LCFS,
         lim=lim,
-        # methods=["multistart_lbfgs", "bayesian"],
-        # methods = ["multistart_lbfgs"], 
-        methods = ["bayesian"], 
+        methods=["bayesian"],
         NUM_COILS=num_coils,
         REG_IN=1e-6,
         ALPHA=alpha,
         WEIGHT_FB=weight_fb,
+        K_FB=k_fb,
         MAX_EVALS=2**18,
         MAX_TIME=3*86400,
         N_RUNS=ntrials,
@@ -1175,8 +1190,8 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
 # Per-case run logging
 # ============================================
 
-def _make_case_logger(base, weight_fb, num_coils):
-    name = f'run_{weight_fb}_{num_coils}'
+def _make_case_logger(base, weight_fb, num_coils, k_fb):
+    name = f'run_{weight_fb}_{num_coils}_k{k_fb}'
     log = logging.getLogger(name)
     if log.handlers:
         return log
@@ -1191,13 +1206,12 @@ def _make_case_logger(base, weight_fb, num_coils):
     return log
 
 
-def logged_parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
+def logged_parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, k_fb):
     base = os.path.join(_BASE_DIR,
         f'examples/comparisons/combined_boundary_DIIID/{run_folder}/'
-        f'alpha:{alpha},weight:{weight_fb:.0e},lambda:1e-06,coils:{num_coils}')
+        f'alpha:{alpha},weight:{weight_fb:.0e},lambda:1e-06,coils:{num_coils},k:{k_fb}')
     os.makedirs(base, exist_ok=True)
 
-    # redirect fb_crashes logger to per-case file
     crash_log = logging.getLogger('fb_crashes')
     for h in crash_log.handlers[:]:
         crash_log.removeHandler(h)
@@ -1205,12 +1219,12 @@ def logged_parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, al
     crash_handler.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
     crash_log.addHandler(crash_handler)
 
-    log = _make_case_logger(base, weight_fb, num_coils)
-    params = f"weight_fb={weight_fb:.0e} num_coils={num_coils} ntrials={ntrials} alpha={alpha}"
+    log = _make_case_logger(base, weight_fb, num_coils, k_fb)
+    params = f"weight_fb={weight_fb:.0e} num_coils={num_coils} ntrials={ntrials} alpha={alpha} k_fb={k_fb}"
     t0 = time.time()
     log.info(f"START {params}")
     try:
-        result = parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha)
+        result = parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, k_fb)
         log.info(f"DONE {params} elapsed={time.time()-t0:.1f}s")
         return result
     except Exception as e:
@@ -1224,7 +1238,7 @@ def logged_parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, al
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--folder', type=str, default='combined',
+    parser.add_argument('--folder', type=str, default='combined_k',
                         help='Output folder under examples/comparisons/combined_boundary_DIIID/')
     parser.add_argument('--nprocs', type=int, default=20,
                         help='Number of parallel processes')
@@ -1238,24 +1252,23 @@ if __name__ == "__main__":
 
     weights = [1e-4, 1e-3, 1e-2, 1e-1]
     coils = [3]
-
-    # weights = [1e-4, 1e-3, 1e-2, 1e-1]
-    # coils = [3]
+    ks = [2, 5, 10]
 
     pool = Pool(processes=args.nprocs)
     async_results = {}
     for w in weights:
         for nc in coils:
-            async_results[(w, nc)] = pool.apply_async(
-                logged_parallel_case, args=(w, nc, args.ntrials, args.folder, args.nthreads, args.alpha)
-            )
+            for k in ks:
+                async_results[(w, nc, k)] = pool.apply_async(
+                    logged_parallel_case, args=(w, nc, args.ntrials, args.folder, args.nthreads, args.alpha, k)
+                )
 
     pool.close()
     pool.join()
 
-    for (w, nc), result in async_results.items():
+    for (w, nc, k), result in async_results.items():
         try:
             result.get()
-            print(f"weight_fb={w}, num_coils={nc}: done")
+            print(f"weight_fb={w}, num_coils={nc}, k_fb={k}: done")
         except Exception as e:
-            print(f"weight_fb={w}, num_coils={nc}: failed - {e}")
+            print(f"weight_fb={w}, num_coils={nc}, k_fb={k}: failed - {e}")
