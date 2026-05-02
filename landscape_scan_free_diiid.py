@@ -156,6 +156,7 @@ def main(n_samples, weights, n_procs, oft_threads):
         tasks = [(int(i), float(w), np.array([THETA1_FIXED, samples[i, 0], samples[i, 1], 0.0, 0.0, 0.0])) for i in pending_idx]
         print(f"weight={w_key}: dispatching {len(tasks)} tasks across {n_procs} procs (oft_threads={oft_threads})")
 
+        n_done_initial = n_samples - len(tasks)
         t0 = time.time()
         n_session = 0
         with Pool(processes=n_procs, initializer=_worker_init, initargs=(eqdsk_path, oft_threads)) as pool:
@@ -169,7 +170,8 @@ def main(n_samples, weights, n_procs, oft_threads):
                     eta = (len(tasks) - n_session) / rate if rate > 0 else float("inf")
                     done_mask = ~np.isnan(cost)
                     n_failed = int((cost[done_mask] >= 1e6).sum())
-                    print(f"  weight={w_key} {n_session}/{len(tasks)} fails={n_failed} rate={rate:.3f}/s elapsed={elapsed:.0f}s eta={eta:.0f}s")
+                    n_total = n_done_initial + n_session
+                    print(f"  weight={w_key} session={n_session}/{len(tasks)} total={n_total}/{n_samples} fails={n_failed} rate={rate:.3f}/s elapsed={elapsed:.0f}s eta={eta:.0f}s")
 
         _save_final(out_path, samples, cost, w, n_samples)
         if os.path.exists(ckpt_path):
