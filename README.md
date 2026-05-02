@@ -151,9 +151,8 @@ Each run saves to its own `run_XX/` folder. Re-running auto-continues from the n
 
 open: 
 export OMP_NUM_THREADS=1 export MKL_NUM_THREADS=1 export OPENBLAS_NUM_THREADS=1 export NUMEXPR_NUM_THREADS=1
-python opt_comp_combined_boundary.py --nprocs 12 --nthreads 2 --ntrials 1 --folder convergence_w5_b_temp
+python opt_comp_combined_boundary.py --nprocs 4 --nthreads 2 --ntrials 1 --folder convergence_w5_l_temp
 
 land: 
-
 export OMP_NUM_THREADS=1 export MKL_NUM_THREADS=1 export OPENBLAS_NUM_THREADS=1 export NUMEXPR_NUM_THREADS=1
 python landscape_scan_free_diiid.py --nprocs 10 --oft-threads 1 --n 16384 --weights 1e-2

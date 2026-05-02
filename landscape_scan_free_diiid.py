@@ -7,8 +7,8 @@ Sweeps weight_fb. Each worker runs its own OFT_env / TokaMaker.
 Checkpoints every CHECKPOINT_EVERY completions (resumable).
 
 Run:
-  python landscape_scan_free_diiid.py --nprocs 20
-  python landscape_scan_free_diiid.py --nprocs 20 --n 1024 --weights 1e-2
+  export OMP_NUM_THREADS=1 export MKL_NUM_THREADS=1 export OPENBLAS_NUM_THREADS=1 export NUMEXPR_NUM_THREADS=1 
+  python landscape_scan_free_diiid.py --nprocs 20 --n 65536 --weights 1e-2
 """
 
 import argparse
