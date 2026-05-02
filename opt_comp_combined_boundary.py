@@ -56,6 +56,25 @@ _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 _crash_logger = logging.getLogger('fb_crashes')
 _crash_logger.setLevel(logging.ERROR)
 
+_MEM_LOG_DIR = None
+_mem_loggers = {}
+
+def _get_mem_logger():
+    if _MEM_LOG_DIR is None:
+        return None
+    pid = os.getpid()
+    cached = _mem_loggers.get((_MEM_LOG_DIR, pid))
+    if cached is not None:
+        return cached
+    log = logging.getLogger(f'mem_{_MEM_LOG_DIR}_{pid}')
+    log.setLevel(logging.INFO)
+    log.propagate = False
+    fh = logging.FileHandler(os.path.join(_MEM_LOG_DIR, 'memory.log'))
+    fh.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+    log.addHandler(fh)
+    _mem_loggers[(_MEM_LOG_DIR, pid)] = log
+    return log
+
 
 class TimeoutException(Exception):
     pass
@@ -185,7 +204,9 @@ def _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
         del mygs
         gc.collect()
         rss1 = proc.memory_info().rss / 1024 ** 2
-        print(f"[mem] pid={os.getpid()} pre={rss0:.1f}MB post={rss1:.1f}MB delta={rss1-rss0:+.1f}MB", flush=True)
+        mem_log = _get_mem_logger()
+        if mem_log is not None:
+            mem_log.info(f"pid={os.getpid()} nCoils={nCoils} pre={rss0:.1f}MB post={rss1:.1f}MB delta={rss1-rss0:+.1f}MB")
 
         return boundary_distance(fixed_LCFS, EQ_in["rzout"], fixed_mag_axis)
     except Exception:
@@ -1122,6 +1143,11 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
 
 def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
     t0 = time.time()
+    global _MEM_LOG_DIR
+    _MEM_LOG_DIR = os.path.join(_BASE_DIR,
+        f'examples/comparisons/combined_boundary_DIIID/{run_folder}/'
+        f'alpha:{alpha},weight:{weight_fb:.0e},lambda:1e-06,coils:{num_coils}')
+    os.makedirs(_MEM_LOG_DIR, exist_ok=True)
     tmp_dir = os.path.join(_BASE_DIR, 'tmp', f'temp_combined_{weight_fb}_{num_coils}')
     try:
         shutil.rmtree(tmp_dir)
