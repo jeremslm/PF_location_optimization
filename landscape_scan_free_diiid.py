@@ -86,14 +86,14 @@ def _worker_eval(args):
             params, _W["myOFT"], _W["eqdsk"], _W["fixed_mag_axis"], _W["fixed_LCFS"],
             _W["cand1"], _W["cand2"], _W["lim"], weight_fb, NUM_COILS,
         )
-        return idx, float(c), bool(c >= 1e6)
+        return idx, float(c)
     except Exception:
         traceback.print_exc()
-        return idx, 1e6, True
+        return idx, 1e6
 
 
-def _save_final(out_path, samples, cost, failed, weight_fb, n_samples):
-    valid = ~failed & ~np.isnan(cost)
+def _save_final(out_path, samples, cost, weight_fb, n_samples):
+    valid = ~np.isnan(cost) & (cost < 1e6)
     if valid.any():
         masked = np.where(valid, cost, np.inf)
         idx_min = int(np.argmin(masked))
@@ -108,7 +108,6 @@ def _save_final(out_path, samples, cost, failed, weight_fb, n_samples):
         out_path,
         samples=samples,
         cost=cost,
-        failed=failed,
         theta1_anchor=THETA1_FIXED,
         mu_anchor=0.0,
         min_theta2=min_theta2,
@@ -138,20 +137,17 @@ def main(n_samples, weights, n_procs, oft_threads):
         if os.path.exists(ckpt_path):
             ck = np.load(ckpt_path, allow_pickle=False)
             cost = ck["cost"].copy()
-            failed = ck["failed"].copy()
-            done = ck["done"].copy()
-            print(f"resuming weight={w_key}: {int(done.sum())}/{n_samples} already done")
+            n_done = int((~np.isnan(cost)).sum())
+            print(f"resuming weight={w_key}: {n_done}/{n_samples} already done")
         elif os.path.exists(out_path):
             print(f"weight={w_key} already complete at {out_path}, skipping")
             continue
         else:
             cost = np.full(n_samples, np.nan)
-            failed = np.zeros(n_samples, dtype=bool)
-            done = np.zeros(n_samples, dtype=bool)
 
-        pending_idx = np.where(~done)[0]
+        pending_idx = np.where(np.isnan(cost))[0]
         if len(pending_idx) == 0:
-            _save_final(out_path, samples, cost, failed, w, n_samples)
+            _save_final(out_path, samples, cost, w, n_samples)
             if os.path.exists(ckpt_path):
                 os.remove(ckpt_path)
             print(f"weight={w_key} done")
@@ -163,24 +159,24 @@ def main(n_samples, weights, n_procs, oft_threads):
         t0 = time.time()
         n_session = 0
         with Pool(processes=n_procs, initializer=_worker_init, initargs=(eqdsk_path, oft_threads)) as pool:
-            for idx, c, fail in pool.imap_unordered(_worker_eval, tasks, chunksize=4):
+            for idx, c in pool.imap_unordered(_worker_eval, tasks, chunksize=4):
                 cost[idx] = c
-                failed[idx] = fail
-                done[idx] = True
                 n_session += 1
                 if n_session % CHECKPOINT_EVERY == 0:
-                    np.savez(ckpt_path, cost=cost, failed=failed, done=done)
+                    np.savez(ckpt_path, samples=samples, cost=cost)
                     elapsed = time.time() - t0
                     rate = n_session / elapsed
                     eta = (len(tasks) - n_session) / rate if rate > 0 else float("inf")
-                    n_failed = int(failed[done].sum())
+                    done_mask = ~np.isnan(cost)
+                    n_failed = int((cost[done_mask] >= 1e6).sum())
                     print(f"  weight={w_key} {n_session}/{len(tasks)} fails={n_failed} rate={rate:.3f}/s elapsed={elapsed:.0f}s eta={eta:.0f}s")
 
-        _save_final(out_path, samples, cost, failed, w, n_samples)
+        _save_final(out_path, samples, cost, w, n_samples)
         if os.path.exists(ckpt_path):
             os.remove(ckpt_path)
         elapsed = time.time() - t0
-        print(f"weight={w_key} done in {elapsed:.0f}s, fails={int(failed.sum())}/{n_samples}, saved {out_path}")
+        n_failed_final = int((cost[~np.isnan(cost)] >= 1e6).sum())
+        print(f"weight={w_key} done in {elapsed:.0f}s, fails={n_failed_final}/{n_samples}, saved {out_path}")
 
 
 if __name__ == "__main__":
