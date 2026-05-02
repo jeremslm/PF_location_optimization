@@ -148,3 +148,12 @@ python opt_acq_func_sweep.py --acq_funcs EI LCB PI --coils 2 3 4 5 6 --lambdas 1
 ```
 
 Each run saves to its own `run_XX/` folder. Re-running auto-continues from the next index with a fresh seed offset; runs accumulate safely across sessions.
+
+open: 
+export OMP_NUM_THREADS=1 export MKL_NUM_THREADS=1 export OPENBLAS_NUM_THREADS=1 export NUMEXPR_NUM_THREADS=1
+python opt_comp_combined_boundary.py --nprocs 12 --nthreads 2 --ntrials 1 --folder convergence_w5_b_temp
+
+land: 
+
+export OMP_NUM_THREADS=1 export MKL_NUM_THREADS=1 export OPENBLAS_NUM_THREADS=1 export NUMEXPR_NUM_THREADS=1
+python landscape_scan_free_diiid.py --nprocs 10 --oft-threads 1 --n 16384 --weights 1e-2

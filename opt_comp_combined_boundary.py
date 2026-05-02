@@ -12,6 +12,7 @@ Sweep: weight_fb x ncoils, REG_IN = 1e-6 fixed, alpha = 0.75.
 """
 
 import copy
+import gc
 import json
 import logging
 import os
@@ -21,9 +22,12 @@ import sys
 import time
 import traceback
 import argparse
+
+import psutil
 from itertools import permutations as _iperms
 from math import factorial
 from multiprocessing import Pool
+import psutil 
 
 import numpy as np
 import pandas as pd
@@ -138,12 +142,15 @@ def _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
     mesh_file = os.path.join(_tmp_dir, f"mesh_fb_{pid}.h5")
     eqdsk_tmp = os.path.join(_tmp_dir, f"gTMP_{pid}")
     try:
+        proc = psutil.Process(os.getpid())
+        rss0 = proc.memory_info().rss / 1024 ** 2
         t0 = time.time()
         scan_geom = make_new_coils(params, nCoils, coil_center_cand1, coil_center_cand2)
         make_mesh(scan_geom, mesh_file, lim)
         t_mesh = time.time()
 
         mygs = TokaMaker(myOFT)
+
         mesh_pts, mesh_lc, mesh_reg, coil_dict, cond_dict = load_gs_mesh(mesh_file)
         mygs.setup_mesh(mesh_pts, mesh_lc, mesh_reg)
         mygs.setup_regions(cond_dict=cond_dict, coil_dict=coil_dict)
@@ -174,6 +181,12 @@ def _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
         EQ_in = read_eqdsk(eqdsk_tmp)
         t_total = time.time()
         print(f"[fb_cost] mesh={t_mesh-t0:.2f}s setup={t_setup-t_mesh:.2f}s solve={t_solve-t_setup:.2f}s other={t_total-t_solve:.2f}s total={t_total-t0:.2f}s", flush=True)
+
+        del mygs
+        gc.collect()
+        rss1 = proc.memory_info().rss / 1024 ** 2
+        print(f"[mem] pid={os.getpid()} pre={rss0:.1f}MB post={rss1:.1f}MB delta={rss1-rss0:+.1f}MB", flush=True)
+
         return boundary_distance(fixed_LCFS, EQ_in["rzout"], fixed_mag_axis)
     except Exception:
         _crash_logger.error(
@@ -938,7 +951,7 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
         objective.last_fb_cost = fb_cost
 
         norm_fixed = fixed_cost / objective.norm_fixed if objective.norm_fixed > 0 else fixed_cost
-        norm_fb = fb_cost / objective.norm_fb if objective.norm_fb > 0 else fb_cost
+        norm_fb = fb_cost / objective.norm_fb if objective.norm_fb is not None and objective.norm_fb > 0 else fb_cost
 
         dist_penalty = OMEGA * np.sum(np.maximum(DIST_TH - np.diff(np.sort(thetas)), 0.0) ** 2)
 
@@ -1237,7 +1250,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     weights = [1e-4, 1e-3, 1e-2, 1e-1]
-    coils = [3]
+    coils = [2,5,6]
 
     # weights = [1e-4, 1e-3, 1e-2, 1e-1]
     # coils = [3]
