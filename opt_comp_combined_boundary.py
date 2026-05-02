@@ -1148,6 +1148,7 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
         f'examples/comparisons/combined_boundary_DIIID/{run_folder}/'
         f'alpha:{alpha},weight:{weight_fb:.0e},lambda:1e-06,coils:{num_coils}')
     os.makedirs(_MEM_LOG_DIR, exist_ok=True)
+    _get_mem_logger()
     tmp_dir = os.path.join(_BASE_DIR, 'tmp', f'temp_combined_{weight_fb}_{num_coils}')
     try:
         shutil.rmtree(tmp_dir)
