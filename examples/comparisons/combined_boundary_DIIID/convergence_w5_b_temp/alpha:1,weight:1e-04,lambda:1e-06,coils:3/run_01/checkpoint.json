@@ -1,0 +1,1 @@
+{"optimization_settings": {"num_coils": 3, "max_evals": 262144, "max_time": 259200.0, "convergence_threshold": 0.01, "omega": 0.01, "dist_th": 5.0, "reg_in": 1e-06, "rfil": 0.01, "alpha": 1.0, "weight_fb": 0.0001, "maxiter": 1000000000, "lbfgs_maxfun": 100}, "method": "Bayesian", "n_evals": 400, "elapsed": 16341.76754283905}

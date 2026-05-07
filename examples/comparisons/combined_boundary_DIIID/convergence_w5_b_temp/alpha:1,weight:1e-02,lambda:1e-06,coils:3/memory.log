@@ -1,0 +1,6 @@
+2026-05-07 12:47:04,128 pid=49305 nCoils=3 pre=244.8MB post=319.4MB delta=+74.6MB
+2026-05-07 12:47:43,612 pid=49305 nCoils=3 pre=319.6MB post=360.8MB delta=+41.1MB
+2026-05-07 12:48:22,849 pid=49305 nCoils=3 pre=360.8MB post=369.8MB delta=+9.0MB
+2026-05-07 12:49:02,240 pid=49305 nCoils=3 pre=369.8MB post=402.7MB delta=+32.9MB
+2026-05-07 12:49:44,760 pid=49305 nCoils=3 pre=402.7MB post=430.3MB delta=+27.6MB
+2026-05-07 12:50:24,231 pid=49305 nCoils=3 pre=430.3MB post=447.8MB delta=+17.4MB

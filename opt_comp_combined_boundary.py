@@ -1399,7 +1399,7 @@ if __name__ == "__main__":
     # weights = [1e-4, 1e-3, 1e-2, 1e-1]
     # coils = [3]
 
-    pool = Pool(processes=args.nprocs)
+    pool = Pool(processes=args.nprocs, maxtasksperchild=1)
     async_results = {}
     for w in weights:
         for nc in coils:
