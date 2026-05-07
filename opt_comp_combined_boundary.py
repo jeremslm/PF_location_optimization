@@ -384,7 +384,7 @@ class OptimizationComparison:
             if fb_cost is not None:
                 self._best_fb_cost = fb_cost
         self._convergence.append(self._best_cost)
-        if self._n_evals % 3 == 0 and elapsed > 0:
+        if self._n_evals % 100 == 0 and elapsed > 0:
             rate = self._n_evals / elapsed
             print(f"[{self._current_method}] eval={self._n_evals} start={self._current_start} best={self._best_cost:.4e} {1/rate:.2f}s/eval", flush=True)
             self._save_checkpoint()
@@ -1105,14 +1105,16 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
                                     bayesian_stagnation_window=25, 
                                     unique_refined_points=3, 
                                     acq_multiplier=10,
-                                    lbfgs_maxfun=100)
+                                    lbfgs_maxfun=100,
+                                    max_perms=1)
         else:
             comparison.run_bayesian(bayesian_stagnation_window=25,
                                     random_state=seed_offset, 
                                     unique_refined_points=3, 
                                     acq_multiplier=10,
                                     lbfgs_maxfun=100,
-                                    start_time=PROCESS_START,)
+                                    start_time=PROCESS_START,
+                                    max_perms=1)
 
     summary = comparison.summary()
 
