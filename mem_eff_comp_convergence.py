@@ -49,10 +49,11 @@ def _find_or_create_run_dir(base):
     for name in sorted(os.listdir(base)):
         d = os.path.join(base, name)
         if os.path.isdir(d) and name.startswith('run_'):
-            ckpt = os.path.join(d, 'checkpoint.json')
             res = os.path.join(d, 'results.json')
-            if os.path.exists(ckpt) and not os.path.exists(res):
-                return d, True
+            if os.path.exists(res):
+                continue
+            ckpt = os.path.join(d, 'checkpoint.json')
+            return d, os.path.exists(ckpt)
     idx = 1
     while os.path.exists(os.path.join(base, f'run_{idx:02d}')):
         idx += 1
