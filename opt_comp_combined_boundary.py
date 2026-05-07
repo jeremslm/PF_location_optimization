@@ -1014,7 +1014,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     RFIL = kwargs.get('RFIL', 0.01)
     N_RUNS = kwargs.get('N_RUNS', 1)
     RUN_FOLDER = kwargs.get('RUN_FOLDER', 'combined')
-    ALPHA = kwargs.get('ALPHA', 0.75)
+    ALPHA = kwargs.get('ALPHA', 1)
     WEIGHT_FB = kwargs.get('WEIGHT_FB', 1e-2)
 
     r_bnd, psi_bnd = mygs.get_vfixed()
@@ -1210,8 +1210,8 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
         fixed_LCFS=fixed_LCFS,
         lim=lim,
         # methods=["multistart_lbfgs", "bayesian"],
-        methods = ["multistart_lbfgs"], 
-        # methods = ["bayesian"], 
+        # methods = ["multistart_lbfgs"], 
+        methods = ["bayesian"], 
         NUM_COILS=num_coils,
         REG_IN=1e-6,
         ALPHA=alpha,
@@ -1292,7 +1292,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     weights = [1e-4, 1e-3, 1e-2, 1e-1]
-    coils = [3]
+    coils = [2,3,4,5]
 
     # weights = [1e-4, 1e-3, 1e-2, 1e-1]
     # coils = [3]
