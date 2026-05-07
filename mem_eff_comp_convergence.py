@@ -125,6 +125,7 @@ def chunk_main(args):
     from scipy.optimize import minimize
     from scipy.stats import qmc
 
+    import opt_comp_combined_boundary as _ocb
     from opt_comp_combined_boundary import (
         OptimizationComparison, make_combined_objective,
         _check_starts_convergence, TimeoutException, MaxEvalsException,
@@ -147,6 +148,8 @@ def chunk_main(args):
     base = _case_base(folder, alpha, w, reg_in, c)
     run_dir, resuming = _find_or_create_run_dir(base)
     ckpt_path = os.path.join(run_dir, 'checkpoint.json')
+    _ocb._MEM_LOG_DIR = run_dir
+    _ocb._get_mem_logger()
     print(f"[chunk] {('resume' if resuming else 'fresh')} {run_dir}", flush=True)
 
     import shutil
@@ -326,6 +329,8 @@ def chunk_main(args):
 def case_watchdog(args_tuple):
     w, c, ns = args_tuple
     base = _case_base(ns.folder, ns.alpha, w, ns.reg_in, c)
+    os.makedirs(base, exist_ok=True)
+    log_path = os.path.join(base, 'chunks.log')
     consecutive_failures = 0
     chunk_idx = 0
     while True:
@@ -346,8 +351,11 @@ def case_watchdog(args_tuple):
             "--max-time", str(ns.max_time),
             "--random-state", str(ns.random_state),
         ]
-        print(f"[watchdog w={w:.0e} c={c}] launching chunk #{chunk_idx}", flush=True)
-        ret = subprocess.run(cmd)
+        print(f"[watchdog w={w:.0e} c={c}] launching chunk #{chunk_idx} -> {log_path}", flush=True)
+        with open(log_path, 'a') as logf:
+            logf.write(f"\n===== chunk #{chunk_idx} w={w:.0e} c={c} {time.strftime('%Y-%m-%d %H:%M:%S')} =====\n")
+            logf.flush()
+            ret = subprocess.run(cmd, stdout=logf, stderr=subprocess.STDOUT)
         if ret.returncode != 0:
             consecutive_failures += 1
             print(f"[watchdog w={w:.0e} c={c}] chunk failed ret={ret.returncode} "
@@ -381,7 +389,7 @@ def main():
     parser.add_argument('--weights', type=float, nargs='+', default=[1e-4, 1e-3, 1e-2, 1e-1])
     parser.add_argument('--coils', type=int, nargs='+', default=[2, 3, 4, 5])
     parser.add_argument('--ncpus', type=int, default=16)
-    parser.add_argument('--starts-per-call', type=int, default=50, dest='starts_per_call')
+    parser.add_argument('--starts-per-call', type=int, default=20, dest='starts_per_call')
     parser.add_argument('--folder', type=str, default='convergence_w5_l_temp')
     parser.add_argument('--alpha', type=float, default=1.0)
     parser.add_argument('--lambda', dest='reg_in', type=float, default=1e-6)
