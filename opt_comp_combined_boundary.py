@@ -230,7 +230,7 @@ class OptimizationComparison:
     def __init__(self, objective_func, bounds, max_time=86400,
                  max_evals=None, convergence_threshold=0.001,
                  NUM_COILS=3, OMEGA=1e-7, DIST_TH=5.0, REG_IN=1e-6,
-                 RFIL=0.01, ALPHA=0.75, WEIGHT_FB=1e-2):
+                 RFIL=0.01, ALPHA=0.75, WEIGHT_FB=1e-2, verbose=False):
         self.objective = objective_func
         self.bounds = bounds
         self.max_time = max_time
@@ -244,6 +244,7 @@ class OptimizationComparison:
         self.rfil = RFIL
         self.alpha = ALPHA
         self.weight_fb = WEIGHT_FB
+        self.verbose = verbose
         self.results = {}
         self.all_runs = {}
         self.r_bnd = None
@@ -295,27 +296,39 @@ class OptimizationComparison:
     def _save_checkpoint(self):
         if self.checkpoint_path is None or self._best_params is None:
             return
+        elapsed = self._times[-1] if self._times else 0.0
+        settings = {
+            'num_coils': int(self.num_coils),
+            'max_evals': int(self.max_evals) if self.max_evals is not None else None,
+            'max_time': float(self.max_time),
+            'convergence_threshold': float(self.convergence_threshold),
+            'omega': float(self.omega),
+            'dist_th': float(self.dist_th),
+            'reg_in': float(self.reg_in),
+            'rfil': float(self.rfil),
+            'alpha': float(self.alpha),
+            'weight_fb': float(self.weight_fb),
+            'maxiter': self._maxiter,
+            'lbfgs_maxfun': self._lbfgs_maxfun,
+        }
+        if not self.verbose:
+            data = {
+                'optimization_settings': settings,
+                'method': self._current_method,
+                'n_evals': self._n_evals,
+                'elapsed': elapsed,
+            }
+            with open(self.checkpoint_path, 'w') as f:
+                json.dump(data, f)
+            return
         thetas, radials, coil_positions, coil_currents = self._extract_best_result()
         data = {
-            'optimization_settings': {
-                'num_coils': int(self.num_coils),
-                'max_evals': int(self.max_evals) if self.max_evals is not None else None,
-                'max_time': float(self.max_time),
-                'convergence_threshold': float(self.convergence_threshold),
-                'omega': float(self.omega),
-                'dist_th': float(self.dist_th),
-                'reg_in': float(self.reg_in),
-                'rfil': float(self.rfil),
-                'alpha': float(self.alpha),
-                'weight_fb': float(self.weight_fb),
-                'maxiter': self._maxiter,
-                'lbfgs_maxfun': self._lbfgs_maxfun,
-            },
+            'optimization_settings': settings,
             'method': self._current_method,
             'stopping': 'in_progress',
             'n_evals': self._n_evals,
             'current_start': self._current_start,
-            'elapsed': self._times[-1] if self._times else 0.0,
+            'elapsed': elapsed,
             'best_cost': self._best_cost,
             'best_flux_err': self._best_flux_err,
             'best_fb_cost': self._best_fb_cost,
