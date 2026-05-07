@@ -184,3 +184,15 @@ Traceback (most recent call last):
     raise ValueError('Meshing error: unclaimed region detected!')
 ValueError: Meshing error: unclaimed region detected!
 
+2026-05-07 12:50:50,639 pid=37560 weight_fb=1.00e-03 params=[7.1173e+01 1.4861e+02 1.4655e+02 1.2705e+02 1.5766e+02 9.9863e-02
+ 5.5067e-01 3.5726e-01 7.5239e-01 3.2452e-01]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 168, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 148, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
