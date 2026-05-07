@@ -218,6 +218,14 @@ def chunk_main(args):
         comparison._start_boundaries = list(ckpt['start_boundaries'])
         comparison._start_costs = list(ckpt['start_costs'])
         comparison._times = list(ckpt['times'])
+        comparison._fb_mesh_times = list(ckpt.get('fb_mesh_times', []))
+        comparison._fb_setup_times = list(ckpt.get('fb_setup_times', []))
+        comparison._fb_solve_times = list(ckpt.get('fb_solve_times', []))
+        comparison._fb_other_times = list(ckpt.get('fb_other_times', []))
+        comparison._fb_total_times = list(ckpt.get('fb_total_times', []))
+        comparison._fixed_times = list(ckpt.get('fixed_times', []))
+        comparison._bayesian_ask_times = list(ckpt.get('bayesian_ask_times', []))
+        comparison._bayesian_tell_times = list(ckpt.get('bayesian_tell_times', []))
         random_state = ckpt['random_state']
         comparison._random_state = random_state
         starts_bests = list(ckpt['start_costs'])

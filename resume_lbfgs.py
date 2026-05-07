@@ -193,6 +193,14 @@ def resume_checkpoint(ckpt_path, myOFT, mygs, eqdsk, fixed_LCFS, fixed_mag_axis,
     comparison._start_boundaries = list(ckpt['start_boundaries'])
     comparison._start_costs = list(ckpt['start_costs'])
     comparison._times = list(ckpt['times'])
+    comparison._fb_mesh_times = list(ckpt.get('fb_mesh_times', []))
+    comparison._fb_setup_times = list(ckpt.get('fb_setup_times', []))
+    comparison._fb_solve_times = list(ckpt.get('fb_solve_times', []))
+    comparison._fb_other_times = list(ckpt.get('fb_other_times', []))
+    comparison._fb_total_times = list(ckpt.get('fb_total_times', []))
+    comparison._fixed_times = list(ckpt.get('fixed_times', []))
+    comparison._bayesian_ask_times = list(ckpt.get('bayesian_ask_times', []))
+    comparison._bayesian_tell_times = list(ckpt.get('bayesian_tell_times', []))
     comparison._x_history = []  # not checkpointed, not in results — safe to start empty
     # offset start_time so new elapsed values continue the existing timeline
     comparison._start_time = time.time() - ELAPSED_OFFSET
