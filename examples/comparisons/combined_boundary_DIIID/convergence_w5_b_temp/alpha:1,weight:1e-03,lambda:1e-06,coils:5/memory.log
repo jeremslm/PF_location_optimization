@@ -71,3 +71,4 @@
 2026-05-07 12:48:58,783 pid=37560 nCoils=5 pre=1800.0MB post=1818.8MB delta=+18.8MB
 2026-05-07 12:49:40,365 pid=37560 nCoils=5 pre=1818.8MB post=1834.1MB delta=+15.3MB
 2026-05-07 12:50:22,421 pid=37560 nCoils=5 pre=1834.1MB post=1844.1MB delta=+9.9MB
+2026-05-07 12:51:32,858 pid=37560 nCoils=5 pre=1844.1MB post=1870.2MB delta=+26.1MB
