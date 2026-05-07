@@ -1055,7 +1055,8 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
         max_time=MAX_TIME, max_evals=MAX_EVALS,
         convergence_threshold=CONVERGENCE_THRESHOLD,
         NUM_COILS=NUM_COILS, OMEGA=OMEGA, DIST_TH=DIST_TH,
-        REG_IN=REG_IN, RFIL=RFIL, ALPHA=ALPHA, WEIGHT_FB=WEIGHT_FB
+        REG_IN=REG_IN, RFIL=RFIL, ALPHA=ALPHA, WEIGHT_FB=WEIGHT_FB,
+        verbose=True,
     )
     comparison.set_problem_data(r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2,
                                 mygs.o_point, eval_green)
@@ -1156,12 +1157,12 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
 # Parallel worker
 # ============================================
 
-def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
+def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, method, reg_in):
     t0 = time.time()
     global _MEM_LOG_DIR
     _MEM_LOG_DIR = os.path.join(_BASE_DIR,
         f'examples/comparisons/combined_boundary_DIIID/{run_folder}/'
-        f'alpha:{alpha},weight:{weight_fb:.0e},lambda:1e-06,coils:{num_coils}')
+        f'alpha:{alpha},weight:{weight_fb:.0e},lambda:{reg_in:.0e},coils:{num_coils}')
     os.makedirs(_MEM_LOG_DIR, exist_ok=True)
     _get_mem_logger()
     tmp_dir = os.path.join(_BASE_DIR, 'tmp', f'temp_combined_{weight_fb}_{num_coils}')
@@ -1202,6 +1203,10 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
 
     os.chdir(_BASE_DIR)
 
+    if method == 'both':
+        methods = ['multistart_lbfgs', 'bayesian']
+    else:
+        methods = [method]
     comparison, summary = main(
         mygs=mygs,
         myOFT=myOFT,
@@ -1209,15 +1214,13 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
         fixed_mag_axis=fixed_mag_axis,
         fixed_LCFS=fixed_LCFS,
         lim=lim,
-        # methods=["multistart_lbfgs", "bayesian"],
-        # methods = ["multistart_lbfgs"], 
-        methods = ["bayesian"], 
+        methods=methods,
         NUM_COILS=num_coils,
-        REG_IN=1e-6,
+        REG_IN=reg_in,
         ALPHA=alpha,
         WEIGHT_FB=weight_fb,
         MAX_EVALS=2**18,
-        MAX_TIME=3*86400,
+        MAX_TIME=86400,
         N_RUNS=ntrials,
         RUN_FOLDER=run_folder,
         PROCESS_START=t0,
@@ -1246,13 +1249,12 @@ def _make_case_logger(base, weight_fb, num_coils):
     return log
 
 
-def logged_parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha):
+def logged_parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, method, reg_in):
     base = os.path.join(_BASE_DIR,
         f'examples/comparisons/combined_boundary_DIIID/{run_folder}/'
-        f'alpha:{alpha},weight:{weight_fb:.0e},lambda:1e-06,coils:{num_coils}')
+        f'alpha:{alpha},weight:{weight_fb:.0e},lambda:{reg_in:.0e},coils:{num_coils}')
     os.makedirs(base, exist_ok=True)
 
-    # redirect fb_crashes logger to per-case file
     crash_log = logging.getLogger('fb_crashes')
     for h in crash_log.handlers[:]:
         crash_log.removeHandler(h)
@@ -1261,11 +1263,11 @@ def logged_parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, al
     crash_log.addHandler(crash_handler)
 
     log = _make_case_logger(base, weight_fb, num_coils)
-    params = f"weight_fb={weight_fb:.0e} num_coils={num_coils} ntrials={ntrials} alpha={alpha}"
+    params = f"weight_fb={weight_fb:.0e} num_coils={num_coils} ntrials={ntrials} alpha={alpha} method={method} reg_in={reg_in:.0e}"
     t0 = time.time()
     log.info(f"START {params}")
     try:
-        result = parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha)
+        result = parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, method, reg_in)
         log.info(f"DONE {params} elapsed={time.time()-t0:.1f}s")
         return result
     except Exception as e:
