@@ -156,6 +156,18 @@ python opt_comp_combined_boundary.py --nprocs 4 --nthreads 2 --ntrials 1 --folde
 export OMP_NUM_THREADS=1 export MKL_NUM_THREADS=1 export OPENBLAS_NUM_THREADS=1 export NUMEXPR_NUM_THREADS=1
 python opt_comp_combined_boundary.py --nprocs 4 --nthreads 2 --ntrials 1 --folder convergence_w5_b_temp
 
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+python opt_comp_combined_boundary.py \
+--nprocs 8 --nthreads 2 --ntrials 1 \
+--folder convergence_w5_b_temp \
+--method bayesian \
+--coils 2 3 4 5 \
+--lambda 1e-6 \
+--weights 1e-4 1e-3 1e-2 1e-1
+
 
 
 
