@@ -53,6 +53,8 @@ from OFT_pf_coil_opt_fct import CoilPositionSpace
 
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+FB_COST_MAX_S = 100.0
+
 _crash_logger = logging.getLogger('fb_crashes')
 _crash_logger.setLevel(logging.ERROR)
 
@@ -81,6 +83,10 @@ class TimeoutException(Exception):
 
 
 class MaxEvalsException(Exception):
+    pass
+
+
+class FBCostSlowException(Exception):
     pass
 
 
@@ -302,6 +308,9 @@ class OptimizationComparison:
         self._fb_other_times = []
         self._fb_total_times = []
         self._fixed_times = []
+        self._fixed_green_times = []
+        self._fixed_solve_times = []
+        self._fixed_other_times = []
         self._bayesian_ask_times = []
         self._bayesian_tell_times = []
         self.objective.norm_fixed = None
@@ -372,6 +381,9 @@ class OptimizationComparison:
             'fb_other_times': list(self._fb_other_times),
             'fb_total_times': list(self._fb_total_times),
             'fixed_times': list(self._fixed_times),
+            'fixed_green_times': list(self._fixed_green_times),
+            'fixed_solve_times': list(self._fixed_solve_times),
+            'fixed_other_times': list(self._fixed_other_times),
             'bayesian_ask_times': list(self._bayesian_ask_times),
             'bayesian_tell_times': list(self._bayesian_tell_times),
         }
@@ -398,6 +410,9 @@ class OptimizationComparison:
         fixed_time = getattr(self.objective, 'last_fixed_time', None)
         if fixed_time is not None:
             self._fixed_times.append(fixed_time)
+            self._fixed_green_times.append(getattr(self.objective, 'last_fixed_green_time', None))
+            self._fixed_solve_times.append(getattr(self.objective, 'last_fixed_solve_time', None))
+            self._fixed_other_times.append(getattr(self.objective, 'last_fixed_other_time', None))
         fb_timing = getattr(self.objective, 'last_fb_timing', None)
         if fb_timing is not None:
             self._fb_mesh_times.append(fb_timing['mesh'])
@@ -405,6 +420,12 @@ class OptimizationComparison:
             self._fb_solve_times.append(fb_timing['solve'])
             self._fb_other_times.append(fb_timing['other'])
             self._fb_total_times.append(fb_timing['total'])
+            fb_max = getattr(self, 'fb_cost_max_s', None)
+            if fb_max is not None and fb_timing['total'] > fb_max:
+                self._save_checkpoint()
+                raise FBCostSlowException(
+                    f"fb_cost total={fb_timing['total']:.1f}s exceeds {fb_max:.1f}s ceiling"
+                )
         if self._initial_fixed_cost is None and flux_err is not None:
             self._initial_fixed_cost = flux_err
         if self._initial_fb_cost is None and fb_cost is not None:
@@ -586,6 +607,15 @@ class OptimizationComparison:
             'random_state': random_state,
             'flux_err_history': list(self._flux_err_history),
             'fb_cost_history': list(self._fb_cost_history),
+            'fb_mesh_times': list(self._fb_mesh_times),
+            'fb_setup_times': list(self._fb_setup_times),
+            'fb_solve_times': list(self._fb_solve_times),
+            'fb_other_times': list(self._fb_other_times),
+            'fb_total_times': list(self._fb_total_times),
+            'fixed_times': list(self._fixed_times),
+            'fixed_green_times': list(self._fixed_green_times),
+            'fixed_solve_times': list(self._fixed_solve_times),
+            'fixed_other_times': list(self._fixed_other_times),
             'maxiter': maxiter,
             'lbfgs_maxfun': lbfgs_maxfun,
         }
@@ -748,6 +778,17 @@ class OptimizationComparison:
             'random_state': random_state,
             'flux_err_history': list(self._flux_err_history),
             'fb_cost_history': list(self._fb_cost_history),
+            'fb_mesh_times': list(self._fb_mesh_times),
+            'fb_setup_times': list(self._fb_setup_times),
+            'fb_solve_times': list(self._fb_solve_times),
+            'fb_other_times': list(self._fb_other_times),
+            'fb_total_times': list(self._fb_total_times),
+            'fixed_times': list(self._fixed_times),
+            'fixed_green_times': list(self._fixed_green_times),
+            'fixed_solve_times': list(self._fixed_solve_times),
+            'fixed_other_times': list(self._fixed_other_times),
+            'bayesian_ask_times': list(self._bayesian_ask_times),
+            'bayesian_tell_times': list(self._bayesian_tell_times),
             'maxiter': maxiter,
             'lbfgs_maxfun': lbfgs_maxfun,
         }
@@ -907,7 +948,13 @@ class OptimizationComparison:
                 'other': self._stats(self._fb_other_times),
                 'total': self._stats(self._fb_total_times),
             },
-            'fixed_cost': self._stats(self._fixed_times),
+            'fixed_cost': {
+                'n': len(self._fixed_times),
+                'green': self._stats(self._fixed_green_times),
+                'solve': self._stats(self._fixed_solve_times),
+                'other': self._stats(self._fixed_other_times),
+                'total': self._stats(self._fixed_times),
+            },
             'per_eval': per_eval,
         }
         if method == 'Multi-start L-BFGS' and self._start_boundaries:
@@ -1001,6 +1048,13 @@ class OptimizationComparison:
             method_data['times'] = [float(t) for t in res['times']]
             method_data['flux_err_history'] = res['flux_err_history']
             method_data['fb_cost_history'] = res['fb_cost_history']
+            for key in ['fb_mesh_times', 'fb_setup_times', 'fb_solve_times',
+                        'fb_other_times', 'fb_total_times',
+                        'fixed_times', 'fixed_green_times', 'fixed_solve_times',
+                        'fixed_other_times',
+                        'bayesian_ask_times', 'bayesian_tell_times']:
+                if key in res:
+                    method_data[key] = [float(x) if x is not None else None for x in res[key]]
             method_data['timing_summary'] = self._compute_timing_summary(method)
             save_data['methods'][method] = method_data
         if self.all_runs:
@@ -1047,6 +1101,7 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
         n_bnd = psi_bnd.shape[0]
         n_coils_total = len(coil_centers_3x3)
         con = np.zeros((n_bnd - 1 + n_coils_total, n_coils_total))
+        t_green0 = time.time()
         for i, filament_set in enumerate(coil_centers_3x3):
             flux_tmp = np.zeros((n_bnd,))
             for fil in filament_set:
@@ -1055,14 +1110,20 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
             con[n_bnd - 1 + i, i] = REG_IN
         err = np.zeros((n_bnd - 1 + n_coils_total,))
         err[:n_bnd - 1] = psi_bnd[1:] - psi_bnd[0]
+        t_green1 = time.time()
         currs, residuals, _, _ = np.linalg.lstsq(con, err, rcond=None)
+        t_solve1 = time.time()
         if len(residuals) > 0:
             fixed_cost = residuals[0]
         else:
             fixed_cost = np.linalg.norm(np.dot(con, currs) - err) ** 2
 
         objective.last_flux_err = fixed_cost
-        objective.last_fixed_time = time.time() - t_fix0
+        t_fix1 = time.time()
+        objective.last_fixed_time = t_fix1 - t_fix0
+        objective.last_fixed_green_time = t_green1 - t_green0
+        objective.last_fixed_solve_time = t_solve1 - t_green1
+        objective.last_fixed_other_time = (t_green0 - t_fix0) + (t_fix1 - t_solve1)
 
         fb_cost_raw, fb_timing = _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
                                                      coil_center_cand1, coil_center_cand2, lim,
@@ -1094,6 +1155,9 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
     objective.fb_failures = 0
     objective.last_fb_timing = None
     objective.last_fixed_time = None
+    objective.last_fixed_green_time = None
+    objective.last_fixed_solve_time = None
+    objective.last_fixed_other_time = None
     return objective
 
 
@@ -1160,6 +1224,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     )
     comparison.set_problem_data(r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2,
                                 mygs.o_point, eval_green)
+    comparison.fb_cost_max_s = FB_COST_MAX_S
 
     base = os.path.join(_BASE_DIR, f'examples/comparisons/combined_boundary_DIIID/{RUN_FOLDER}/'
                         f'alpha:{ALPHA},weight:{WEIGHT_FB:.0e},lambda:{REG_IN:.0e},coils:{NUM_COILS}')
@@ -1391,20 +1456,24 @@ if __name__ == "__main__":
                         help='OFT threads per process')
     parser.add_argument('--alpha', type=float, default=1,
                         help='Blending weight for free-boundary cost')
+    parser.add_argument('--method', type=str, default='bayesian',
+                        choices=['bayesian', 'multistart_lbfgs'],
+                        help='Optimization method')
+    parser.add_argument('--coils', type=int, nargs='+', default=[2, 3, 4, 5],
+                        help='Coil counts to sweep')
+    parser.add_argument('--weights', type=float, nargs='+', default=[1e-4, 1e-3, 1e-2, 1e-1],
+                        help='Free-boundary weights to sweep')
+    parser.add_argument('--lambda', dest='reg_in', type=float, default=1e-6,
+                        help='Regularization (REG_IN)')
     args = parser.parse_args()
-
-    weights = [1e-4, 1e-3, 1e-2, 1e-1]
-    coils = [2,3,4,5]
-
-    # weights = [1e-4, 1e-3, 1e-2, 1e-1]
-    # coils = [3]
 
     pool = Pool(processes=args.nprocs, maxtasksperchild=1)
     async_results = {}
-    for w in weights:
-        for nc in coils:
+    for w in args.weights:
+        for nc in args.coils:
             async_results[(w, nc)] = pool.apply_async(
-                logged_parallel_case, args=(w, nc, args.ntrials, args.folder, args.nthreads, args.alpha)
+                logged_parallel_case,
+                args=(w, nc, args.ntrials, args.folder, args.nthreads, args.alpha, args.method, args.reg_in)
             )
 
     pool.close()

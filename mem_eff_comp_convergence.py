@@ -36,6 +36,7 @@ CONVERGENCE_THRESHOLD = 0.01
 STARTS_WINDOW = 5
 LBFGS_MAXFUN = 100
 MAX_RETRIES = 3
+CHUNK_TIMEOUT_S = 14400
 
 
 def _case_base(folder, alpha, w, reg_in, c):
@@ -129,6 +130,7 @@ def chunk_main(args):
     from opt_comp_combined_boundary import (
         OptimizationComparison, make_combined_objective,
         _check_starts_convergence, TimeoutException, MaxEvalsException,
+        FBCostSlowException, FB_COST_MAX_S,
     )
     from OpenFUSIONToolkit.TokaMaker.util import eval_green
     from helper_fct import resize_polygon, update_boundary
@@ -197,6 +199,7 @@ def chunk_main(args):
     comparison._random_state = random_state
     comparison._maxiter = 1000000000
     comparison._lbfgs_maxfun = LBFGS_MAXFUN
+    comparison.fb_cost_max_s = FB_COST_MAX_S
 
     starts_bests = []
     if resuming:
@@ -273,13 +276,17 @@ def chunk_main(args):
         except MaxEvalsException:
             stopped_by = "max function calls"
             break
+        except FBCostSlowException as e:
+            stopped_by = "fb_cost_slow"
+            print(f"[chunk] {e}; saving checkpoint and exiting for respawn", flush=True)
+            break
     else:
         stopped_by = "all starts completed"
 
     print(f"[chunk] stopped_by={stopped_by} chunk_starts={chunk_done} "
           f"total_starts={comparison._starts_completed} evals={comparison._n_evals}", flush=True)
 
-    if stopped_by == "chunk_budget":
+    if stopped_by in ("chunk_budget", "fb_cost_slow"):
         shutil.rmtree(tmp_dir_path, ignore_errors=True)
         return 0
 
@@ -309,6 +316,15 @@ def chunk_main(args):
         'random_state': random_state,
         'flux_err_history': list(comparison._flux_err_history),
         'fb_cost_history': list(comparison._fb_cost_history),
+        'fb_mesh_times': list(comparison._fb_mesh_times),
+        'fb_setup_times': list(comparison._fb_setup_times),
+        'fb_solve_times': list(comparison._fb_solve_times),
+        'fb_other_times': list(comparison._fb_other_times),
+        'fb_total_times': list(comparison._fb_total_times),
+        'fixed_times': list(comparison._fixed_times),
+        'fixed_green_times': list(comparison._fixed_green_times),
+        'fixed_solve_times': list(comparison._fixed_solve_times),
+        'fixed_other_times': list(comparison._fixed_other_times),
         'maxiter': comparison._maxiter,
         'lbfgs_maxfun': LBFGS_MAXFUN,
     }
@@ -355,10 +371,16 @@ def case_watchdog(args_tuple):
         with open(log_path, 'a') as logf:
             logf.write(f"\n===== chunk #{chunk_idx} w={w:.0e} c={c} {time.strftime('%Y-%m-%d %H:%M:%S')} =====\n")
             logf.flush()
-            ret = subprocess.run(cmd, stdout=logf, stderr=subprocess.STDOUT)
-        if ret.returncode != 0:
+            try:
+                ret = subprocess.run(cmd, stdout=logf, stderr=subprocess.STDOUT, timeout=CHUNK_TIMEOUT_S)
+                rc = ret.returncode
+            except subprocess.TimeoutExpired:
+                logf.write(f"\n[watchdog] chunk #{chunk_idx} exceeded {CHUNK_TIMEOUT_S}s wall limit, killed\n")
+                logf.flush()
+                rc = -1
+        if rc != 0:
             consecutive_failures += 1
-            print(f"[watchdog w={w:.0e} c={c}] chunk failed ret={ret.returncode} "
+            print(f"[watchdog w={w:.0e} c={c}] chunk failed ret={rc} "
                   f"consecutive_failures={consecutive_failures}", flush=True)
             if consecutive_failures > MAX_RETRIES:
                 print(f"[watchdog w={w:.0e} c={c}] giving up after {MAX_RETRIES} retries", flush=True)
@@ -389,7 +411,7 @@ def main():
     parser.add_argument('--weights', type=float, nargs='+', default=[1e-4, 1e-3, 1e-2, 1e-1])
     parser.add_argument('--coils', type=int, nargs='+', default=[2, 3, 4, 5])
     parser.add_argument('--ncpus', type=int, default=16)
-    parser.add_argument('--starts-per-call', type=int, default=20, dest='starts_per_call')
+    parser.add_argument('--starts-per-call', type=int, default=1, dest='starts_per_call')
     parser.add_argument('--folder', type=str, default='convergence_w5_l_temp')
     parser.add_argument('--alpha', type=float, default=1.0)
     parser.add_argument('--lambda', dest='reg_in', type=float, default=1e-6)
