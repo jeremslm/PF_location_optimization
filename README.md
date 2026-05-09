@@ -179,7 +179,7 @@ python mem_eff_comp_convergence.py \
 --weights 1e-4 1e-3 1e-2 1e-1 \
 --coils 2 3 4 5 \
 --ncpus 16 \
---starts-per-call 50 \
+--starts-per-call 1 \
 --nthreads 1 \
 --folder convergence_w5_l_temp
 
