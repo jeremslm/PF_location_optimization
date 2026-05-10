@@ -185,4 +185,4 @@ python mem_eff_comp_convergence.py \
 
 land: 
 export OMP_NUM_THREADS=1 export MKL_NUM_THREADS=1 export OPENBLAS_NUM_THREADS=1 export NUMEXPR_NUM_THREADS=1
-python landscape_scan_free_diiid.py --nprocs 10 --oft-threads 2 --n 16384 --weights 1e-2
+python landscape_scan_free_diiid.py --n 65536 --weights 1e-2 --nprocs 10 --evals-per-chunk 100
