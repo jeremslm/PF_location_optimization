@@ -1,4 +1,4 @@
-"""
+b"""
 Optimization Comparison for PF Coil Placement
 ==============================================
 

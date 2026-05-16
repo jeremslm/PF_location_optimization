@@ -117,6 +117,17 @@ def boundary_distance(fixed_LCFS, free_LCFS, mag_axis):
     return np.mean((r_free - r_fixed_interp) ** 2)
 
 
+def boundary_residual(fixed_LCFS, free_LCFS, mag_axis):
+    R0, Z0 = mag_axis
+    theta_fixed = np.arctan2(fixed_LCFS[:, 1] - Z0, fixed_LCFS[:, 0] - R0)
+    r_fixed = np.sqrt((fixed_LCFS[:, 0] - R0)**2 + (fixed_LCFS[:, 1] - Z0)**2)
+    theta_free = np.arctan2(free_LCFS[:, 1] - Z0, free_LCFS[:, 0] - R0)
+    r_free = np.sqrt((free_LCFS[:, 0] - R0)**2 + (free_LCFS[:, 1] - Z0)**2)
+    sort = np.argsort(theta_fixed)
+    r_fixed_interp = np.interp(theta_free, theta_fixed[sort], r_fixed[sort], period=2 * np.pi)
+    return theta_free, r_free - r_fixed_interp
+
+
 def make_new_coils(params, nCoils, coil_center_cand1, coil_center_cand2, dx=0.03, dy=0.03):
     thetas = params[:nCoils]
     radials = params[nCoils:2 * nCoils]
@@ -221,14 +232,14 @@ def _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
         if mem_log is not None:
             mem_log.info(f"pid={os.getpid()} nCoils={nCoils} pre={rss0:.1f}MB post={rss1:.1f}MB delta={rss1-rss0:+.1f}MB")
 
-        return boundary_distance(fixed_LCFS, EQ_in["rzout"], fixed_mag_axis), timing
+        return boundary_distance(fixed_LCFS, EQ_in["rzout"], fixed_mag_axis), timing, EQ_in["rzout"]
     except Exception:
         _crash_logger.error(
             "pid=%d weight_fb=%.2e params=%s\n%s",
             os.getpid(), weight_fb, np.array2string(np.asarray(params), precision=4),
             traceback.format_exc()
         )
-        return 1e6, None
+        return 1e6, None, None
     finally:
         for f in [mesh_file, eqdsk_tmp]:
             if os.path.exists(f):
@@ -267,14 +278,34 @@ class OptimizationComparison:
         self.o_point = None
         self.eval_green = None
         self.brute_force_cost = None
+        self.myOFT = None
+        self.eqdsk = None
+        self.fixed_mag_axis = None
+        self.fixed_LCFS = None
+        self.lim = None
 
-    def set_problem_data(self, r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2, o_point, eval_green):
+    def set_problem_data(self, r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2, o_point, eval_green,
+                         myOFT=None, eqdsk=None, fixed_mag_axis=None, fixed_LCFS=None, lim=None):
         self.r_bnd = r_bnd
         self.psi_bnd = psi_bnd
         self.coil_center_cand1 = coil_center_cand1
         self.coil_center_cand2 = coil_center_cand2
         self.o_point = o_point
         self.eval_green = eval_green
+        self.myOFT = myOFT
+        self.eqdsk = eqdsk
+        self.fixed_mag_axis = fixed_mag_axis
+        self.fixed_LCFS = fixed_LCFS
+        self.lim = lim
+
+    def _compute_free_lcfs(self, params):
+        if self.myOFT is None or self.fixed_LCFS is None:
+            return None
+        _, _, free_lcfs = _free_boundary_cost(np.asarray(params), self.myOFT, self.eqdsk,
+                                              self.fixed_mag_axis, self.fixed_LCFS,
+                                              self.coil_center_cand1, self.coil_center_cand2,
+                                              self.lim, self.weight_fb, self.num_coils)
+        return free_lcfs
 
     def _reset_tracking(self, start_time=None):
         self._n_evals = 0
@@ -884,17 +915,19 @@ class OptimizationComparison:
             ax3.set_title('Coil Placement (All Methods)', fontsize=14)
             ax3.set_aspect('equal')
             ax3.grid(True, alpha=0.3)
-        if self.r_bnd is not None and self.psi_bnd is not None:
-            theta = np.arctan2(self.r_bnd[:, 1], self.r_bnd[:, 0] - self.o_point[0])
-            psi_desired = self.psi_bnd[1:] - self.psi_bnd[0]
-            ax4.plot(theta[1:], psi_desired, 'ko', markersize=3, label='Desired', alpha=0.5)
+        if self.fixed_LCFS is not None and self.myOFT is not None:
+            ax4.axhline(0, color='k', linewidth=0.8, alpha=0.5)
             for (method, res), color in zip(sorted_methods, colors):
-                _, psi_computed, _ = self._compute_flux_for_params(res['best_params'])
-                ax4.plot(theta[1:], psi_computed, '+', color=color, markersize=4,
+                free_lcfs = self._compute_free_lcfs(res['best_params'])
+                if free_lcfs is None:
+                    continue
+                theta_free, residual = boundary_residual(self.fixed_LCFS, free_lcfs, self.fixed_mag_axis)
+                order = np.argsort(theta_free)
+                ax4.plot(theta_free[order], residual[order], '+-', color=color, markersize=4,
                          label=method, alpha=0.7)
             ax4.set_xlabel(r'$\theta$ [rad]', fontsize=12)
-            ax4.set_ylabel(r'$\psi_{boundary}$', fontsize=12)
-            ax4.set_title('Desired vs Computed Flux', fontsize=14)
+            ax4.set_ylabel(r'$r_{free}-r_{fixed}$ [m]', fontsize=12)
+            ax4.set_title('Boundary Residual (final config)', fontsize=14)
             ax4.legend(fontsize=8, loc='best')
             ax4.grid(True, alpha=0.3)
         plt.tight_layout()
@@ -1125,9 +1158,9 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
         objective.last_fixed_solve_time = t_solve1 - t_green1
         objective.last_fixed_other_time = (t_green0 - t_fix0) + (t_fix1 - t_solve1)
 
-        fb_cost_raw, fb_timing = _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
-                                                     coil_center_cand1, coil_center_cand2, lim,
-                                                     weight_fb, NUM_COILS)
+        fb_cost_raw, fb_timing, _ = _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
+                                                        coil_center_cand1, coil_center_cand2, lim,
+                                                        weight_fb, NUM_COILS)
         objective.last_fb_timing = fb_timing
         failed = fb_cost_raw >= 1e6
 
@@ -1184,6 +1217,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     r_bnd, psi_bnd = mygs.get_vfixed()
     print(f"Found {len(r_bnd)} boundary points")
 
+
     lim1 = update_boundary(r0=1.69, z0=0, a0=0.67, kappa=2, delta=0.8, squar=0.15, npts=1700)
     coil_center_cand1 = resize_polygon(lim1, dx=0.1)
     lim2 = update_boundary(r0=1.94, z0=0, a0=0.95, kappa=1.55, delta=0.8, squar=0.15, npts=1700)
@@ -1223,7 +1257,8 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
         verbose=True,
     )
     comparison.set_problem_data(r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2,
-                                mygs.o_point, eval_green)
+                                mygs.o_point, eval_green,
+                                myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim)
     comparison.fb_cost_max_s = FB_COST_MAX_S
 
     base = os.path.join(_BASE_DIR, f'examples/comparisons/combined_boundary_DIIID/{RUN_FOLDER}/'
@@ -1338,7 +1373,8 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, me
     os.makedirs(tmp_dir)
     os.chdir(tmp_dir)
 
-    eqdsk = read_eqdsk(os.path.join(_BASE_DIR, 'examples/data/eqdsk/g192185.02440'))
+    # eqdsk = read_eqdsk(os.path.join(_BASE_DIR, 'examples/data/eqdsk/g192185.02440'))
+    eqdsk = read_eqdsk(os.path.join(_BASE_DIR, 'examples/data/eqdsk/DIIID_opt_3coil_symm'))
     LCFS_contour = eqdsk['rzout'].copy()
     fixed_LCFS = LCFS_contour
 
@@ -1459,7 +1495,7 @@ if __name__ == "__main__":
     parser.add_argument('--method', type=str, default='bayesian',
                         choices=['bayesian', 'multistart_lbfgs'],
                         help='Optimization method')
-    parser.add_argument('--coils', type=int, nargs='+', default=[2, 3, 4, 5],
+    parser.add_argument('--coils', type=int, nargs='+', default=[2,3,4,5],
                         help='Coil counts to sweep')
     parser.add_argument('--weights', type=float, nargs='+', default=[1e-4, 1e-3, 1e-2, 1e-1],
                         help='Free-boundary weights to sweep')
