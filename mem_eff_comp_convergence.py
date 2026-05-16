@@ -87,7 +87,8 @@ def _build_physics_isolated(nthreads, tmp_suffix):
     from OpenFUSIONToolkit.TokaMaker.util import read_eqdsk
     from helper_fct import update_boundary
 
-    eqdsk = read_eqdsk(os.path.join(_BASE_DIR, 'examples/data/eqdsk/g192185.02440'))
+    # eqdsk = read_eqdsk(os.path.join(_BASE_DIR, 'examples/data/eqdsk/g192185.02440'))
+    eqdsk = read_eqdsk(os.path.join(_BASE_DIR, 'examples/data/eqdsk/DIIID_opt_3coil_symm'))
     LCFS_contour = eqdsk['rzout'].copy()
     fixed_LCFS = LCFS_contour
     lim = update_boundary(r0=1.69, z0=0, a0=0.67, kappa=2, delta=0.8, squar=0.15, npts=1700)
@@ -191,7 +192,8 @@ def chunk_main(args):
         verbose=True,
     )
     comparison.set_problem_data(r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2,
-                                mygs.o_point, eval_green)
+                                mygs.o_point, eval_green,
+                                myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim)
     comparison.checkpoint_path = ckpt_path
     comparison._reset_tracking()
     comparison._current_method = 'L-BFGS'
