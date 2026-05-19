@@ -169,8 +169,6 @@ python opt_comp_combined_boundary.py \
 --weights 1e-4 1e-3 1e-2 1e-1
 
 
-
-
 export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
