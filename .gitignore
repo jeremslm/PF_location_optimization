@@ -9,4 +9,5 @@ CLAUDE.md
 /notes/
 /archived/
 /tmp/
-/paper/chunks.log
+chunks.log
+**/chunks.log
