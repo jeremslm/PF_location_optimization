@@ -1,0 +1,4 @@
+Alpha increasing over time
+
+
+Higher convergence rate for bayesian optimization 
