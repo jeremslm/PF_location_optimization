@@ -269,6 +269,7 @@ class OptimizationComparison:
         self.alpha = ALPHA
         self.weight_fb = WEIGHT_FB
         self.verbose = verbose
+        self.xpoint_index = 55
         self.results = {}
         self.all_runs = {}
         self.r_bnd = None
@@ -285,7 +286,8 @@ class OptimizationComparison:
         self.lim = None
 
     def set_problem_data(self, r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2, o_point, eval_green,
-                         myOFT=None, eqdsk=None, fixed_mag_axis=None, fixed_LCFS=None, lim=None):
+                         myOFT=None, eqdsk=None, fixed_mag_axis=None, fixed_LCFS=None, lim=None,
+                         xpoint_index=55):
         self.r_bnd = r_bnd
         self.psi_bnd = psi_bnd
         self.coil_center_cand1 = coil_center_cand1
@@ -297,6 +299,7 @@ class OptimizationComparison:
         self.fixed_mag_axis = fixed_mag_axis
         self.fixed_LCFS = fixed_LCFS
         self.lim = lim
+        self.xpoint_index = xpoint_index
 
     def _compute_free_lcfs(self, params):
         if self.myOFT is None or self.fixed_LCFS is None:
@@ -304,7 +307,8 @@ class OptimizationComparison:
         _, _, free_lcfs = _free_boundary_cost(np.asarray(params), self.myOFT, self.eqdsk,
                                               self.fixed_mag_axis, self.fixed_LCFS,
                                               self.coil_center_cand1, self.coil_center_cand2,
-                                              self.lim, self.weight_fb, self.num_coils)
+                                              self.lim, self.weight_fb, self.num_coils,
+                                              xpoint_index=self.xpoint_index)
         return free_lcfs
 
     def _reset_tracking(self, start_time=None):
@@ -1110,7 +1114,8 @@ class OptimizationComparison:
 def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
                             coil_center_cand1, coil_center_cand2, lim,
                             r_bnd, psi_bnd, weight_fb, NUM_COILS, RFIL,
-                            REG_IN, OMEGA, DIST_TH, theta_range, inner, outer):
+                            REG_IN, OMEGA, DIST_TH, theta_range, inner, outer,
+                            xpoint_index=55):
     def objective(params):
         t_fix0 = time.time()
         thetas = params[:NUM_COILS]
@@ -1160,7 +1165,7 @@ def make_combined_objective(alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
 
         fb_cost_raw, fb_timing, _ = _free_boundary_cost(params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
                                                         coil_center_cand1, coil_center_cand2, lim,
-                                                        weight_fb, NUM_COILS)
+                                                        weight_fb, NUM_COILS, xpoint_index=xpoint_index)
         objective.last_fb_timing = fb_timing
         failed = fb_cost_raw >= 1e6
 
@@ -1213,6 +1218,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     RUN_FOLDER = kwargs.get('RUN_FOLDER', 'combined')
     ALPHA = kwargs.get('ALPHA', 1)
     WEIGHT_FB = kwargs.get('WEIGHT_FB', 1e-2)
+    xpoint_index = kwargs.get('xpoint_index', 55)
 
     r_bnd, psi_bnd = mygs.get_vfixed()
     print(f"Found {len(r_bnd)} boundary points")
@@ -1237,7 +1243,8 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
         ALPHA, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
         coil_center_cand1, coil_center_cand2, lim,
         r_bnd, psi_bnd, WEIGHT_FB, NUM_COILS, RFIL,
-        REG_IN, OMEGA, DIST_TH, theta_range, inner, outer
+        REG_IN, OMEGA, DIST_TH, theta_range, inner, outer,
+        xpoint_index=xpoint_index
     )
 
     print("\n" + "=" * 60)
@@ -1258,7 +1265,8 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     )
     comparison.set_problem_data(r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2,
                                 mygs.o_point, eval_green,
-                                myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim)
+                                myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
+                                xpoint_index=xpoint_index)
     comparison.fb_cost_max_s = FB_COST_MAX_S
 
     base = os.path.join(_BASE_DIR, f'examples/comparisons/combined_boundary_DIIID/{RUN_FOLDER}/'
@@ -1375,8 +1383,10 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, me
 
     # eqdsk = read_eqdsk(os.path.join(_BASE_DIR, 'examples/data/eqdsk/g192185.02440'))
     eqdsk = read_eqdsk(os.path.join(_BASE_DIR, 'examples/data/eqdsk/DIIID_opt_3coil_symm'))
-    LCFS_contour = eqdsk['rzout'].copy()
-    fixed_LCFS = LCFS_contour
+    _target = np.load(os.path.join(_BASE_DIR, 'notebooks', 'fb_lcfs_target.npz'))
+    fixed_LCFS = _target['lcfs']
+    LCFS_contour = fixed_LCFS
+    eqdsk['rzout'] = fixed_LCFS
 
     lim = update_boundary(r0=1.69, z0=0, a0=0.67, kappa=2, delta=0.8, squar=0.15, npts=1700)
 
@@ -1399,8 +1409,8 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, me
     mygs.init_psi()
     mygs.solve()
 
-    # fixed_mag_axis = np.array(mygs.o_point)
-    fixed_mag_axis = np.array([1.77764093, -0.04014656])
+    fixed_mag_axis = _target['mag_axis']
+    xpoint_index = int(np.argmin(fixed_LCFS[:, 1]))
 
     os.chdir(_BASE_DIR)
 
@@ -1425,6 +1435,7 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, me
         N_RUNS=ntrials,
         RUN_FOLDER=run_folder,
         PROCESS_START=t0,
+        xpoint_index=xpoint_index,
     )
     shutil.rmtree(tmp_dir, ignore_errors=True)
     return summary

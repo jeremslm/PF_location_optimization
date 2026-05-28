@@ -1,4 +1,1 @@
-Alpha increasing over time
-
-
-Higher convergence rate for bayesian optimization 
+Target LCFS is not fixed LCFS, it is now 3 coil 1e-4 free boundary LCFS 
