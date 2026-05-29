@@ -1,0 +1,9 @@
+I dont get what you mean by:
+
+weight_fb = min(weight_fb, REG_IN)? 
+weight_fb times some scale factor
+- arbitrary??? 
+
+
+
+

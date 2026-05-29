@@ -89,8 +89,10 @@ def _build_physics_isolated(nthreads, tmp_suffix):
 
     # eqdsk = read_eqdsk(os.path.join(_BASE_DIR, 'examples/data/eqdsk/g192185.02440'))
     eqdsk = read_eqdsk(os.path.join(_BASE_DIR, 'examples/data/eqdsk/DIIID_opt_3coil_symm'))
-    LCFS_contour = eqdsk['rzout'].copy()
-    fixed_LCFS = LCFS_contour
+    _target = np.load(os.path.join(_BASE_DIR, 'notebooks', 'fb_lcfs_target.npz'))
+    fixed_LCFS = _target['lcfs']
+    LCFS_contour = fixed_LCFS
+    eqdsk['rzout'] = fixed_LCFS
     lim = update_boundary(r0=1.69, z0=0, a0=0.67, kappa=2, delta=0.8, squar=0.15, npts=1700)
 
     tmp_dir = os.path.join(_BASE_DIR, 'tmp', f'mem_eff_{tmp_suffix}')
@@ -114,9 +116,10 @@ def _build_physics_isolated(nthreads, tmp_suffix):
     mygs.init_psi()
     mygs.solve()
 
-    fixed_mag_axis = np.array([1.77764093, -0.04014656])
+    fixed_mag_axis = _target['mag_axis']
+    xpoint_index = int(np.argmin(fixed_LCFS[:, 1]))
     os.chdir(_BASE_DIR)
-    return myOFT, mygs, eqdsk, fixed_LCFS, fixed_mag_axis, lim
+    return myOFT, mygs, eqdsk, fixed_LCFS, fixed_mag_axis, lim, xpoint_index
 
 
 def chunk_main(args):
@@ -158,7 +161,7 @@ def chunk_main(args):
     import shutil
     tmp_suffix = f"{os.getpid()}_{w:.0e}_{c}"
     tmp_dir_path = os.path.join(_BASE_DIR, 'tmp', f'mem_eff_{tmp_suffix}')
-    myOFT, mygs, eqdsk, fixed_LCFS, fixed_mag_axis, lim = _build_physics_isolated(nthreads, tmp_suffix)
+    myOFT, mygs, eqdsk, fixed_LCFS, fixed_mag_axis, lim, xpoint_index = _build_physics_isolated(nthreads, tmp_suffix)
     r_bnd, psi_bnd = mygs.get_vfixed()
 
     lim1 = update_boundary(r0=1.69, z0=0, a0=0.67, kappa=2, delta=0.8, squar=0.15, npts=1700)
@@ -181,6 +184,7 @@ def chunk_main(args):
         coil_center_cand1, coil_center_cand2, lim,
         r_bnd, psi_bnd, w, c, RFIL,
         reg_in, OMEGA, DIST_TH, theta_range, inner, outer,
+        xpoint_index=xpoint_index,
     )
 
     comparison = OptimizationComparison(
@@ -193,7 +197,8 @@ def chunk_main(args):
     )
     comparison.set_problem_data(r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2,
                                 mygs.o_point, eval_green,
-                                myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim)
+                                myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
+                                xpoint_index=xpoint_index)
     comparison.checkpoint_path = ckpt_path
     comparison._reset_tracking()
     comparison._current_method = 'L-BFGS'
