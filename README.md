@@ -161,7 +161,7 @@ export MKL_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 export NUMEXPR_NUM_THREADS=1
 python opt_comp_combined_boundary.py \
---nprocs 8 --nthreads 2 --ntrials 1 \
+--nprocs 4 --nthreads 1 --ntrials 1 \
 --folder convergence_w5_b_temp \
 --method bayesian \
 --coils 2 3 4 5 \

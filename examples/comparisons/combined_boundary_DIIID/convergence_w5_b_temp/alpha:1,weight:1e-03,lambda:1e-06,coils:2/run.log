@@ -1,0 +1,2 @@
+2026-05-29 14:13:35,786 INFO START weight_fb=1e-03 num_coils=2 ntrials=1 alpha=1 method=bayesian reg_in=1e-06
+2026-05-29 21:00:09,210 INFO DONE weight_fb=1e-03 num_coils=2 ntrials=1 alpha=1 method=bayesian reg_in=1e-06 elapsed=24393.4s
