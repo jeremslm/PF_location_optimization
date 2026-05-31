@@ -1,3 +1,8 @@
+Running target = LCFS 1e-4
+
+
+
+
 I dont get what you mean by:
 
 weight_fb = min(weight_fb, REG_IN)? 
@@ -5,5 +10,14 @@ weight_fb times some scale factor
 - arbitrary??? 
 
 
+
+
+
+
+
+------
+In outer loop: 
++ lambda ||I(theta)||^2
+lambda = 0 
 
 
