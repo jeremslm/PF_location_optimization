@@ -9,7 +9,7 @@ Self-dispatching (mirror of mem_eff_comp_convergence.py):
     a single weight_fb. Builds physics once, evaluates each task, prints
     one "RESULT idx cost reason" line per task, exits.
 
-Constraints: theta1 = 20 deg, mu1 = mu2 = mu3 = 0. Sobol-samples (theta2, theta3).
+Constraints: theta1 = 13.3635 deg, mu1 = 0.3494 (true coil 1), mu2 = mu3 = 0. Sobol-samples (theta2, theta3).
 Sweeps weight_fb. Checkpoints every CHECKPOINT_EVERY completions.
 Output schema matches landscape_scan_diiid.py: samples, cost, failed (bool), ...
 """
@@ -42,13 +42,14 @@ if tokamaker_python_path is not None:
 NUM_COILS = 3
 N_SAMPLES = 262144
 WEIGHTS_FB = [1e-4, 1e-3, 1e-2, 1e-1]
-THETA1_FIXED = 20.0
+THETA1_FIXED = 13.3635
+MU1_FIXED = 0.3494
 ANGULAR_BOUNDS = (10, 170)
 SOBOL_SEED = 42
 CHECKPOINT_EVERY = 200
 EVALS_PER_CHUNK = 100
 CHUNK_TIMEOUT_S = 10800
-OUT_DIR = "examples/comparisons/free_boundary_DIIID/landscape/coils:3"
+OUT_DIR = "examples/comparisons/target=free_diiid_3_coil"
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -57,17 +58,19 @@ def _build_physics_isolated(oft_threads, tmp_suffix):
     from OpenFUSIONToolkit.TokaMaker.util import read_eqdsk
     from helper_fct import resize_polygon, update_boundary
 
-    eqdsk_path = os.path.join(_BASE_DIR, "examples/data/eqdsk/g192185.02440")
+    eqdsk_path = os.path.join(_BASE_DIR, "examples/data/eqdsk/DIIID_opt_3coil_symm")
     tmp_dir = os.path.join(_BASE_DIR, "tmp", f"landscape_free_{tmp_suffix}")
     shutil.rmtree(tmp_dir, ignore_errors=True)
     os.makedirs(tmp_dir, exist_ok=True)
     os.chdir(tmp_dir)
 
     eqdsk = read_eqdsk(eqdsk_path)
-    fixed_LCFS = eqdsk["rzout"].copy()
+    _target = np.load(os.path.join(_BASE_DIR, "notebooks", "fb_lcfs_target.npz"))
+    fixed_LCFS = _target["lcfs"]
+    eqdsk["rzout"] = fixed_LCFS
+    fixed_mag_axis = _target["mag_axis"]
     lim = update_boundary(r0=1.69, z0=0, a0=0.67, kappa=2, delta=0.8, squar=0.15, npts=1700)
     myOFT = OFT_env(nthreads=oft_threads)
-    fixed_mag_axis = np.array([1.77764093, -0.04014656])
     lim1 = update_boundary(r0=1.69, z0=0, a0=0.67, kappa=2, delta=0.8, squar=0.15, npts=1700)
     cand1 = resize_polygon(lim1, dx=0.1)
     lim2 = update_boundary(r0=1.94, z0=0, a0=0.95, kappa=1.55, delta=0.8, squar=0.15, npts=1700)
@@ -94,7 +97,7 @@ def chunk_main(args):
             idx = int(t["idx"])
             t2 = float(t["theta2"])
             t3 = float(t["theta3"])
-            params = np.array([THETA1_FIXED, t2, t3, 0.0, 0.0, 0.0])
+            params = np.array([THETA1_FIXED, t2, t3, MU1_FIXED, 0.0, 0.0])
             cost_val, timing = _free_boundary_cost(
                 params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
                 cand1, cand2, lim, weight, NUM_COILS,

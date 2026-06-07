@@ -2,12 +2,8 @@ mem_eff_comp_convergence.py hyperparameters
 ===========================================
 
 
-OMEGA = 1e-2
-DIST_TH = 5.0
-RFIL = 0.01
-CONVERGENCE_THRESHOLD = 0.01
 STARTS_WINDOW = 10               # lbfgs stagnation window (starts)
-BAYESIAN_STAGNATION_WINDOW = 100 # bayesian gp stagnation window (evals)
+BAYESIAN_STAGNATION_WINDOW = 500 # bayesian gp stagnation window (evals)
 BAYESIAN_MAX_PERMS = 1
 UNIQUE_REFINED_POINTS = 3       # l-bfgs refinement candidates after gp phase
 ACQ_MULTIPLIER = 10             # raw acq candidates = ACQ_MULTIPLIER * UNIQUE_REFINED_POINTS

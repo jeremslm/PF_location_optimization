@@ -34,7 +34,7 @@ DIST_TH = 5.0
 RFIL = 0.01
 CONVERGENCE_THRESHOLD = 0.01
 STARTS_WINDOW = 10
-BAYESIAN_STAGNATION_WINDOW = 100
+BAYESIAN_STAGNATION_WINDOW = 500
 BAYESIAN_MAX_PERMS = 1
 UNIQUE_REFINED_POINTS = 3
 ACQ_MULTIPLIER = 10
@@ -379,10 +379,11 @@ def chunk_bayesian(args):
     alpha, reg_in, folder = args.alpha, args.reg_in, args.folder
 
     base = _case_base(folder, alpha, w, reg_in, c)
-    run_dir, _ = _find_or_create_run_dir(base)
+    run_dir, resuming = _find_or_create_run_dir(base)
+    ckpt_path = os.path.join(run_dir, 'checkpoint.json')
     _ocb._MEM_LOG_DIR = run_dir
     _ocb._get_mem_logger()
-    print(f"[bayesian] {run_dir}", flush=True)
+    print(f"[bayesian] {('resume' if resuming else 'fresh')} {run_dir}", flush=True)
 
     tmp_suffix = f"{os.getpid()}_{w:.0e}_{c}"
     tmp_dir_path = os.path.join(_BASE_DIR, 'tmp', f'mem_eff_{tmp_suffix}')
@@ -431,10 +432,45 @@ def chunk_bayesian(args):
     space = [Real(low, high) for low, high in bounds]
     max_perms = BAYESIAN_MAX_PERMS
     n_perms = min(max_perms, factorial(c))
-    gp_opt = Optimizer(space, base_estimator='gp',
-                       n_initial_points=n_initial * n_perms,
-                       initial_point_generator='sobol',
-                       acq_func='EI', random_state=args.random_state)
+    n_rebuilds = 0
+    xi_window = None
+
+    if resuming:
+        with open(ckpt_path) as f:
+            ckpt = json.load(f)
+        objective.norm_fixed = ckpt.get('initial_fixed_cost')
+        objective.norm_fb = ckpt.get('initial_fb_cost')
+        objective.fb_failures = ckpt.get('fb_failures', 0)
+        comparison._n_evals = ckpt['n_evals']
+        comparison._best_cost = ckpt['best_cost']
+        comparison._best_flux_err = ckpt.get('best_flux_err')
+        comparison._best_fb_cost = ckpt.get('best_fb_cost')
+        comparison._best_params = np.array(ckpt['best_params'])
+        comparison._initial_fixed_cost = ckpt.get('initial_fixed_cost')
+        comparison._initial_fb_cost = ckpt.get('initial_fb_cost')
+        comparison._fb_failures = ckpt.get('fb_failures', 0)
+        comparison._history = list(ckpt['cost_history'])
+        comparison._flux_err_history = list(ckpt['flux_err_history'])
+        comparison._fb_cost_history = list(ckpt['fb_cost_history'])
+        comparison._convergence = list(ckpt['convergence_history'])
+        comparison._times = list(ckpt.get('times', []))
+        n_rebuilds = ckpt.get('n_rebuilds', 0)
+        elapsed_offset = ckpt.get('elapsed', 0.0)
+        comparison._start_time = time.time() - elapsed_offset
+        xi_window = ckpt['xi_window']
+        yi_window = ckpt['yi_window']
+        gp_opt = Optimizer(space, base_estimator='gp',
+                           n_initial_points=0,
+                           acq_func='EI', random_state=args.random_state)
+        gp_opt.tell(xi_window, yi_window)
+        print(f"[bayesian] restored: n_evals={comparison._n_evals} "
+              f"n_rebuilds={n_rebuilds} best={comparison._best_cost:.4e}", flush=True)
+    else:
+        gp_opt = Optimizer(space, base_estimator='gp',
+                           n_initial_points=n_initial * n_perms,
+                           initial_point_generator='sobol',
+                           acq_func='EI', random_state=args.random_state)
+
     bayesian_stagnation_window = BAYESIAN_STAGNATION_WINDOW
 
     def stopping_callback():
@@ -454,7 +490,6 @@ def chunk_bayesian(args):
             return True
         return False
 
-    n_rebuilds = 0
     bayesian_stopped_by = 'completed'
     try:
         flag = True
@@ -472,7 +507,42 @@ def chunk_bayesian(args):
                                    acq_func='EI', random_state=args.random_state)
                 gp_opt.tell(xi_window, yi_window)
                 n_rebuilds += 1
-            if stopping_callback():
+                thetas, radials, coil_positions, coil_currents = comparison._extract_best_result()
+                ckpt = {
+                    'xi_window': xi_window,
+                    'yi_window': list(yi_window),
+                    'n_evals': comparison._n_evals,
+                    'n_rebuilds': n_rebuilds,
+                    'best_cost': comparison._best_cost,
+                    'best_params': list(comparison._best_params),
+                    'best_flux_err': comparison._best_flux_err,
+                    'best_fb_cost': comparison._best_fb_cost,
+                    'initial_fixed_cost': comparison._initial_fixed_cost,
+                    'initial_fb_cost': comparison._initial_fb_cost,
+                    'fb_failures': comparison._fb_failures,
+                    'cost_history': list(comparison._history),
+                    'flux_err_history': list(comparison._flux_err_history),
+                    'fb_cost_history': list(comparison._fb_cost_history),
+                    'convergence_history': list(comparison._convergence),
+                    'times': list(comparison._times),
+                    'random_state': args.random_state,
+                    'elapsed': time.time() - comparison._start_time,
+                    'parameters': {'thetas': thetas, 'radials': radials},
+                    'coil_positions_top': coil_positions,
+                    'coil_currents': coil_currents,
+                    'n_initial': n_initial,
+                    'n_perms': n_perms,
+                    'n_bayesian_evals': comparison._n_evals,
+                    'n_gp_observations': comparison._n_evals * n_perms,
+                    'gp_window': gp_window,
+                    'convergence_window': bayesian_stagnation_window,
+                    'bayesian_stopping': 'chunk_budget',
+                }
+                with open(ckpt_path, 'w') as f:
+                    json.dump(ckpt, f)
+                bayesian_stopped_by = 'chunk_budget'
+                flag = False
+            if flag and stopping_callback():
                 flag = False
     except TimeoutException:
         bayesian_stopped_by = 'exceeded wall time'
@@ -485,6 +555,10 @@ def chunk_bayesian(args):
     elapsed_bayesian = time.time() - comparison._start_time
     print(f"[bayesian] gp stopped_by={bayesian_stopped_by} evals={bayesian_evals} "
           f"best={comparison._best_cost:.4e} rebuilds={n_rebuilds}", flush=True)
+
+    if bayesian_stopped_by == 'chunk_budget':
+        shutil.rmtree(tmp_dir_path, ignore_errors=True)
+        return 0
 
     bayesian_convergence = list(comparison._convergence)
     n_acq_candidates = ACQ_MULTIPLIER * UNIQUE_REFINED_POINTS
