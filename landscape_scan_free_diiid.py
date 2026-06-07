@@ -184,7 +184,7 @@ def _watchdog_eval(args):
             os.remove(task_file)
 
 
-def _save_final(out_path, samples, cost, failed, weight_fb, n_samples):
+def _save_final(out_path, samples, cost, failed, weight_fb, n_samples, sobol_seed=SOBOL_SEED):
     valid = (~failed) & (~np.isnan(cost))
     if valid.any():
         masked = np.where(valid, cost, np.inf)
@@ -202,7 +202,7 @@ def _save_final(out_path, samples, cost, failed, weight_fb, n_samples):
         cost=cost,
         failed=failed,
         theta1_anchor=THETA1_FIXED,
-        mu_anchor=0.0,
+        mu1_anchor=MU1_FIXED,
         min_theta2=min_theta2,
         min_theta3=min_theta3,
         min_cost=min_cost,
@@ -210,7 +210,7 @@ def _save_final(out_path, samples, cost, failed, weight_fb, n_samples):
         num_coils=NUM_COILS,
         angular_bounds=np.array(ANGULAR_BOUNDS),
         n_samples=n_samples,
-        sobol_seed=SOBOL_SEED,
+        sobol_seed=sobol_seed,
     )
 
 
@@ -220,6 +220,7 @@ def orchestrator_main(ns):
     n_procs = ns.nprocs
     oft_threads = ns.oft_threads
     evals_per_chunk = ns.evals_per_chunk
+    sobol_seed = ns.sobol_seed
 
     out_dir_abs = os.path.join(_BASE_DIR, OUT_DIR)
     os.makedirs(out_dir_abs, exist_ok=True)
@@ -248,7 +249,7 @@ def orchestrator_main(ns):
             print(f"weight={w_key} already complete at {out_path}, skipping", flush=True)
             continue
         else:
-            sampler = qmc.Sobol(d=2, scramble=True, seed=SOBOL_SEED)
+            sampler = qmc.Sobol(d=2, scramble=True, seed=sobol_seed)
             samples = th_lo + sampler.random(n_samples) * (th_hi - th_lo)
             cost = np.full(n_samples, np.nan)
             failed = np.zeros(n_samples, dtype=bool)
@@ -256,7 +257,7 @@ def orchestrator_main(ns):
 
         pending_idx = np.where(np.isnan(cost))[0]
         if len(pending_idx) == 0:
-            _save_final(out_path, samples, cost, failed, w, n_samples_eff)
+            _save_final(out_path, samples, cost, failed, w, n_samples_eff, sobol_seed)
             if os.path.exists(ckpt_path):
                 os.remove(ckpt_path)
             print(f"weight={w_key} done", flush=True)
@@ -307,6 +308,7 @@ def main():
     parser.add_argument("--oft-threads", type=int, default=1, dest="oft_threads")
     parser.add_argument("--weights", type=str, default=None, help="comma-separated, e.g. 1e-2,1e-3")
     parser.add_argument("--evals-per-chunk", type=int, default=EVALS_PER_CHUNK, dest="evals_per_chunk")
+    parser.add_argument("--sobol-seed", type=int, default=SOBOL_SEED, dest="sobol_seed")
     parser.add_argument("--weight", type=float, default=None, help="chunk mode: weight_fb")
     parser.add_argument("--task-file", type=str, default=None, dest="task_file", help="chunk mode: JSON task file")
     args = parser.parse_args()
@@ -317,6 +319,8 @@ def main():
         sys.exit(chunk_main(args))
 
     args.weights = [float(x) for x in args.weights.split(",")] if args.weights else WEIGHTS_FB
+    if not hasattr(args, 'sobol_seed') or args.sobol_seed is None:
+        args.sobol_seed = SOBOL_SEED
     orchestrator_main(args)
 
 

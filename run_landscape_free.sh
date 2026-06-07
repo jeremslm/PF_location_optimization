@@ -10,4 +10,5 @@ python landscape_scan_free_diiid.py \
     --nprocs 5 \
     --oft-threads 1 \
     --weights 1e-4 \
-    --evals-per-chunk 50
+    --evals-per-chunk 50 \
+    --sobol-seed 100 
