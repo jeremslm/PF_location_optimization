@@ -33,9 +33,16 @@ OMEGA = 1e-2
 DIST_TH = 5.0
 RFIL = 0.01
 CONVERGENCE_THRESHOLD = 0.01
-STARTS_WINDOW = 5
-LBFGS_MAXFUN = 100
-MAX_RETRIES = 3
+STARTS_WINDOW = 10
+BAYESIAN_STAGNATION_WINDOW = 100
+BAYESIAN_MAX_PERMS = 1
+UNIQUE_REFINED_POINTS = 3
+ACQ_MULTIPLIER = 10
+ACQ_DEDUP_TOL = 0.05
+REFINEMENT_WINDOW = 5
+LBFGS_MAXFUN_MULTISTART = 100
+LBFGS_MAXFUN_REFINEMENT = 500
+MAX_RETRIES = 1
 CHUNK_TIMEOUT_S = 14400
 
 
@@ -205,7 +212,7 @@ def chunk_main(args):
     comparison._convergence_window = STARTS_WINDOW
     comparison._random_state = random_state
     comparison._maxiter = 1000000000
-    comparison._lbfgs_maxfun = LBFGS_MAXFUN
+    comparison._lbfgs_maxfun = LBFGS_MAXFUN_MULTISTART
     comparison.fb_cost_max_s = FB_COST_MAX_S
 
     starts_bests = []
@@ -267,7 +274,7 @@ def chunk_main(args):
             minimize(comparison._track_objective, x0, method='L-BFGS-B', bounds=bounds,
                      options={'ftol': 1e-9, 'gtol': 1e-6,
                               'maxiter': comparison._maxiter,
-                              'maxfun': LBFGS_MAXFUN, 'disp': False})
+                              'maxfun': LBFGS_MAXFUN_MULTISTART, 'disp': False})
             comparison._starts_completed += 1
             starts_bests.append(comparison._best_cost)
             comparison._start_boundaries.append(comparison._n_evals)
@@ -333,13 +340,241 @@ def chunk_main(args):
         'fixed_solve_times': list(comparison._fixed_solve_times),
         'fixed_other_times': list(comparison._fixed_other_times),
         'maxiter': comparison._maxiter,
-        'lbfgs_maxfun': LBFGS_MAXFUN,
+        'lbfgs_maxfun': LBFGS_MAXFUN_MULTISTART,
     }
     comparison.save_results_to_json(os.path.join(run_dir, 'results.json'))
     fig = comparison.plot_result()
     time_fig = comparison.plot_convergence_vs_time(log_scale=True)
     fig.savefig(os.path.join(run_dir, 'convergence_plot.png'), dpi=150, bbox_inches='tight')
     time_fig.savefig(os.path.join(run_dir, 'convergence_vs_time_plot.png'), dpi=150, bbox_inches='tight')
+    plt.close('all')
+    shutil.rmtree(tmp_dir_path, ignore_errors=True)
+    return 0
+
+
+def chunk_bayesian(args):
+    import numpy as np
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    from math import factorial
+    from skopt import Optimizer
+    from skopt.space import Real
+
+    from scipy.optimize import minimize
+
+    import opt_comp_combined_boundary as _ocb
+    from opt_comp_combined_boundary import (
+        OptimizationComparison, make_combined_objective,
+        _check_starts_convergence, TimeoutException, MaxEvalsException,
+    )
+    from OpenFUSIONToolkit.TokaMaker.util import eval_green
+    from helper_fct import resize_polygon, update_boundary
+    from OFT_pf_coil_opt_fct import CoilPositionSpace
+
+    import shutil
+    w, c = args.weight, args.coil
+    gp_window = args.gp_window
+    n_initial = (args.n_initial_bayes or 0) or int(round(25 * c))
+    alpha, reg_in, folder = args.alpha, args.reg_in, args.folder
+
+    base = _case_base(folder, alpha, w, reg_in, c)
+    run_dir, _ = _find_or_create_run_dir(base)
+    _ocb._MEM_LOG_DIR = run_dir
+    _ocb._get_mem_logger()
+    print(f"[bayesian] {run_dir}", flush=True)
+
+    tmp_suffix = f"{os.getpid()}_{w:.0e}_{c}"
+    tmp_dir_path = os.path.join(_BASE_DIR, 'tmp', f'mem_eff_{tmp_suffix}')
+    myOFT, mygs, eqdsk, fixed_LCFS, fixed_mag_axis, lim, xpoint_index = \
+        _build_physics_isolated(args.nthreads, tmp_suffix)
+    r_bnd, psi_bnd = mygs.get_vfixed()
+
+    lim1 = update_boundary(r0=1.69, z0=0, a0=0.67, kappa=2, delta=0.8, squar=0.15, npts=1700)
+    coil_center_cand1 = resize_polygon(lim1, dx=0.1)
+    lim2 = update_boundary(r0=1.94, z0=0, a0=0.95, kappa=1.55, delta=0.8, squar=0.15, npts=1700)
+    coil_center_cand2 = resize_polygon(lim2, dx=0.15)
+
+    coil_space = CoilPositionSpace(inner_boundary=coil_center_cand1,
+                                   outer_boundary=coil_center_cand2, method='coords')
+    coil_space.set_bounds(angular_bounds=(10, 170), radial_bounds=(0, 1))
+    theta_bounds, radial_bounds = coil_space.get_bounds()
+    bounds = [theta_bounds] * c + [radial_bounds] * c
+
+    theta_range = np.linspace(0, 180, len(coil_center_cand1) // 2)
+    inner = coil_center_cand1[:len(coil_center_cand1) // 2]
+    outer = coil_center_cand2[:len(coil_center_cand2) // 2]
+
+    objective = make_combined_objective(
+        alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
+        coil_center_cand1, coil_center_cand2, lim,
+        r_bnd, psi_bnd, w, c, RFIL,
+        reg_in, OMEGA, DIST_TH, theta_range, inner, outer,
+        xpoint_index=xpoint_index,
+    )
+
+    comparison = OptimizationComparison(
+        objective, bounds,
+        max_time=args.max_time, max_evals=args.max_evals,
+        convergence_threshold=CONVERGENCE_THRESHOLD,
+        NUM_COILS=c, OMEGA=OMEGA, DIST_TH=DIST_TH,
+        REG_IN=reg_in, RFIL=RFIL, ALPHA=alpha, WEIGHT_FB=w,
+        verbose=True,
+    )
+    comparison.set_problem_data(r_bnd, psi_bnd, coil_center_cand1, coil_center_cand2,
+                                mygs.o_point, eval_green,
+                                myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
+                                xpoint_index=xpoint_index)
+    comparison._reset_tracking()
+    comparison._current_method = 'Bayesian'
+
+    space = [Real(low, high) for low, high in bounds]
+    max_perms = BAYESIAN_MAX_PERMS
+    n_perms = min(max_perms, factorial(c))
+    gp_opt = Optimizer(space, base_estimator='gp',
+                       n_initial_points=n_initial * n_perms,
+                       initial_point_generator='sobol',
+                       acq_func='EI', random_state=args.random_state)
+    bayesian_stagnation_window = BAYESIAN_STAGNATION_WINDOW
+
+    def stopping_callback():
+        n = comparison._n_evals
+        if n <= n_initial + bayesian_stagnation_window:
+            return False
+        running_min = np.minimum.accumulate(comparison._history)
+        old_best = running_min[-(bayesian_stagnation_window + 1)]
+        new_best = running_min[-1]
+        if abs(old_best) > 0:
+            rel_imp = (old_best - new_best) / abs(old_best)
+            if rel_imp < comparison.convergence_threshold:
+                comparison._stopped_reason = "bayesian_stagnation"
+                return True
+        elif new_best == 0:
+            comparison._stopped_reason = "bayesian_stagnation"
+            return True
+        return False
+
+    n_rebuilds = 0
+    bayesian_stopped_by = 'completed'
+    try:
+        flag = True
+        while flag:
+            x = gp_opt.ask()
+            cost = comparison._track_objective(x)
+            xs_perm, ys_perm = comparison._get_permuted_points(x, cost, max_perms=max_perms)
+            gp_opt.tell(xs_perm, ys_perm)
+            n_obs = len(gp_opt.yi)
+            if gp_window and n_obs > 0 and n_obs % gp_window == 0:
+                xi_window = gp_opt.Xi[-gp_window:]
+                yi_window = gp_opt.yi[-gp_window:]
+                gp_opt = Optimizer(space, base_estimator='gp',
+                                   n_initial_points=0,
+                                   acq_func='EI', random_state=args.random_state)
+                gp_opt.tell(xi_window, yi_window)
+                n_rebuilds += 1
+            if stopping_callback():
+                flag = False
+    except TimeoutException:
+        bayesian_stopped_by = 'exceeded wall time'
+    except MaxEvalsException:
+        bayesian_stopped_by = 'max function calls'
+    if comparison._stopped_reason:
+        bayesian_stopped_by = comparison._stopped_reason
+
+    bayesian_evals = comparison._n_evals
+    elapsed_bayesian = time.time() - comparison._start_time
+    print(f"[bayesian] gp stopped_by={bayesian_stopped_by} evals={bayesian_evals} "
+          f"best={comparison._best_cost:.4e} rebuilds={n_rebuilds}", flush=True)
+
+    bayesian_convergence = list(comparison._convergence)
+    n_acq_candidates = ACQ_MULTIPLIER * UNIQUE_REFINED_POINTS
+    pts_refined = 0
+    refinement_stopped_by = None
+    refinement_bests = []
+    refinement_evals = []
+    refinement_times = []
+    refinement_costs = []
+    refinement_convergence = []
+    n_acq_unique = None
+    if bayesian_stopped_by not in ("exceeded wall time", "max function calls"):
+        comparison._convergence = []
+        comparison._stopped_reason = None
+        raw_candidates = gp_opt.ask(n_points=n_acq_candidates, strategy='cl_min')
+        candidates = comparison._deduplicate_candidates(raw_candidates, tol=ACQ_DEDUP_TOL,
+                                                        max_unique=UNIQUE_REFINED_POINTS)
+        n_acq_unique = len(candidates)
+        print(f"[bayesian] acq candidates: {n_acq_candidates} raw -> {n_acq_unique} unique", flush=True)
+        for cand in candidates:
+            evals_before = comparison._n_evals
+            time_before = time.time() - comparison._start_time
+            try:
+                minimize(comparison._track_objective, np.array(cand), method='L-BFGS-B',
+                         bounds=bounds, options={'ftol': 1e-9, 'gtol': 1e-6,
+                                                 'maxiter': comparison._maxiter,
+                                                 'maxfun': LBFGS_MAXFUN_REFINEMENT, 'disp': False})
+                pts_refined += 1
+                refinement_bests.append(comparison._best_cost)
+                refinement_evals.append(comparison._n_evals - evals_before)
+                refinement_times.append(time.time() - comparison._start_time - time_before)
+                refinement_costs.append(comparison._best_cost)
+                if _check_starts_convergence(refinement_bests, REFINEMENT_WINDOW,
+                                             comparison.convergence_threshold):
+                    refinement_stopped_by = "converged"
+                    break
+            except TimeoutException:
+                refinement_stopped_by = "exceeded wall time"
+                break
+            except MaxEvalsException:
+                refinement_stopped_by = "max function calls"
+                break
+        refinement_convergence = list(comparison._convergence)
+        if refinement_stopped_by is None:
+            refinement_stopped_by = "all refinements completed"
+
+    elapsed = time.time() - comparison._start_time
+    stopped_by = refinement_stopped_by or bayesian_stopped_by
+    print(f"[bayesian] total stopped_by={stopped_by} evals={comparison._n_evals} "
+          f"best={comparison._best_cost:.4e}", flush=True)
+
+    thetas, radials, coil_positions, coil_currents = comparison._extract_best_result()
+    comparison.results['Bayesian'] = {
+        'best_cost': comparison._best_cost,
+        'best_flux_err': comparison._best_flux_err,
+        'best_fb_cost': comparison._best_fb_cost,
+        'n_evals': comparison._n_evals,
+        'time': elapsed,
+        'stopping': stopped_by,
+        'parameters': {'thetas': thetas, 'radials': radials},
+        'coil_positions_top': coil_positions,
+        'coil_currents': coil_currents,
+        'convergence_history': bayesian_convergence + refinement_convergence,
+        'bayesian_convergence_history': bayesian_convergence,
+        'refinement_convergence_history': refinement_convergence,
+        'cost_history': list(comparison._history),
+        'n_initial': n_initial,
+        'n_perms': n_perms,
+        'n_bayesian_evals': bayesian_evals,
+        'n_gp_observations': bayesian_evals * n_perms,
+        'time_bayesian_phase': elapsed_bayesian,
+        'pts_refined': pts_refined,
+        'refinement_evals': refinement_evals,
+        'refinement_times': refinement_times,
+        'refinement_costs': refinement_costs,
+        'bayesian_stopping': bayesian_stopped_by,
+        'acq_multiplier': ACQ_MULTIPLIER,
+        'n_acq_candidates': n_acq_candidates,
+        'n_acq_unique': n_acq_unique,
+        'unique_refined_points': UNIQUE_REFINED_POINTS,
+        'acq_dedup_tol': ACQ_DEDUP_TOL,
+        'refinement_window': REFINEMENT_WINDOW,
+        'refinement_stopping': refinement_stopped_by,
+        'convergence_window': BAYESIAN_STAGNATION_WINDOW,
+        'n_rebuilds': n_rebuilds,
+        'gp_window': gp_window,
+    }
+    comparison.save_results_to_json(os.path.join(run_dir, 'results.json'))
+    fig = comparison.plot_result()
+    fig.savefig(os.path.join(run_dir, 'convergence_plot.png'), dpi=150, bbox_inches='tight')
     plt.close('all')
     shutil.rmtree(tmp_dir_path, ignore_errors=True)
     return 0
@@ -364,6 +599,7 @@ def case_watchdog(args_tuple):
         cmd = [
             sys.executable, os.path.abspath(__file__),
             "--mode", "chunk",
+            "--method", ns.method,
             "--weight", str(w), "--coil", str(c),
             "--starts-per-call", str(ns.starts_per_call),
             "--folder", ns.folder,
@@ -373,6 +609,8 @@ def case_watchdog(args_tuple):
             "--max-evals", str(ns.max_evals),
             "--max-time", str(ns.max_time),
             "--random-state", str(ns.random_state),
+            "--gp-window", str(ns.gp_window),
+            "--n-initial-bayes", str(ns.n_initial_bayes or 0),
         ]
         print(f"[watchdog w={w:.0e} c={c}] launching chunk #{chunk_idx} -> {log_path}", flush=True)
         with open(log_path, 'a') as logf:
@@ -415,6 +653,9 @@ def orchestrator_main(ns):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', choices=['orchestrator', 'chunk'], default='orchestrator')
+    parser.add_argument('--method', choices=['lbfgs', 'bayesian'], default='lbfgs')
+    parser.add_argument('--gp-window', type=int, default=200, dest='gp_window')
+    parser.add_argument('--n-initial-bayes', type=int, default=None, dest='n_initial_bayes')
     parser.add_argument('--weights', type=float, nargs='+', default=[1e-4, 1e-3, 1e-2, 1e-1])
     parser.add_argument('--coils', type=int, nargs='+', default=[2, 3, 4, 5])
     parser.add_argument('--ncpus', type=int, default=16)
@@ -435,6 +676,8 @@ def main():
     if args.mode == 'chunk':
         if args.weight is None or args.coil is None:
             parser.error("--mode chunk requires --weight and --coil")
+        if args.method == 'bayesian':
+            sys.exit(chunk_bayesian(args))
         sys.exit(chunk_main(args))
     else:
         orchestrator_main(args)
