@@ -9,7 +9,7 @@ python mem_eff_comp_convergence.py \
     --method bayesian \
     --weights 1e-4 1e-3 1e-2 1e-1 \
     --coils 2 3 4 5 \
-    --ncpus 16 \
+    --ncpus 10 \
     --alpha 1.0 \
     --lambda 1e-6 \
     --nthreads 1 \
