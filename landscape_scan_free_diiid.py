@@ -98,7 +98,7 @@ def chunk_main(args):
             t2 = float(t["theta2"])
             t3 = float(t["theta3"])
             params = np.array([THETA1_FIXED, t2, t3, MU1_FIXED, 0.0, 0.0])
-            cost_val, timing = _free_boundary_cost(
+            cost_val, timing, _ = _free_boundary_cost(
                 params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
                 cand1, cand2, lim, weight, NUM_COILS,
             )

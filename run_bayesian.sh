@@ -16,4 +16,5 @@ python mem_eff_comp_convergence.py \
     --max-evals 10080 \
     --max-time 604800 \
     --random-state 100 \
-    --gp-window 25
+    --gp-window 25 \
+    --folder convergence_w5_bayesian

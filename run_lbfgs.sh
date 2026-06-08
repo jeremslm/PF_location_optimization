@@ -16,4 +16,5 @@ python mem_eff_comp_convergence.py \
     --nthreads 1 \
     --max-evals 10080 \
     --max-time 604800 \
-    --random-state 100
+    --random-state 100 \
+    --folder convergence_w5_lbfgs
