@@ -1217,6 +1217,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     N_RUNS = kwargs.get('N_RUNS', 1)
     RUN_FOLDER = kwargs.get('RUN_FOLDER', 'combined')
     ALPHA = kwargs.get('ALPHA', 1)
+    RANDOM_STATE = kwargs.get('RANDOM_STATE', None)
     WEIGHT_FB = kwargs.get('WEIGHT_FB', 1e-2)
     xpoint_index = kwargs.get('xpoint_index', 55)
 
@@ -1276,7 +1277,7 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     while os.path.exists(os.path.join(base, f'run_{existing_runs:02d}', 'results.json')):
         existing_runs += 1
 
-    seed_offset = existing_runs
+    seed_offset = RANDOM_STATE if RANDOM_STATE is not None else existing_runs
 
     if N_RUNS == 1:
         run_idx = existing_runs
@@ -1309,19 +1310,19 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
     if 'bayesian' in methods:
         print(f"Running Bayesian Optimization... coils={NUM_COILS}, weight_fb={WEIGHT_FB:.0e}")
         if N_RUNS > 1:
-            comparison.run_multiple('bayesian', n_runs=N_RUNS, 
+            comparison.run_multiple('bayesian', n_runs=N_RUNS,
                                     base_seed=seed_offset,
-                                    bayesian_stagnation_window=25, 
-                                    unique_refined_points=3, 
+                                    bayesian_stagnation_window=500,
+                                    unique_refined_points=3,
                                     acq_multiplier=10,
-                                    lbfgs_maxfun=100,
+                                    lbfgs_maxfun=500,
                                     max_perms=1)
         else:
-            comparison.run_bayesian(bayesian_stagnation_window=25,
-                                    random_state=seed_offset, 
-                                    unique_refined_points=3, 
+            comparison.run_bayesian(bayesian_stagnation_window=500,
+                                    random_state=seed_offset,
+                                    unique_refined_points=3,
                                     acq_multiplier=10,
-                                    lbfgs_maxfun=100,
+                                    lbfgs_maxfun=500,
                                     start_time=PROCESS_START,
                                     max_perms=1)
 
@@ -1365,7 +1366,8 @@ def main(mygs, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, lim,
 # Parallel worker
 # ============================================
 
-def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, method, reg_in):
+def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, method, reg_in,
+                  max_evals=2**18, max_time=86400, random_state=None):
     t0 = time.time()
     global _MEM_LOG_DIR
     _MEM_LOG_DIR = os.path.join(_BASE_DIR,
@@ -1430,11 +1432,12 @@ def parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, me
         REG_IN=reg_in,
         ALPHA=alpha,
         WEIGHT_FB=weight_fb,
-        MAX_EVALS=2**18,
-        MAX_TIME=86400,
+        MAX_EVALS=max_evals,
+        MAX_TIME=max_time,
         N_RUNS=ntrials,
         RUN_FOLDER=run_folder,
         PROCESS_START=t0,
+        RANDOM_STATE=random_state,
         xpoint_index=xpoint_index,
     )
     shutil.rmtree(tmp_dir, ignore_errors=True)
@@ -1461,7 +1464,8 @@ def _make_case_logger(base, weight_fb, num_coils):
     return log
 
 
-def logged_parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, method, reg_in):
+def logged_parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, method, reg_in,
+                         max_evals=2**18, max_time=86400, random_state=None):
     base = os.path.join(_BASE_DIR,
         f'examples/comparisons/combined_boundary_DIIID/{run_folder}/'
         f'alpha:{alpha},weight:{weight_fb:.0e},lambda:{reg_in:.0e},coils:{num_coils}')
@@ -1479,7 +1483,8 @@ def logged_parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, al
     t0 = time.time()
     log.info(f"START {params}")
     try:
-        result = parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, method, reg_in)
+        result = parallel_case(weight_fb, num_coils, ntrials, run_folder, nthreads, alpha, method, reg_in,
+                               max_evals=max_evals, max_time=max_time, random_state=random_state)
         log.info(f"DONE {params} elapsed={time.time()-t0:.1f}s")
         return result
     except Exception as e:
@@ -1512,6 +1517,9 @@ if __name__ == "__main__":
                         help='Free-boundary weights to sweep')
     parser.add_argument('--lambda', dest='reg_in', type=float, default=1e-6,
                         help='Regularization (REG_IN)')
+    parser.add_argument('--max-evals', type=int, default=2**18, dest='max_evals')
+    parser.add_argument('--max-time', type=int, default=86400, dest='max_time')
+    parser.add_argument('--random-state', type=int, default=None, dest='random_state')
     args = parser.parse_args()
 
     pool = Pool(processes=args.nprocs, maxtasksperchild=1)
@@ -1520,7 +1528,8 @@ if __name__ == "__main__":
         for nc in args.coils:
             async_results[(w, nc)] = pool.apply_async(
                 logged_parallel_case,
-                args=(w, nc, args.ntrials, args.folder, args.nthreads, args.alpha, args.method, args.reg_in)
+                args=(w, nc, args.ntrials, args.folder, args.nthreads, args.alpha, args.method, args.reg_in,
+                      args.max_evals, args.max_time, args.random_state)
             )
 
     pool.close()
