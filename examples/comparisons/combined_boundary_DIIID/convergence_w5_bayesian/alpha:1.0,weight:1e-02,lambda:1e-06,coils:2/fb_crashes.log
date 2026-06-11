@@ -1,0 +1,2114 @@
+2026-06-09 13:33:16,322 pid=588423 weight_fb=1.00e-02 params=[84.3697 37.5093  0.3951  0.1252]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 13:34:53,122 pid=588423 weight_fb=1.00e-02 params=[44.3697 77.5093  0.1451  0.3752]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 13:49:10,202 pid=588423 weight_fb=1.00e-02 params=[159.3697  52.5093   0.8639   0.4064]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 13:50:44,828 pid=588423 weight_fb=1.00e-02 params=[39.3697 92.5093  0.1139  0.1564]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 14:00:17,502 pid=588423 weight_fb=1.00e-02 params=[51.8697 40.0093  0.7545  0.9533]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 14:01:04,564 pid=588423 weight_fb=1.00e-02 params=[131.8697 120.0093   0.2545   0.4533]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 14:09:47,369 pid=588423 weight_fb=1.00e-02 params=[2.1870e+01 7.0009e+01 6.6982e-02 3.9082e-01]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 14:15:37,482 pid=588423 weight_fb=1.00e-02 params=[149.889   10.       0.2809   1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 14:23:43,180 pid=588423 weight_fb=1.00e-02 params=[ 81.7112 167.0074   0.       0.9856]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 14:24:30,802 pid=588423 weight_fb=1.00e-02 params=[81.712  77.6705  0.4549  0.7884]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 14:42:27,011 pid=588423 weight_fb=1.00e-02 params=[145.3508 164.5091   0.9213   0.9511]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 15:02:19,681 pid=588423 weight_fb=1.00e-02 params=[1.4722e+02 1.6866e+02 2.0700e-01 2.5164e-02]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 15:07:15,863 pid=588423 weight_fb=1.00e-02 params=[8.2182e+01 1.0159e+02 2.4722e-02 5.1241e-02]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 15:15:12,086 pid=588423 weight_fb=1.00e-02 params=[1.1108e+02 1.1478e+02 9.9132e-02 4.2439e-01]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-09 15:24:08,316 pid=588423 weight_fb=1.00e-02 params=[1.3649e+02 1.7000e+02 7.4965e-01 1.0481e-01]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 15:31:18,631 pid=588423 weight_fb=1.00e-02 params=[1.0061e+02 4.4328e+01 4.0221e-01 5.9109e-02]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 15:37:46,057 pid=588423 weight_fb=1.00e-02 params=[156.291  163.362    0.4089   0.2006]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 15:45:43,812 pid=588423 weight_fb=1.00e-02 params=[1.6587e+02 1.3920e+02 1.0140e-01 8.3499e-01]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 15:46:31,366 pid=588423 weight_fb=1.00e-02 params=[165.8695 169.5771   0.       0.9976]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 15:58:05,429 pid=588423 weight_fb=1.00e-02 params=[4.7877e+01 1.5927e+02 0.0000e+00 1.4471e-01]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 16:07:05,332 pid=588423 weight_fb=1.00e-02 params=[ 62.8647 162.1364   0.6996   0.4709]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 16:08:41,717 pid=588423 weight_fb=1.00e-02 params=[1.3290e+02 1.6915e+02 1.0000e+00 2.5518e-02]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 16:10:17,426 pid=588423 weight_fb=1.00e-02 params=[132.8955 167.2614   1.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 16:10:50,897 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.9355   1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-09 16:13:14,614 pid=588423 weight_fb=1.00e-02 params=[1.6374e+02 1.7000e+02 9.9771e-01 4.1398e-03]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 16:14:02,201 pid=588423 weight_fb=1.00e-02 params=[163.1274 170.       0.3701   1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 16:17:29,697 pid=588423 weight_fb=1.00e-02 params=[160.8198 144.8662   0.2575   0.8113]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 16:18:18,000 pid=588423 weight_fb=1.00e-02 params=[ 60.8555 170.       0.7695   1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 216, in _free_boundary_cost
+    mygs.save_eqdsk(eqdsk_tmp, truncate_eq=False)
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 1750, in save_eqdsk
+    raise Exception(error_string.value)
+Exception: b'Tracing failed at psi =     0.9844'
+
+2026-06-09 16:21:31,338 pid=588423 weight_fb=1.00e-02 params=[5.1141e+01 5.5500e+01 7.5903e-02 5.6797e-03]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 16:22:19,462 pid=588423 weight_fb=1.00e-02 params=[1.3625e+02 1.4568e+02 7.5901e-02 8.1579e-01]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 16:28:07,951 pid=588423 weight_fb=1.00e-02 params=[161.5901  65.742    0.2322   0.7887]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 16:29:44,409 pid=588423 weight_fb=1.00e-02 params=[163.0022 150.4712   0.2322   0.1633]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 16:35:44,868 pid=588423 weight_fb=1.00e-02 params=[130.9901 170.       1.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 16:38:59,930 pid=588423 weight_fb=1.00e-02 params=[ 29.8493 162.3943   0.3481   0.6427]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 16:39:33,498 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.3481   0.942 ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-09 16:48:23,968 pid=588423 weight_fb=1.00e-02 params=[94.6412 45.578   0.3969  0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 16:50:36,437 pid=588423 weight_fb=1.00e-02 params=[12.852  11.5936  0.1174  0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-09 16:58:46,061 pid=588423 weight_fb=1.00e-02 params=[114.7685 170.       0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 16:59:19,772 pid=588423 weight_fb=1.00e-02 params=[110.178  108.7205   0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-09 17:02:47,504 pid=588423 weight_fb=1.00e-02 params=[142.8535 161.3279   0.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 17:12:18,370 pid=588423 weight_fb=1.00e-02 params=[157.3139 170.       0.7228   1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 17:21:00,563 pid=588423 weight_fb=1.00e-02 params=[155.0253 170.       1.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 17:52:19,315 pid=588423 weight_fb=1.00e-02 params=[81.3587 29.7956  0.      0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 17:59:21,578 pid=588423 weight_fb=1.00e-02 params=[1.7000e+02 1.7000e+02 7.7547e-01 5.3886e-04]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 18:16:04,988 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.9743   0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 18:16:55,033 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.9743   0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 18:17:46,189 pid=588423 weight_fb=1.00e-02 params=[144.2858 170.       0.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 18:18:37,058 pid=588423 weight_fb=1.00e-02 params=[144.2858 170.       0.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 18:32:04,336 pid=588423 weight_fb=1.00e-02 params=[103.6987  22.3905   1.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 18:38:12,276 pid=588423 weight_fb=1.00e-02 params=[137.2593 170.       0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 18:39:04,378 pid=588423 weight_fb=1.00e-02 params=[129.4733 170.       1.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 18:39:55,482 pid=588423 weight_fb=1.00e-02 params=[153.5981 170.       1.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 18:40:47,497 pid=588423 weight_fb=1.00e-02 params=[129.4742 170.       0.9339   0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 18:43:26,879 pid=588423 weight_fb=1.00e-02 params=[ 90.7706 170.       0.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 18:47:56,978 pid=588423 weight_fb=1.00e-02 params=[ 90.7704 170.       0.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 18:56:58,699 pid=588423 weight_fb=1.00e-02 params=[1.7000e+02 1.7000e+02 1.0000e+00 1.3387e-01]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 19:06:21,250 pid=588423 weight_fb=1.00e-02 params=[7.7832e+01 5.4872e+01 0.0000e+00 7.1369e-02]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 19:20:16,562 pid=588423 weight_fb=1.00e-02 params=[157.9381 170.       1.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 19:21:11,330 pid=588423 weight_fb=1.00e-02 params=[157.9381 170.       1.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 19:22:59,420 pid=588423 weight_fb=1.00e-02 params=[1.7000e+02 1.7000e+02 1.0000e+00 1.3387e-01]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 19:23:54,688 pid=588423 weight_fb=1.00e-02 params=[8.2402e+01 1.7000e+02 0.0000e+00 1.5366e-01]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 19:25:44,860 pid=588423 weight_fb=1.00e-02 params=[1.7000e+02 1.7000e+02 1.0000e+00 1.3387e-01]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 19:33:14,308 pid=588423 weight_fb=1.00e-02 params=[8.1638e+01 1.7000e+02 0.0000e+00 6.8244e-02]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 19:40:52,021 pid=588423 weight_fb=1.00e-02 params=[2.3479e+01 1.0110e+02 6.9302e-02 1.0000e+00]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 19:54:53,761 pid=588423 weight_fb=1.00e-02 params=[147.7176 170.       1.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 20:24:35,867 pid=588423 weight_fb=1.00e-02 params=[ 66.498 170.      1.      1.   ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 216, in _free_boundary_cost
+    mygs.save_eqdsk(eqdsk_tmp, truncate_eq=False)
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 1750, in save_eqdsk
+    raise Exception(error_string.value)
+Exception: b'Tracing failed at psi =     0.9844'
+
+2026-06-09 20:29:36,381 pid=588423 weight_fb=1.00e-02 params=[51.7401 31.7482  0.      1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 20:31:33,669 pid=588423 weight_fb=1.00e-02 params=[17.3881 69.6142  0.1087  0.2434]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 20:33:32,505 pid=588423 weight_fb=1.00e-02 params=[164.2524 170.       1.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 20:40:22,852 pid=588423 weight_fb=1.00e-02 params=[ 81.9461 167.0915   0.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 20:41:20,849 pid=588423 weight_fb=1.00e-02 params=[ 95.0823 170.       0.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 20:42:19,208 pid=588423 weight_fb=1.00e-02 params=[ 95.0823 170.       0.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 20:43:19,630 pid=588423 weight_fb=1.00e-02 params=[9.5085e+01 1.7000e+02 8.9757e-02 1.0000e+00]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 20:44:18,600 pid=588423 weight_fb=1.00e-02 params=[ 95.0966 170.       0.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 20:46:16,454 pid=588423 weight_fb=1.00e-02 params=[1.5033e+02 1.7000e+02 3.2427e-03 0.0000e+00]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 20:47:14,535 pid=588423 weight_fb=1.00e-02 params=[150.3219 170.       0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 20:50:14,029 pid=588423 weight_fb=1.00e-02 params=[135.6223 170.       0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 20:51:14,209 pid=588423 weight_fb=1.00e-02 params=[125.5012 170.       0.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 20:53:17,479 pid=588423 weight_fb=1.00e-02 params=[135.6223 170.       0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 20:53:59,789 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.4004   0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-09 20:54:44,116 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.4004   0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-09 20:55:26,870 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.4004   0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-09 21:22:43,648 pid=588423 weight_fb=1.00e-02 params=[161.3798 170.       0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 21:23:45,484 pid=588423 weight_fb=1.00e-02 params=[161.3798 170.       0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 21:24:45,669 pid=588423 weight_fb=1.00e-02 params=[1.6136e+02 1.6970e+02 3.5147e-02 0.0000e+00]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 21:25:44,539 pid=588423 weight_fb=1.00e-02 params=[161.3798 170.       0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 21:44:41,313 pid=588423 weight_fb=1.00e-02 params=[145.3643 170.       0.5367   0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 21:54:25,482 pid=588423 weight_fb=1.00e-02 params=[146.2704 170.       0.9893   1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 21:58:35,698 pid=588423 weight_fb=1.00e-02 params=[153.2224 170.       0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 21:59:37,544 pid=588423 weight_fb=1.00e-02 params=[48.3891 31.5006  0.5273  0.5916]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 22:00:36,799 pid=588423 weight_fb=1.00e-02 params=[143.9485 170.       1.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 22:03:48,249 pid=588423 weight_fb=1.00e-02 params=[143.9485 170.       1.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 22:07:07,525 pid=588423 weight_fb=1.00e-02 params=[146.2844 165.0172   1.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 22:10:11,755 pid=588423 weight_fb=1.00e-02 params=[124.8066 170.       0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 22:11:12,634 pid=588423 weight_fb=1.00e-02 params=[1.5323e+02 1.7000e+02 0.0000e+00 4.0227e-03]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 22:24:56,838 pid=588423 weight_fb=1.00e-02 params=[10.     10.      0.0799  0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-09 22:30:09,881 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.9031   1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-09 22:31:11,492 pid=588423 weight_fb=1.00e-02 params=[1.5114e+02 1.7000e+02 1.1614e-02 0.0000e+00]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 22:34:27,576 pid=588423 weight_fb=1.00e-02 params=[8.9003e+01 1.0000e+01 0.0000e+00 3.4612e-02]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 22:39:56,737 pid=588423 weight_fb=1.00e-02 params=[73.2705 46.3993  0.6554  0.2259]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 22:50:48,388 pid=588423 weight_fb=1.00e-02 params=[1.2847e+02 1.7000e+02 2.4059e-02 0.0000e+00]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 22:52:58,776 pid=588423 weight_fb=1.00e-02 params=[ 90.4545 170.       0.       1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 23:03:57,514 pid=588423 weight_fb=1.00e-02 params=[127.9343 170.       0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 23:12:45,405 pid=588423 weight_fb=1.00e-02 params=[8.7582e+01 1.7000e+02 9.6713e-03 0.0000e+00]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 23:16:04,730 pid=588423 weight_fb=1.00e-02 params=[148.4851 170.       1.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 23:19:07,895 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.7097   1.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-09 23:21:19,263 pid=588423 weight_fb=1.00e-02 params=[127.904 170.      0.      0.   ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 23:23:33,162 pid=588423 weight_fb=1.00e-02 params=[127.8971 170.       0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 23:24:37,354 pid=588423 weight_fb=1.00e-02 params=[109.007 170.      1.      0.   ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 23:30:08,621 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.4594   0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-09 23:32:24,875 pid=588423 weight_fb=1.00e-02 params=[127.897 170.      0.      0.   ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 23:33:32,628 pid=588423 weight_fb=1.00e-02 params=[1.2789e+02 1.6177e+02 0.0000e+00 2.7927e-02]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Matrix solve failed for targets         
+
+2026-06-09 23:46:33,305 pid=588423 weight_fb=1.00e-02 params=[102.2067  38.1193   0.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-09 23:57:49,055 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.8401   0.2264]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 00:08:23,354 pid=588423 weight_fb=1.00e-02 params=[108.4649  21.5761   1.       0.    ]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 213, in _free_boundary_cost
+    mygs.solve()
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/_core.py", line 695, in solve
+    raise ValueError("Error in solve: {0}".format(error_string.value.decode()))
+ValueError: Error in solve: Exceeded "maxits"                       
+
+2026-06-10 03:05:18,541 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:05:48,215 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:06:18,003 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:06:47,629 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:07:17,348 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:07:47,122 pid=588423 weight_fb=1.00e-02 params=[169.9    169.9      0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:08:16,924 pid=588423 weight_fb=1.00e-02 params=[169.9    169.9      0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:08:46,293 pid=588423 weight_fb=1.00e-02 params=[169.9    169.9      0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:09:15,593 pid=588423 weight_fb=1.00e-02 params=[169.9    169.9      0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:09:45,360 pid=588423 weight_fb=1.00e-02 params=[169.9    169.9      0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:10:15,192 pid=588423 weight_fb=1.00e-02 params=[169.9501 169.9501   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:10:44,563 pid=588423 weight_fb=1.00e-02 params=[169.9501 169.9501   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:11:14,146 pid=588423 weight_fb=1.00e-02 params=[169.9501 169.9501   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:11:43,971 pid=588423 weight_fb=1.00e-02 params=[169.9501 169.9501   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:12:13,468 pid=588423 weight_fb=1.00e-02 params=[169.9501 169.9501   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:12:43,097 pid=588423 weight_fb=1.00e-02 params=[169.975  169.975    0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:13:12,757 pid=588423 weight_fb=1.00e-02 params=[169.975  169.975    0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:13:42,620 pid=588423 weight_fb=1.00e-02 params=[169.975  169.975    0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:14:12,155 pid=588423 weight_fb=1.00e-02 params=[169.975  169.975    0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:14:41,674 pid=588423 weight_fb=1.00e-02 params=[169.975  169.975    0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:15:11,521 pid=588423 weight_fb=1.00e-02 params=[169.9875 169.9875   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:15:41,376 pid=588423 weight_fb=1.00e-02 params=[169.9875 169.9875   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:16:11,017 pid=588423 weight_fb=1.00e-02 params=[169.9875 169.9875   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:16:40,809 pid=588423 weight_fb=1.00e-02 params=[169.9875 169.9875   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:17:10,592 pid=588423 weight_fb=1.00e-02 params=[169.9875 169.9875   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:17:40,408 pid=588423 weight_fb=1.00e-02 params=[169.9938 169.9938   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:18:09,933 pid=588423 weight_fb=1.00e-02 params=[169.9938 169.9938   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:18:39,743 pid=588423 weight_fb=1.00e-02 params=[169.9938 169.9938   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:19:09,403 pid=588423 weight_fb=1.00e-02 params=[169.9938 169.9938   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:19:38,740 pid=588423 weight_fb=1.00e-02 params=[169.9938 169.9938   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:20:08,274 pid=588423 weight_fb=1.00e-02 params=[169.9969 169.9969   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:20:38,004 pid=588423 weight_fb=1.00e-02 params=[169.9969 169.9969   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:21:07,400 pid=588423 weight_fb=1.00e-02 params=[169.9969 169.9969   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:21:36,725 pid=588423 weight_fb=1.00e-02 params=[169.9969 169.9969   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:22:06,585 pid=588423 weight_fb=1.00e-02 params=[169.9969 169.9969   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:22:36,516 pid=588423 weight_fb=1.00e-02 params=[169.9984 169.9984   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:23:06,145 pid=588423 weight_fb=1.00e-02 params=[169.9984 169.9984   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:23:35,691 pid=588423 weight_fb=1.00e-02 params=[169.9984 169.9984   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:24:05,509 pid=588423 weight_fb=1.00e-02 params=[169.9984 169.9984   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:24:35,334 pid=588423 weight_fb=1.00e-02 params=[169.9984 169.9984   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:25:05,018 pid=588423 weight_fb=1.00e-02 params=[169.9992 169.9992   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:25:34,718 pid=588423 weight_fb=1.00e-02 params=[169.9992 169.9992   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:26:04,290 pid=588423 weight_fb=1.00e-02 params=[169.9992 169.9992   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:26:33,870 pid=588423 weight_fb=1.00e-02 params=[169.9992 169.9992   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:27:03,591 pid=588423 weight_fb=1.00e-02 params=[169.9992 169.9992   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:27:33,131 pid=588423 weight_fb=1.00e-02 params=[169.9996 169.9996   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:28:02,477 pid=588423 weight_fb=1.00e-02 params=[169.9996 169.9996   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:28:32,231 pid=588423 weight_fb=1.00e-02 params=[169.9996 169.9996   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:29:01,973 pid=588423 weight_fb=1.00e-02 params=[169.9996 169.9996   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:29:31,302 pid=588423 weight_fb=1.00e-02 params=[169.9996 169.9996   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:30:01,147 pid=588423 weight_fb=1.00e-02 params=[169.9998 169.9998   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:30:30,684 pid=588423 weight_fb=1.00e-02 params=[169.9998 169.9998   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:31:00,312 pid=588423 weight_fb=1.00e-02 params=[169.9998 169.9998   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:31:30,004 pid=588423 weight_fb=1.00e-02 params=[169.9998 169.9998   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:31:59,690 pid=588423 weight_fb=1.00e-02 params=[169.9998 169.9998   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:32:29,140 pid=588423 weight_fb=1.00e-02 params=[169.9999 169.9999   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:32:58,678 pid=588423 weight_fb=1.00e-02 params=[169.9999 169.9999   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:33:28,236 pid=588423 weight_fb=1.00e-02 params=[169.9999 169.9999   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:33:57,577 pid=588423 weight_fb=1.00e-02 params=[169.9999 169.9999   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:34:27,180 pid=588423 weight_fb=1.00e-02 params=[169.9999 169.9999   0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:34:57,036 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:35:26,544 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:35:56,065 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:36:25,361 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:36:55,004 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:37:24,665 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:37:54,353 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:38:23,529 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:38:53,363 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:39:23,186 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:39:52,781 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:40:22,403 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:40:51,702 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:41:21,320 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:41:51,104 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:42:20,701 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:42:50,263 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:43:19,601 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:43:49,195 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:44:18,862 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:44:48,567 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:45:18,049 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:45:47,757 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:46:17,408 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:46:46,970 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:47:16,616 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:47:46,025 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:48:15,557 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:48:45,119 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:49:14,976 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:49:45,050 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:50:14,488 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:50:43,933 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:51:13,465 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:51:43,245 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:52:12,936 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:52:42,361 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:53:12,127 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:53:41,732 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:54:11,466 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:54:41,088 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:55:10,469 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:55:40,130 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:56:09,826 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+
+2026-06-10 03:56:39,165 pid=588423 weight_fb=1.00e-02 params=[170.     170.       0.6198   0.2729]
+Traceback (most recent call last):
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 185, in _free_boundary_cost
+    make_mesh(scan_geom, mesh_file, lim)
+  File "/home/nl2951/alfven/PF_location_optimization/opt_comp_combined_boundary.py", line 165, in make_mesh
+    mesh_pts, mesh_lc, mesh_reg = gs_mesh.build_mesh()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nl2951/OpenFUSIONToolkit/install_release/python/OpenFUSIONToolkit/TokaMaker/meshing.py", line 628, in build_mesh
+    raise ValueError('Meshing error: unclaimed region detected!')
+ValueError: Meshing error: unclaimed region detected!
+

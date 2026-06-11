@@ -1,0 +1,2 @@
+2026-06-08 20:05:08,645 INFO START weight_fb=1e-04 num_coils=3 ntrials=1 alpha=1.0 method=bayesian reg_in=1e-06
+2026-06-10 00:16:00,297 ERROR FAILED weight_fb=1e-04 num_coils=3 ntrials=1 alpha=1.0 method=bayesian reg_in=1e-06 elapsed=101451.7s error=fb_cost total=122.7s exceeds 100.0s ceiling

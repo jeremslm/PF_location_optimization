@@ -8,7 +8,7 @@ python opt_comp_combined_boundary.py \
     --method bayesian \
     --weights 1e-4 1e-3 1e-2 1e-1 \
     --coils 2 3 4 5 \
-    --nprocs 16 \
+    --nprocs 6 \
     --ntrials 1 \
     --alpha 1.0 \
     --lambda 1e-6 \
