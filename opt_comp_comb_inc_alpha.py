@@ -33,6 +33,7 @@ import json
 import subprocess
 import sys
 import time
+from math import exp
 from multiprocessing import Pool
 
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -41,14 +42,13 @@ OMEGA = 1e-2
 DIST_TH = 5.0
 RFIL = 0.01
 CONVERGENCE_THRESHOLD = 0.01
-LBFGS_MAXFUN = 100
+LBFGS_MAXFUN = 500
 MAX_RETRIES = 3
 CHUNK_TIMEOUT_S = 14400
 
 BAYES_ITERS_PER_CHUNK = 50
-STAGNATION_WINDOW = 25
+STAGNATION_WINDOW = 500
 N_INITIAL_PER_COIL = 25
-N_SOBOL_POOL = 8192
 ACQ_MULTIPLIER = 10
 UNIQUE_REFINED_POINTS = 3
 ACQ_DEDUP_TOL = 0.05
@@ -57,22 +57,26 @@ STARTS_PER_REFINE_CHUNK = 1
 
 ALPHA_MIN = 0.0
 ALPHA_MAX = 1.0
+MID = 200          # GP-active evals where sigmoid = 0.5 (indexed after n_initial)
+SCALE = 100        # sigmoid steepness
+FAILURE_RATE_TH = 0.15
+FAILURE_BOOST = 0.5
 
 
-def alpha_schedule(n_evals):
-    """Objective blend ALPHA for the current evaluation count.
-
-    Called once per chunk; ALPHA is held constant within a chunk and bumped at
-    each chunk boundary (the reinit cadence). Should rise from ALPHA_MIN toward
-    ALPHA_MAX as n_evals grows.
-    """
-    # TODO(human): return the blend ALPHA as a function of n_evals.
-    raise NotImplementedError("alpha_schedule not yet implemented")
+def alpha_schedule(n_evals, fb_failures=0, n_initial=0):
+    gp_evals = max(n_evals - n_initial, 0)
+    base = ALPHA_MAX / (1 + exp(-(gp_evals - MID) / SCALE))
+    if n_evals >= n_initial and n_evals > 0:
+        failure_rate = fb_failures / n_evals
+        boost = FAILURE_BOOST * max(0.0, failure_rate - FAILURE_RATE_TH) / (1.0 - FAILURE_RATE_TH)
+    else:
+        boost = 0.0
+    return min(base + boost, ALPHA_MAX)
 
 
 def _case_base(folder, w, reg_in, c):
     return os.path.join(_BASE_DIR,
-        f'examples/comparisons/combined_boundary_DIIID/{folder}/'
+        f'examples/comparisons/{folder}/'
         f'weight:{w:.0e},lambda:{reg_in:.0e},coils:{c}')
 
 
@@ -114,8 +118,10 @@ def _build_physics_isolated(nthreads, tmp_suffix):
     from helper_fct import update_boundary
 
     eqdsk = read_eqdsk(os.path.join(_BASE_DIR, 'examples/data/eqdsk/DIIID_opt_3coil_symm'))
-    LCFS_contour = eqdsk['rzout'].copy()
-    fixed_LCFS = LCFS_contour
+    _target = np.load(os.path.join(_BASE_DIR, 'notebooks', 'fb_lcfs_target.npz'))
+    fixed_LCFS = _target['lcfs']
+    LCFS_contour = fixed_LCFS
+    eqdsk['rzout'] = fixed_LCFS
     lim = update_boundary(r0=1.69, z0=0, a0=0.67, kappa=2, delta=0.8, squar=0.15, npts=1700)
 
     tmp_dir = os.path.join(_BASE_DIR, 'tmp', f'inc_alpha_{tmp_suffix}')
@@ -139,7 +145,7 @@ def _build_physics_isolated(nthreads, tmp_suffix):
     mygs.init_psi()
     mygs.solve()
 
-    fixed_mag_axis = np.array([1.77764093, -0.04014656])
+    fixed_mag_axis = _target['mag_axis']
     os.chdir(_BASE_DIR)
     return myOFT, mygs, eqdsk, fixed_LCFS, fixed_mag_axis, lim
 
@@ -238,8 +244,8 @@ def bayesian_chunk(args, run_dir, ckpt_path, ckpt, physics):
     n_evals = len(bayes_x)
     start_time = time.time() - elapsed_offset
     norm_ready = norm_fixed is not None and norm_fb is not None
-    alpha = alpha_schedule(n_evals)
-    print(f"[bayes] {'resume' if ckpt else 'fresh'} {run_dir} n_evals={n_evals} alpha={alpha:.4f}", flush=True)
+    alpha = alpha_schedule(n_evals, fb_failures, n_initial)
+    print(f"[bayes] {'resume' if ckpt else 'fresh'} {run_dir} n_evals={n_evals} fb_failures={fb_failures} alpha={alpha:.4f}", flush=True)
 
     objective = make_combined_objective(
         alpha, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS, cc1, cc2, lim,
@@ -257,11 +263,12 @@ def bayesian_chunk(args, run_dir, ckpt_path, ckpt, physics):
     if norm_ready and bayes_x:
         gp_opt.tell([list(p) for p in bayes_x], recompute_y())
 
+    n_sobol = 1 << (n_initial - 1).bit_length()  # next power of 2 >= n_initial
     sampler = qmc.Sobol(d=n_params, scramble=True, seed=random_state)
-    sobol_samples = sampler.random(N_SOBOL_POOL)
+    sobol_samples = sampler.random(n_sobol)
     sobol_starts = [[low + sobol_samples[i, j] * (high - low)
                      for j, (low, high) in enumerate(bounds)]
-                    for i in range(N_SOBOL_POOL)]
+                    for i in range(n_sobol)]
 
     def evaluate(x):
         nonlocal fb_failures
