@@ -463,7 +463,7 @@ class OptimizationComparison:
                 )
         if self._initial_fixed_cost is None and flux_err is not None:
             self._initial_fixed_cost = flux_err
-        if self._initial_fb_cost is None and fb_cost is not None:
+        if self._initial_fb_cost is None and fb_cost is not None and fb_cost < 1e6:
             self._initial_fb_cost = fb_cost
         if cost < self._best_cost:
             self._best_cost = cost

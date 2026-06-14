@@ -42,8 +42,12 @@ if tokamaker_python_path is not None:
 NUM_COILS = 3
 N_SAMPLES = 262144
 WEIGHTS_FB = [1e-4, 1e-3, 1e-2, 1e-1]
-THETA1_FIXED = 13.3635
-MU1_FIXED = 0.3494
+THETA1_FIXED = 13.363521
+MU1_FIXED    = 0.349398
+THETA2_FIXED = 37.834969
+MU2_FIXED    = 0.589196
+THETA3_FIXED = 70.036749
+MU3_FIXED    = 1.0        # true coil 3 lies outside outer candidate boundary; clamped
 ANGULAR_BOUNDS = (10, 170)
 SOBOL_SEED = 42
 CHECKPOINT_EVERY = 200
@@ -97,7 +101,7 @@ def chunk_main(args):
             idx = int(t["idx"])
             t2 = float(t["theta2"])
             t3 = float(t["theta3"])
-            params = np.array([THETA1_FIXED, t2, t3, MU1_FIXED, 0.0, 0.0])
+            params = np.array([THETA1_FIXED, t2, t3, MU1_FIXED, MU2_FIXED, MU3_FIXED])
             cost_val, timing, _ = _free_boundary_cost(
                 params, myOFT, eqdsk, fixed_mag_axis, fixed_LCFS,
                 cand1, cand2, lim, weight, NUM_COILS,
