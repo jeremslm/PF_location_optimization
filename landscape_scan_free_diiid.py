@@ -9,7 +9,7 @@ Self-dispatching (mirror of mem_eff_comp_convergence.py):
     a single weight_fb. Builds physics once, evaluates each task, prints
     one "RESULT idx cost reason" line per task, exits.
 
-Constraints: theta1 = 13.3635 deg, mu1 = 0.3494 (true coil 1), mu2 = mu3 = 0. Sobol-samples (theta2, theta3).
+Constraints: theta1 = 13.3635 deg, mu1/2/3 fixed to true DIII-D coil radial positions. Sobol-samples (theta2, theta3).
 Sweeps weight_fb. Checkpoints every CHECKPOINT_EVERY completions.
 Output schema matches landscape_scan_diiid.py: samples, cost, failed (bool), ...
 """
@@ -44,16 +44,14 @@ N_SAMPLES = 262144
 WEIGHTS_FB = [1e-4, 1e-3, 1e-2, 1e-1]
 THETA1_FIXED = 13.363521
 MU1_FIXED    = 0.349398
-THETA2_FIXED = 37.834969
 MU2_FIXED    = 0.589196
-THETA3_FIXED = 70.036749
-MU3_FIXED    = 1.0        # true coil 3 lies outside outer candidate boundary; clamped
+MU3_FIXED    = 1.0
 ANGULAR_BOUNDS = (10, 170)
 SOBOL_SEED = 42
 CHECKPOINT_EVERY = 200
 EVALS_PER_CHUNK = 100
 CHUNK_TIMEOUT_S = 10800
-OUT_DIR = "examples/comparisons/target=free_diiid_3_coil"
+OUT_DIR = "examples/comparisons/target=free_diiid_3_coil_06_10"
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
