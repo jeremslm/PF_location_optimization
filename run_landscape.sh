@@ -7,8 +7,8 @@ export NUMEXPR_NUM_THREADS=1
 
 python landscape_scan_free_diiid.py \
     --mode orchestrator \
-    --n 262144 \
-    --nprocs 20 \
+    --n 65536 \
+    --nprocs 30 \
     --oft-threads 1 \
     --evals-per-chunk 100 \
     --weights 1e-4 \
