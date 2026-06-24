@@ -13,5 +13,5 @@ python opt_comp_comb_inc_alpha.py \
     --nthreads 1 \
     --max-evals 10080 \
     --max-time 604800 \
-    --random-state 1 \
+    --random-state 2 \
     --folder comb_inc_alpha
